@@ -9,6 +9,7 @@ const DEFAULT_STORAGE_KEY = "mc-store";
 const defaultPlayer: Player = {
   name: "Seeker",
   hp: 100,
+  maxHp: 100,
   attack: 10,
   defense: 5,
   exp: 0,
@@ -16,6 +17,7 @@ const defaultPlayer: Player = {
 };
 
 const clampStat = (value: number) => Math.max(0, value);
+const clampHp = (hp: number, maxHp: number) => Math.min(maxHp, clampStat(hp));
 
 type MCStore = {
   player: Player;
@@ -48,6 +50,7 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
             player: {
               ...player,
               hp: clampStat(player.hp),
+              maxHp: clampStat(player.maxHp),
               exp: clampStat(player.exp),
               coins: clampStat(player.coins),
             },
@@ -68,7 +71,7 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
           set((state) => ({
             player: {
               ...state.player,
-              hp: clampStat(hp),
+              hp: clampHp(hp, state.player.maxHp),
             },
           })),
 
@@ -76,7 +79,7 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
           set((state) => ({
             player: {
               ...state.player,
-              hp: clampStat(state.player.hp + amount),
+              hp: clampHp(state.player.hp + amount, state.player.maxHp),
             },
           })),
 
@@ -117,12 +120,12 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
       {
         name: storageKey,
         partialize: (state) => ({ player: state.player }),
-      }
-    )
+      },
+    ),
   );
 
 export const getMCStore = (
-  storageKey: string = DEFAULT_STORAGE_KEY
+  storageKey: string = DEFAULT_STORAGE_KEY,
 ): MCStoreHook => {
   const existingStore = storeRegistry.get(storageKey);
 

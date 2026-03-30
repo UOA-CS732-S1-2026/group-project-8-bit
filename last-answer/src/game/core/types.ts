@@ -3,6 +3,7 @@ export type QuestId = string;
 export type Player = {
   name: string;
   hp: number;
+  maxHp: number;
   attack: number;
   defense: number;
   exp: number;
