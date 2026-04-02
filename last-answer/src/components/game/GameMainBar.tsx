@@ -1,10 +1,18 @@
+"use client";
+
 import Image from "next/image";
+import { maxLevel, xpIntoCurrentLevel, xpToNextLevel } from "@/game/core/level";
+import { useMCStore } from "@/store/mcStore";
 import HPBar from "./HPBar";
 
 export function GameMainBar() {
+  const player = useMCStore((state) => state.player);
   const panelFill = "bg-center bg-no-repeat bg-[length:100%_100%]";
   const buttonClass =
     "flex items-center justify-center gap-1 rounded-sm bg-[url('/buttons/parchment-btn.png')] px-1 text-[10px] font-semibold text-zinc-900 sm:gap-1.5 sm:px-2 sm:text-xs";
+  const xpCurrent = xpIntoCurrentLevel(player.exp, player.level);
+  const xpNeeded = player.level >= maxLevel ? 1 : xpToNextLevel(player.level);
+  const xpPercent = Math.min(100, Math.round((xpCurrent / xpNeeded) * 100));
 
   return (
     <header className="flex w-full items-start gap-1 p-1.5 sm:items-center sm:gap-2 sm:p-2">
@@ -26,14 +34,31 @@ export function GameMainBar() {
 
         <div className={`p-2`}>
           <div className="text-[10px] font-semibold tracking-wide text-white sm:text-xs">
-            LV 12
+            LV {player.level}
           </div>
           <HPBar
-            currentHp={10}
-            maxHp={100}
+            currentHp={player.hp}
+            maxHp={player.maxHp}
             className="w-[clamp(8.25rem,30vw,15.5rem)] max-w-none"
             showValues={true}
           />
+          <div className="mt-2">
+            <div className="mb-1 flex items-center justify-between text-[10px] font-semibold tracking-[0.18em] text-stone-200/90">
+              <span>XP</span>
+              <span>
+                {player.level >= maxLevel ? "MAX" : `${xpCurrent} / ${xpNeeded}`}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full border border-stone-500/70 bg-stone-950/80">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-200 transition-all duration-500"
+                style={{ width: `${player.level >= maxLevel ? 100 : xpPercent}%` }}
+              />
+            </div>
+            <div className="mt-1 text-[10px] font-semibold tracking-[0.18em] text-stone-300">
+              {player.coins} coins
+            </div>
+          </div>
         </div>
       </div>
 
