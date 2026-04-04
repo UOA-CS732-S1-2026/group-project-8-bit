@@ -20,34 +20,39 @@ const BASE_COIN_DIVISOR = 4;
 export const supportToolConfigs: Record<
   SupportToolId,
   {
+    id: SupportToolId;
     name: string;
     description: string;
-    uses: number;
+    maxUses: number;
     strongAssist: boolean;
   }
 > = {
   analyze: {
-    name: "Analyze",
+    id: "analyze",
+    name: "Scripture of Unmasking",
     description: "Remove two wrong answers from the current question.",
-    uses: 2,
+    maxUses: 2,
     strongAssist: true,
   },
   hourglass: {
-    name: "Hourglass",
+    id: "hourglass",
+    name: "Suspended Sand",
     description: "Add 4 seconds to the current question timer.",
-    uses: 1,
+    maxUses: 1,
     strongAssist: false,
   },
   barrier: {
-    name: "Barrier",
+    id: "barrier",
+    name: "Veil of Aegis",
     description: "Block the next enemy counterattack after a mistake.",
-    uses: 1,
+    maxUses: 1,
     strongAssist: false,
   },
   chainGuard: {
-    name: "Chain Guard",
+    id: "chainGuard",
+    name: "Oathbound Chain",
     description: "Preserve your combo on the next wrong answer or timeout.",
-    uses: 1,
+    maxUses: 1,
     strongAssist: true,
   },
 };

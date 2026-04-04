@@ -12,8 +12,17 @@ export type Player = {
   defense: number;
   exp: number;
   coins: number;
+  location: string | "mainHub";
+  activeQuest: Quest[] | null;
+  completedQuests: Quest[] | null;
+  inventory: Property[];
 };
 
+export type Property = {
+  id: SupportToolId;
+  leftNumber: number;
+  price: number;
+};
 export type GameMode = "hub" | "dialogue" | "battle" | "reward";
 export type BattleStatus = "idle" | "question" | "burst" | "won" | "lost";
 export type SupportToolId = "analyze" | "hourglass" | "barrier" | "chainGuard";

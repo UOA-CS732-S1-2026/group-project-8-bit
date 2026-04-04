@@ -151,7 +151,7 @@ export function useBattleSession(): BattleSessionControls {
     const questions = pickBattleQuestions(questionCount);
     const enemy = createDemoEnemy(player, isBoss);
 
-    syncBattle(createBattle({ enemy, questions }));
+    syncBattle(createBattle({ enemy, questions, player }));
     setBattleReward(null);
   }
 
@@ -184,7 +184,16 @@ export function useBattleSession(): BattleSessionControls {
       return;
     }
 
-    syncBattle(handleSupportToolActivation(currentBattle, toolId).battle);
+    const nextTransition = handleSupportToolActivation(currentBattle, toolId);
+    const nextBattle = nextTransition.battle;
+    const toolWasConsumed =
+      nextBattle.supportTools[toolId] === currentBattle.supportTools[toolId] - 1;
+
+    syncBattle(nextBattle);
+
+    if (toolWasConsumed) {
+      getMCStore().getState().reduceProperty(toolId, 1);
+    }
   }
 
   function answerQuestion(choiceIndex: number) {

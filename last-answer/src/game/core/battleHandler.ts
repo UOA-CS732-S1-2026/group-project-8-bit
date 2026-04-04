@@ -101,8 +101,9 @@ function resolveFailureState(
 export function createBattle(args: {
   enemy: BattleSession["enemy"];
   questions: Question[];
+  player: Player;
 }): BattleSession {
-  return initializeBattleSession(args.enemy, args.questions);
+  return initializeBattleSession(args.enemy, args.questions, args.player);
 }
 
 export function resolveTimeout(

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BURST_DURATION_MS } from "@/game/core/battleCore";
 import { useBattleSession } from "@/game/useBattleSession";
 import { maxLevel, xpIntoCurrentLevel, xpToNextLevel } from "@/game/core/level";
@@ -7,6 +8,7 @@ import { useMCStore } from "@/store/mcStore";
 import { BattleBurstPanel } from "./BattleBurstPanel";
 import { BattleHudPanel } from "./BattleHudPanel";
 import { BattleLobbyPanel } from "./BattleLobbyPanel";
+import { BattleProperty } from "./BattleProperty";
 import { BattleProfilePanel } from "./BattleProfilePanel";
 import { BattleQuestionPanel } from "./BattleQuestionPanel";
 import { BattleResultPanel } from "./BattleResultPanel";
@@ -23,6 +25,7 @@ function formatAvgTime(ms: number): string {
 export function BattleRenderer() {
   const player = useMCStore((state) => state.player);
   const restoreHpToFull = useMCStore((state) => state.restoreHpToFull);
+  const [isPropertyShopOpen, setIsPropertyShopOpen] = useState(false);
   const {
     battle,
     currentQuestion,
@@ -58,6 +61,13 @@ export function BattleRenderer() {
               isMaxLevel={isMaxLevel}
               onRestoreHp={restoreHpToFull}
             />
+            <button
+              type="button"
+              onClick={() => setIsPropertyShopOpen(true)}
+              className="rounded-2xl border border-amber-300/30 bg-amber-400/15 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-amber-100 transition hover:border-amber-200/60 hover:bg-amber-300/20"
+            >
+              Property Shop
+            </button>
             {battle?.status === "won" || battle?.status === "lost" ? (
               <BattleResultPanel
                 status={battle.status}
@@ -109,13 +119,22 @@ export function BattleRenderer() {
             />
           )}
 
-          <BattleSupportPanel
-            battle={battle}
-            onToggle={() => setSupportMenuOpen(!battle.supportMenuOpen)}
-            onActivateTool={activateSupportTool}
-          />
+          <div className="flex min-h-0 flex-col gap-3">
+            <BattleSupportPanel
+              battle={battle}
+              onToggle={() => setSupportMenuOpen(!battle.supportMenuOpen)}
+              onActivateTool={activateSupportTool}
+            />
+          </div>
         </div>
       </div>
+
+      {isPropertyShopOpen ? (
+        <BattleProperty
+          player={player}
+          onClose={() => setIsPropertyShopOpen(false)}
+        />
+      ) : null}
     </main>
   );
 }

@@ -41,18 +41,41 @@ export function pickBattleQuestions(count: number): Question[] {
   return questions;
 }
 
-export function createSupportState(): BattleSession["supportTools"] {
+function getInventoryUses(
+  player: Player,
+  toolId: keyof BattleSession["supportTools"],
+): number {
+  const property = player.inventory.find((item) => item.id === toolId);
+  return property?.leftNumber ?? 0;
+}
+
+export function createSupportStateForPlayer(
+  player: Player,
+): BattleSession["supportTools"] {
   return {
-    analyze: supportToolConfigs.analyze.uses,
-    hourglass: supportToolConfigs.hourglass.uses,
-    barrier: supportToolConfigs.barrier.uses,
-    chainGuard: supportToolConfigs.chainGuard.uses,
+    analyze: Math.min(
+      supportToolConfigs.analyze.maxUses,
+      getInventoryUses(player, "analyze"),
+    ),
+    hourglass: Math.min(
+      supportToolConfigs.hourglass.maxUses,
+      getInventoryUses(player, "hourglass"),
+    ),
+    barrier: Math.min(
+      supportToolConfigs.barrier.maxUses,
+      getInventoryUses(player, "barrier"),
+    ),
+    chainGuard: Math.min(
+      supportToolConfigs.chainGuard.maxUses,
+      getInventoryUses(player, "chainGuard"),
+    ),
   };
 }
 
 export function initializeBattleSession(
   enemy: BattleSession["enemy"],
   questions: Question[],
+  player: Player,
 ): BattleSession {
   const turnLimit = getBattleTurnLimit(enemy.isBoss);
 
@@ -82,7 +105,7 @@ export function initializeBattleSession(
     chainGuardActive: false,
     eliminatedOptionIndices: [],
     toolUsedThisTurn: false,
-    supportTools: createSupportState(),
+    supportTools: createSupportStateForPlayer(player),
     status: "question",
     pendingBurst: null,
   };
