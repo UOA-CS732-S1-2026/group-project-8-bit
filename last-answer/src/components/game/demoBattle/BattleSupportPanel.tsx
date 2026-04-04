@@ -52,7 +52,7 @@ export function BattleSupportPanel({
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-semibold text-white">{tool.name}</span>
                   <span className="text-[11px] uppercase tracking-[0.2em] text-stone-400">
-                    {remainingUses} left
+                    {remainingUses} usable
                   </span>
                 </div>
                 <p className="mt-1 text-sm leading-5 text-stone-300">
