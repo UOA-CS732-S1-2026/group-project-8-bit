@@ -82,6 +82,12 @@ export function BattleRenderer() {
             ) : null}
           </aside>
         </div>
+        {isPropertyShopOpen ? (
+          <BattleProperty
+            player={player}
+            onClose={() => setIsPropertyShopOpen(false)}
+          />
+        ) : null}
       </main>
     );
   }
@@ -128,13 +134,6 @@ export function BattleRenderer() {
           </div>
         </div>
       </div>
-
-      {isPropertyShopOpen ? (
-        <BattleProperty
-          player={player}
-          onClose={() => setIsPropertyShopOpen(false)}
-        />
-      ) : null}
     </main>
   );
 }
