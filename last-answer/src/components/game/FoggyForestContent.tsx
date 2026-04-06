@@ -1,7 +1,15 @@
 "use client";
+import { useEffect } from "react";
+import { useMCStore } from "@/store/mcStore";
 import InteractBtn from "./InteractBtn";
 
 export default function FoggyForestContent() {
+  const setLocation = useMCStore((state) => state.setLocation);
+
+  useEffect(() => {
+    setLocation("foggyForest");
+  }, [setLocation]);
+
   const handleClick1 = () => {
     console.log("First button was clicked!");
   };

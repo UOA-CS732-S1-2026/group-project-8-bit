@@ -1,7 +1,16 @@
 "use client";
 
-import { create, type StoreApi, type UseBoundStore } from "zustand";
-import { applyLevelProgression, levelForTotalXp } from "@/game/core/level";
+import { create } from "zustand";
+import { applyLevelProgression } from "@/game/core/level";
+import {
+  buildInitialPlayer,
+  clampHp,
+  clampStat,
+  createPlayerStorageKey,
+  defaultPlayer,
+  normalizePlayer,
+  normalizePropertyAmount,
+} from "@/lib/player";
 import type {
   BattleReward,
   Player,
@@ -9,68 +18,6 @@ import type {
   Quest,
   SupportToolId,
 } from "@/game/core/types";
-
-const DEFAULT_STORAGE_KEY = "mc-store";
-const DEFAULT_INVENTORY: Property[] = [
-  {
-    id: "analyze",
-    leftNumber: 1,
-    price: 60,
-  },
-  {
-    id: "hourglass",
-    leftNumber: 1,
-    price: 20,
-  },
-  {
-    id: "barrier",
-    leftNumber: 1,
-    price: 50,
-  },
-  {
-    id: "chainGuard",
-    leftNumber: 1,
-    price: 30,
-  },
-];
-
-const defaultPlayer: Player = {
-  name: "Bruce",
-  level: 1,
-  hp: 100,
-  maxHp: 100,
-  attack: 10,
-  defense: 5,
-  exp: 0,
-  coins: 0,
-  location: "mainHub",
-  activeQuest: null,
-  completedQuests: null,
-  inventory: DEFAULT_INVENTORY,
-};
-
-const clampStat = (value: number) => Math.max(0, value);
-const clampHp = (hp: number, maxHp: number) => Math.min(maxHp, clampStat(hp));
-const normalizePropertyAmount = (amount: number = 1): number | null =>
-  Number.isInteger(amount) && amount > 0 ? amount : null;
-
-const normalizeInventory = (inventory?: Property[] | null): Property[] => {
-  const inventoryById = new Map<SupportToolId, Property>(
-    (inventory ?? []).map((property) => [property.id, property]),
-  );
-
-  return DEFAULT_INVENTORY.map((defaultProperty) => {
-    const persistedProperty = inventoryById.get(defaultProperty.id);
-
-    return {
-      id: defaultProperty.id,
-      leftNumber: clampStat(
-        persistedProperty?.leftNumber ?? defaultProperty.leftNumber,
-      ),
-      price: defaultProperty.price,
-    };
-  });
-};
 
 const getInventoryProperty = (
   inventory: Property[],
@@ -96,68 +43,9 @@ const updateInventoryProperty = (
   return foundProperty ? nextInventory : null;
 };
 
-const getBasePlayer = (player?: Partial<Player>): Player => ({
-  ...defaultPlayer,
-  ...player,
-  name: player?.name ?? defaultPlayer.name,
-  coins: player?.coins ?? defaultPlayer.coins,
-  location: player?.location ?? defaultPlayer.location,
-  activeQuest: player?.activeQuest ?? defaultPlayer.activeQuest,
-  completedQuests: player?.completedQuests ?? defaultPlayer.completedQuests,
-  inventory: normalizeInventory(player?.inventory),
-});
-
-const rebuildPlayerForTotalXp = (
-  totalXp: number,
-  template?: Player,
-): Player => {
-  const safeXp = clampStat(totalXp);
-  const leveledPlayer = applyLevelProgression(getBasePlayer(template), safeXp);
-  const nextPlayer = leveledPlayer.player;
-  const requestedLevel = levelForTotalXp(safeXp);
-
-  return {
-    ...nextPlayer,
-    level: requestedLevel,
-    hp: clampHp(template?.hp ?? nextPlayer.maxHp, nextPlayer.maxHp),
-    coins: template?.coins ?? defaultPlayer.coins,
-    name: template?.name ?? defaultPlayer.name,
-    location: template?.location ?? defaultPlayer.location,
-    activeQuest: template?.activeQuest ?? defaultPlayer.activeQuest,
-    completedQuests:
-      template?.completedQuests ?? defaultPlayer.completedQuests,
-    inventory: normalizeInventory(template?.inventory),
-  };
-};
-
-const normalizePlayer = (player?: Partial<Player> | null): Player => {
-  const safeExp = clampStat(player?.exp ?? defaultPlayer.exp);
-  const safeHp = clampStat(player?.hp ?? defaultPlayer.hp);
-  const safeCoins = clampStat(player?.coins ?? defaultPlayer.coins);
-  const rebuiltPlayer = rebuildPlayerForTotalXp(safeExp, {
-    ...defaultPlayer,
-    ...player,
-    exp: safeExp,
-    hp: safeHp,
-    coins: safeCoins,
-    name: player?.name ?? defaultPlayer.name,
-  });
-
-  return {
-    ...rebuiltPlayer,
-    hp: clampHp(safeHp, rebuiltPlayer.maxHp),
-    coins: safeCoins,
-    name: player?.name ?? defaultPlayer.name,
-    location: player?.location ?? defaultPlayer.location,
-    activeQuest: player?.activeQuest ?? defaultPlayer.activeQuest,
-    completedQuests: player?.completedQuests ?? defaultPlayer.completedQuests,
-    inventory: normalizeInventory(player?.inventory),
-  };
-};
-
 const readPersistedPlayer = (storageKey: string): Player | null => {
   if (typeof window === "undefined") {
-    return defaultPlayer;
+    return null;
   }
 
   try {
@@ -190,10 +78,14 @@ const savePersistedPlayer = (storageKey: string, player: Player): boolean => {
 
 type MCStore = {
   player: Player;
+  storageKey: string;
+  userId: string | null;
   readPlayer: () => Player;
   readPersistPlayer: () => Player | null;
   savePlayer: (player: Player) => void;
   savePersistPlayer: (player: Player) => void;
+  hydratePlayer: (userId: string, player: Player) => void;
+  clearPlayerContext: () => void;
   updatePlayer: (updates: Partial<Player>) => void;
   setHp: (hp: number) => void;
   addHp: (amount: number) => void;
@@ -213,17 +105,15 @@ type MCStore = {
   resetPlayer: () => void;
 };
 
-type MCStoreHook = UseBoundStore<StoreApi<MCStore>>;
-
-const storeRegistry = new Map<string, MCStoreHook>();
-
-const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
+const createMCStore = () =>
   create<MCStore>()((set, get) => ({
     player: defaultPlayer,
+    storageKey: createPlayerStorageKey(),
+    userId: null,
 
     readPlayer: () => get().player,
 
-    readPersistPlayer: () => readPersistedPlayer(storageKey),
+    readPersistPlayer: () => readPersistedPlayer(get().storageKey),
 
     savePlayer: (player) =>
       set({
@@ -231,8 +121,27 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
       }),
 
     savePersistPlayer: (player) => {
-      savePersistedPlayer(storageKey, player);
+      savePersistedPlayer(get().storageKey, player);
     },
+
+    hydratePlayer: (userId, player) => {
+      const storageKey = createPlayerStorageKey(userId);
+      const normalizedPlayer = normalizePlayer(player);
+
+      savePersistedPlayer(storageKey, normalizedPlayer);
+      set({
+        userId,
+        storageKey,
+        player: normalizedPlayer,
+      });
+    },
+
+    clearPlayerContext: () =>
+      set({
+        userId: null,
+        storageKey: createPlayerStorageKey(),
+        player: defaultPlayer,
+      }),
 
     updatePlayer: (updates) =>
       set((state) => ({
@@ -276,7 +185,10 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
 
     setExp: (exp) =>
       set((state) => ({
-        player: rebuildPlayerForTotalXp(exp, state.player),
+        player: normalizePlayer({
+          ...state.player,
+          exp,
+        }),
       })),
 
     addExp: (amount) =>
@@ -441,24 +353,15 @@ const createMCStore = (storageKey: string = DEFAULT_STORAGE_KEY): MCStoreHook =>
         },
       })),
 
-    resetPlayer: () => set({ player: defaultPlayer }),
+    resetPlayer: () =>
+      set((state) => ({
+        player: buildInitialPlayer(state.player.name),
+      })),
   }));
 
-export const getMCStore = (
-  storageKey: string = DEFAULT_STORAGE_KEY,
-): MCStoreHook => {
-  const existingStore = storeRegistry.get(storageKey);
+export const useMCStore = createMCStore();
 
-  if (existingStore) {
-    return existingStore;
-  }
+export const getMCStore = () => useMCStore;
 
-  const store = createMCStore(storageKey);
-  storeRegistry.set(storageKey, store);
-  return store;
-};
-
-export const useMCStore = getMCStore();
-
-export { createMCStore, DEFAULT_STORAGE_KEY, defaultPlayer };
-export type { MCStore, MCStoreHook };
+export { createMCStore, defaultPlayer };
+export type { MCStore };
