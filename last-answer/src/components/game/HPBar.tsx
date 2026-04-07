@@ -4,6 +4,8 @@ type HPBarProps = {
   label?: string;
   className?: string;
   showValues?: boolean;
+  showValueText?: boolean;
+  showOverlayPercent?: boolean;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -16,6 +18,8 @@ export default function HPBar({
   label = "HP",
   className,
   showValues = true,
+  showValueText = true,
+  showOverlayPercent = true,
 }: HPBarProps) {
   const safeMaxHp = maxHp > 0 ? maxHp : 1;
   const safeCurrentHp = clamp(currentHp, 0, safeMaxHp);
@@ -36,14 +40,18 @@ export default function HPBar({
     <div className={["w-full max-w-sm", className].filter(Boolean).join(" ")}>
       <div className="mb-1 flex items-center justify-between gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-stone-200">
         <span>{label}</span>
-        {showValues ? (
-          <span className="text-xs tracking-[0.2em] text-stone-300">
-            {safeCurrentHp} / {safeMaxHp}
-          </span>
+        {showValueText ? (
+          showValues ? (
+            <span className="text-xs tracking-[0.2em] text-stone-300">
+              {safeCurrentHp} / {safeMaxHp}
+            </span>
+          ) : (
+            <span className="text-xs tracking-[0.2em] text-stone-300">
+              {percentage}%
+            </span>
+          )
         ) : (
-          <span className="text-xs tracking-[0.2em] text-stone-300">
-            {percentage}%
-          </span>
+          <span />
         )}
       </div>
 
@@ -88,9 +96,11 @@ export default function HPBar({
           ) : null}
         </div>
 
-        <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[10px] font-bold uppercase tracking-[0.28em] text-stone-200/90 mix-blend-screen sm:text-xs">
-          {percentage}%
-        </div>
+        {showOverlayPercent ? (
+          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[10px] font-bold uppercase tracking-[0.28em] text-stone-200/90 mix-blend-screen sm:text-xs">
+            {percentage}%
+          </div>
+        ) : null}
       </div>
     </div>
   );
