@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function GamePage() {
-  return <main>Game Page</main>;
+  redirect("/game/mainHub");
 }
