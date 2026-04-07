@@ -6,6 +6,8 @@ import { maxLevel, xpIntoCurrentLevel, xpToNextLevel } from "@/game/core/level";
 import { useMCStore } from "@/store/mcStore";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import HPBar from "./HPBar";
+import { usePathname } from "next/navigation";
+
 
 function formatLocation(location: string) {
   if (location === "mainHub") {
@@ -19,6 +21,18 @@ function formatLocation(location: string) {
 
 export function GameMainBar() {
   const player = useMCStore((state) => state.player);
+
+const pathname = usePathname();
+
+const routeTitleMap: Record<string, string> = {
+  "/game/foggyForest": "Foggy Forest",
+  "/game/tavern": "Ashen Tavern - Last Light",
+  "/game/mainHub": "Main Hub",
+};
+
+const pageTitle = routeTitleMap[pathname] ?? "The Oracle of Lost Knowledge";
+
+
   const panelFill = "bg-center bg-no-repeat bg-[length:100%_100%]";
   const buttonClass =
     "flex items-center justify-center gap-1 rounded-sm bg-[url('/buttons/parchment-btn.png')] px-1 text-[10px] font-semibold text-zinc-900 sm:gap-1.5 sm:px-2 sm:text-xs";
@@ -74,9 +88,9 @@ export function GameMainBar() {
         </div>
       </div>
 
-      <div className="center-banner min-w-0 flex-1">
+      <div className="center-banner min-w-0 min-h-[135px] flex-1">
         <div
-          className={`w-full bg-[url('/banners/game-title-banner.png')] px-2 py-1 ${panelFill}`}
+          className={`w-full bg-[url('/banners/game-title-banner.png')] px-3 py-4 ${panelFill}`}
         >
           <h2 className="truncate text-center text-xs font-semibold tracking-[0.08em] text-stone-200 sm:text-sm md:text-base">
             {formatLocation(player.location)}
@@ -85,7 +99,7 @@ export function GameMainBar() {
       </div>
 
       <div
-        className={`shrink-0 bg-[url('/panels/buttons-panel2.png')] px-2 py-2 sm:px-4 ${panelFill}`}
+        className={`shrink-0 bg-[url('/panels/buttons-panel2.png')] px-2 py-2 sm:px-4 min-h-[50px] self-start ${panelFill}`}
       >
         <div className="flex items-center gap-1">
           <Link
