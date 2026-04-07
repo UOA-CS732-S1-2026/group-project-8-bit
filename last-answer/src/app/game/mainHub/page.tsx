@@ -1,3 +1,5 @@
-export default function mainHub() {
-  return <main>mainHub</main>;
+import { MainHub } from "@/components/game/MainHub";
+
+export default function MainHubPage() {
+  return <MainHub />;
 }

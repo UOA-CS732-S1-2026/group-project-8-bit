@@ -1,11 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { maxLevel, xpIntoCurrentLevel, xpToNextLevel } from "@/game/core/level";
 import { useMCStore } from "@/store/mcStore";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import HPBar from "./HPBar";
 import { usePathname } from "next/navigation";
 
+
+function formatLocation(location: string) {
+  if (location === "mainHub") {
+    return "Main Hub";
+  }
+
+  return location
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/(^|\s)\S/g, (character) => character.toUpperCase());
+}
 
 export function GameMainBar() {
   const player = useMCStore((state) => state.player);
@@ -81,7 +93,7 @@ const pageTitle = routeTitleMap[pathname] ?? "The Oracle of Lost Knowledge";
           className={`w-full bg-[url('/banners/game-title-banner.png')] px-3 py-4 ${panelFill}`}
         >
           <h2 className="truncate text-center text-xs font-semibold tracking-[0.08em] text-stone-200 sm:text-sm md:text-base">
-            {pageTitle}
+            {formatLocation(player.location)}
           </h2>
         </div>
       </div>
@@ -90,33 +102,35 @@ const pageTitle = routeTitleMap[pathname] ?? "The Oracle of Lost Knowledge";
         className={`shrink-0 bg-[url('/panels/buttons-panel2.png')] px-2 py-2 sm:px-4 min-h-[50px] self-start ${panelFill}`}
       >
         <div className="flex items-center gap-1">
-          <button
-            type="button"
-            className={`${buttonClass} h-[clamp(1.5rem,5vh,2rem)] w-[clamp(3rem, 8vw, 4.2rem)] ${panelFill}`}
+          <Link
+            href="/game/mainHub"
+            className={`${buttonClass} h-[clamp(1.5rem,5vh,2rem)] w-[clamp(3rem, 8vw, 4.8rem)] ${panelFill}`}
           >
             <Image
               src="/icons/info-icon.png"
-              alt="information"
+              alt="Main hub"
               width={32}
               height={32}
               className="size-3.5 sm:size-5"
             />
-            <span className="hidden sm:inline">Info</span>
-          </button>
+            <span className="hidden sm:inline">Hub</span>
+          </Link>
 
-          <button
-            type="button"
-            className={`${buttonClass} h-[clamp(1.5rem,5vh,2rem)] w-[clamp(3rem, 8vw, 4.2rem)] ${panelFill}`}
+          <LogoutButton
+            showError={false}
+            className={`${buttonClass} h-[clamp(1.5rem,5vh,2rem)] w-[clamp(3rem, 8vw, 4.8rem)] ${panelFill}`}
           >
-            <Image
-              src="/icons/menu-icon.png"
-              alt="Menu"
-              width={32}
-              height={32}
-              className="size-3.5 sm:size-5"
-            />
-            <span className="hidden sm:inline">Menu</span>
-          </button>
+            <>
+              <Image
+                src="/icons/menu-icon.png"
+                alt="Logout"
+                width={32}
+                height={32}
+                className="size-3.5 sm:size-5"
+              />
+              <span className="hidden sm:inline">Exit</span>
+            </>
+          </LogoutButton>
         </div>
       </div>
     </header>
