@@ -40,6 +40,24 @@ const sampleEnemy = {
   defense: 0,
 };
 
+const sampleBattleLog = [
+  {
+    id: "log-1",
+    kind: "player" as const,
+    text: "Answered correctly. Whisper Scrap takes 8 damage.",
+  },
+  {
+    id: "log-2",
+    kind: "enemy" as const,
+    text: "Enemy claws back for 3 damage.",
+  },
+  {
+    id: "log-3",
+    kind: "player" as const,
+    text: "Your guard held firm and reduced the blow.",
+  },
+];
+
 const SAMPLE_QUESTION_DURATION = 12;
 const SAMPLE_TIMER_STEP = 0.05;
 
@@ -130,7 +148,7 @@ export function BattlePage() {
 
   return createPortal(
     <main
-      className="fixed inset-0 overflow-hidden bg-black text-stone-100"
+      className="fixed inset-0 overflow-x-hidden overflow-y-auto bg-black text-stone-100"
       style={{ zIndex: 2147483647 }}
     >
       <div className="absolute inset-0">
@@ -143,14 +161,15 @@ export function BattlePage() {
           className="object-cover object-center"
         />
       </div>
+      <div className="absolute inset-0 bg-white/12 backdrop-blur-[6px]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,5,0.28)_0%,rgba(8,6,5,0.12)_24%,rgba(8,6,5,0.3)_62%,rgba(7,5,4,0.62)_100%)]" />
       <BattleTurnBanner turn={1} />
 
-      <div className="relative z-10 flex min-h-screen w-full flex-col px-4 py-4 lg:px-5 lg:py-5">
-        <div className="mx-auto flex min-h-full w-full max-w-[70rem] flex-1 flex-col gap-3">
+      <div className="relative z-10 flex min-h-screen w-full flex-col px-2 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5">
+        <div className="flex min-h-full w-full flex-1 flex-col gap-3">
           <BattleStage backgroundLabel={scene.label} enemy={sampleEnemy} />
 
-          <div className="space-y-2 pt-[clamp(1.5rem,4vh,2.5rem)]">
+          <div className="pt-[clamp(0.75rem,3vh,2.5rem)]">
             <BattleQuestionPanel
               answers={sampleAnswers}
               question="Answer, wanderer-when knowledge is torn apart, what survives: truth, fear, or desire?"
@@ -158,8 +177,11 @@ export function BattlePage() {
               remainingTime={remainingTime}
               warningThreshold={3}
             />
-            <div className="flex justify-start">
-              <BattleBottomBar player={playerBattleStats} />
+            <div className="flex justify-start pt-4 sm:pt-6 xl:pt-8">
+              <BattleBottomBar
+                player={playerBattleStats}
+                logEntries={sampleBattleLog}
+              />
             </div>
           </div>
         </div>

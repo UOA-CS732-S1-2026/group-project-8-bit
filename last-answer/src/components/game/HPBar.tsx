@@ -6,6 +6,7 @@ type HPBarProps = {
   showValues?: boolean;
   showValueText?: boolean;
   showOverlayPercent?: boolean;
+  showOverlayValues?: boolean;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -20,6 +21,7 @@ export default function HPBar({
   showValues = true,
   showValueText = true,
   showOverlayPercent = true,
+  showOverlayValues = false,
 }: HPBarProps) {
   const safeMaxHp = maxHp > 0 ? maxHp : 1;
   const safeCurrentHp = clamp(currentHp, 0, safeMaxHp);
@@ -96,7 +98,13 @@ export default function HPBar({
           ) : null}
         </div>
 
-        {showOverlayPercent ? (
+        {showOverlayValues ? (
+          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[10px] font-bold tracking-[0.14em] text-stone-200/90 mix-blend-screen sm:text-xs">
+            {safeCurrentHp} / {safeMaxHp}
+          </div>
+        ) : null}
+
+        {showOverlayPercent && !showOverlayValues ? (
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[10px] font-bold uppercase tracking-[0.28em] text-stone-200/90 mix-blend-screen sm:text-xs">
             {percentage}%
           </div>

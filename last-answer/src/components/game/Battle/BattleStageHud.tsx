@@ -10,7 +10,7 @@ export function BattleStageHud({ children, anchor }: BattleStageHudProps) {
     anchor === "enemy"
       ? {
           left: "1rem",
-          top: "1rem",
+          top: "-0.45rem",
         }
       : {
           left: "1rem",
@@ -23,8 +23,9 @@ export function BattleStageHud({ children, anchor }: BattleStageHudProps) {
       style={{
         zIndex: 20,
         width:
-          anchor === "enemy" ? "clamp(21.5rem, 31vw, 29.5rem)" : "21.5rem",
-        maxWidth: "calc(100vw - 2rem)",
+          anchor === "enemy"
+            ? "min(clamp(19.5rem, 27vw, 26rem), calc(100vw - 1rem))"
+            : "min(19.5rem, calc(100vw - 1rem))",
         ...positionStyle,
       }}
     >

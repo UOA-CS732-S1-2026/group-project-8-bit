@@ -3,11 +3,11 @@ import Image from "next/image";
 export function BattleStageEnemyArt() {
   return (
     <div
-      className="absolute z-[18] pointer-events-none"
+      className="absolute z-[8] pointer-events-none"
       style={{
-        bottom: "-2%",
-        right: "22%",
-        height: "clamp(23rem, 52vh, 32rem)",
+        bottom: "-18%",
+        right: "20%",
+        height: "clamp(27rem, 60vh, 37rem)",
         aspectRatio: "1024 / 1536",
       }}
     >

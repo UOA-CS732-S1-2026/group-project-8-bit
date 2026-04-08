@@ -10,16 +10,9 @@ type BattleAnswerGridProps = {
 
 export function BattleAnswerGrid({ answers }: BattleAnswerGridProps) {
   return (
-    <section
-      className="grid gap-0"
-      style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}
-    >
-      {answers.map((answer, index) => (
-        <div
-          key={answer.key}
-          className="min-w-0"
-          style={{ marginLeft: index === 0 ? "0" : "-1px" }}
-        >
+    <section className="grid grid-cols-2 gap-4 md:gap-6 xl:grid-cols-4 xl:gap-10">
+      {answers.map((answer) => (
+        <div key={answer.key} className="min-w-0">
           <BattleAnswerButton answer={answer} />
         </div>
       ))}
