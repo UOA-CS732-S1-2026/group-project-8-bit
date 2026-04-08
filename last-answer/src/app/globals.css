@@ -26,3 +26,62 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+@keyframes candle-flame-flicker {
+  0% {
+    transform: translate(-50%, 0) scale(0.96, 1.02) rotate(-2deg);
+    opacity: 0.9;
+  }
+
+  20% {
+    transform: translate(-48%, -3%) scale(1.02, 0.98) rotate(1deg);
+    opacity: 1;
+  }
+
+  42% {
+    transform: translate(-51%, -6%) scale(0.97, 1.08) rotate(-3deg);
+    opacity: 0.92;
+  }
+
+  64% {
+    transform: translate(-49%, -2%) scale(1.04, 0.96) rotate(2deg);
+    opacity: 0.98;
+  }
+
+  82% {
+    transform: translate(-50%, -5%) scale(0.99, 1.06) rotate(-1deg);
+    opacity: 0.94;
+  }
+
+  100% {
+    transform: translate(-50%, 0) scale(0.96, 1.02) rotate(-2deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes candle-glow-flicker {
+  0% {
+    transform: translate(-50%, 0) scale(0.9);
+    opacity: 0.35;
+  }
+
+  25% {
+    transform: translate(-49%, -4%) scale(1.02);
+    opacity: 0.52;
+  }
+
+  50% {
+    transform: translate(-51%, -6%) scale(0.94);
+    opacity: 0.4;
+  }
+
+  75% {
+    transform: translate(-49%, -3%) scale(1.06);
+    opacity: 0.56;
+  }
+
+  100% {
+    transform: translate(-50%, 0) scale(0.9);
+    opacity: 0.35;
+  }
+}

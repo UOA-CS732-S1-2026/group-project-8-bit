@@ -1,4 +1,5 @@
 import { BattleItemsPanel } from "./BattleItemsPanel";
+import { BattleLogPanel } from "./BattleLogPanel";
 import { BattlePlayerPanel } from "./BattlePlayerPanel";
 
 type BattleBottomBarProps = {
@@ -10,19 +11,29 @@ type BattleBottomBarProps = {
     attack: number;
     defense: number;
   };
+  logEntries: {
+    id: string;
+    kind: "player" | "enemy";
+    text: string;
+  }[];
 };
 
-export function BattleBottomBar({ player }: BattleBottomBarProps) {
+export function BattleBottomBar({ player, logEntries }: BattleBottomBarProps) {
   return (
-    <section className="flex max-w-full items-stretch gap-3">
+    <section className="flex w-full max-w-full flex-col gap-3 xl:flex-row xl:items-end">
       <div
-        className="min-w-0 flex-none"
-        style={{ width: "clamp(22.5rem, 33vw, 31rem)" }}
+        className="min-w-0 w-full xl:flex-none"
+        style={{ width: "min(100%, 27.5rem)" }}
       >
         <BattlePlayerPanel player={player} />
       </div>
-      <div className="shrink-0 self-stretch">
-        <BattleItemsPanel />
+      <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row xl:flex-1 xl:items-end">
+        <div className="shrink-0 self-start sm:self-end">
+          <BattleItemsPanel />
+        </div>
+        <div className="min-w-0 flex-1 self-stretch xl:self-end">
+          <BattleLogPanel entries={logEntries} />
+        </div>
       </div>
     </section>
   );

@@ -5,7 +5,7 @@ type BattleTurnBannerProps = {
 export function BattleTurnBanner({ turn }: BattleTurnBannerProps) {
   return (
     <div
-      className="pointer-events-none"
+      className="pointer-events-none px-3"
       style={{
         position: "fixed",
         top: "0.75rem",
@@ -17,22 +17,22 @@ export function BattleTurnBanner({ turn }: BattleTurnBannerProps) {
       <div
         className="text-center"
         style={{
-          width: "15rem",
-          height: "4.5rem",
-          padding: "0.875rem 1.5rem",
+          width: "min(12.75rem, calc(100vw - 1.5rem))",
+          height: "clamp(3rem, 8vw, 3.7rem)",
+          padding: "0.55rem 1rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundImage: "url('/panels/state-panel.png')",
+          backgroundImage: "url('/panels/buttons-panel.png')",
           backgroundSize: "100% 100%",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
       >
         <div
-          className="font-semibold leading-none text-stone-50"
+          className="font-semibold leading-none text-[#ead8b8]"
           style={{
-            fontSize: "1.5625rem",
+            fontSize: "clamp(1.05rem, 3vw, 1.34rem)",
             lineHeight: 1,
           }}
         >

@@ -5,15 +5,15 @@ export function BattleStagePlayerArt() {
     <div
       className="absolute z-[8] pointer-events-none"
       style={{
-        bottom: "-60%",
-        left: "16%",
-        height: "clamp(21rem, 64vh, 31rem)",
+        bottom: "-49%",
+        left: "22%",
+        height: "clamp(16rem, 50vh, 24rem)",
         aspectRatio: "706 / 900",
       }}
     >
       <div className="relative h-full w-full">
         <Image
-          src="/battle/male.png"
+          src="/battle/human1.png"
           alt="Player full-body art"
           fill
           sizes="20vw"

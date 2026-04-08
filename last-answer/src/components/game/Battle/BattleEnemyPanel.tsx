@@ -15,7 +15,7 @@ export function BattleEnemyPanel({ enemy }: BattleEnemyPanelProps) {
     <section className="relative w-full overflow-hidden rounded-[0.6rem] bg-[linear-gradient(180deg,rgba(30,22,17,0.96)_0%,rgba(12,10,9,0.98)_100%)] shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
       <div className="absolute inset-0 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat opacity-90" />
       <div className="relative px-4 py-3">
-        <div className="flex items-center gap-2" style={{ marginLeft: "2.25rem" }}>
+        <div className="flex items-center gap-2" style={{ marginLeft: "0.1rem" }}>
           <div
             className="ml-4 shrink-0 overflow-hidden rounded-[0.45rem] bg-black/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
             style={{
@@ -33,9 +33,6 @@ export function BattleEnemyPanel({ enemy }: BattleEnemyPanelProps) {
                 <div className="truncate text-[1.28rem] font-semibold leading-none">
                   {enemy.name}
                 </div>
-                <div className="shrink-0 text-[1.08rem] font-semibold tracking-[0.04em] text-[#f2d2c3]">
-                  {enemy.hp}/{enemy.maxHp}
-                </div>
               </div>
 
               <div className="mt-2.5 min-w-0">
@@ -45,22 +42,27 @@ export function BattleEnemyPanel({ enemy }: BattleEnemyPanelProps) {
                   label=""
                   className="max-w-none"
                   showValueText={false}
-                  showOverlayPercent
+                  showOverlayPercent={false}
+                  showOverlayValues
                 />
               </div>
             </div>
 
             <div className="mt-2.5 flex items-center gap-5 text-[1.04rem] font-semibold text-stone-200">
               <div className="flex items-center gap-2">
-                <span className="text-[0.72rem] uppercase tracking-[0.18em] text-[#bca17f]">
-                  Atk
-                </span>
+                <img
+                  src="/battle/sword_cutout.png"
+                  alt="Attack"
+                  className="h-7 w-7 shrink-0 object-contain"
+                />
                 <span>{enemy.attack}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[0.72rem] uppercase tracking-[0.18em] text-[#bca17f]">
-                  Def
-                </span>
+                <img
+                  src="/battle/shield_cutout.png"
+                  alt="Defense"
+                  className="h-7 w-7 shrink-0 object-contain"
+                />
                 <span>{enemy.defense}</span>
               </div>
             </div>

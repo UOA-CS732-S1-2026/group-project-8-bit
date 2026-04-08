@@ -24,12 +24,11 @@ export function BattleQuestionPanel({
   warningThreshold,
 }: BattleQuestionPanelProps) {
   return (
-    <div className="-mt-8 relative z-[20] w-full space-y-0">
+    <div className="relative z-[20] -mt-8 w-full space-y-0 sm:-mt-12 lg:-mt-16 xl:-mt-20">
       <div
-        className="mb-2"
+        className="mb-[-1.5rem]"
         style={{
-          width: "32rem",
-          maxWidth: "calc(100vw - 2rem)",
+          width: "min(26rem, calc(100vw - 1rem))",
           marginLeft: "auto",
         }}
       >
@@ -44,7 +43,7 @@ export function BattleQuestionPanel({
       <div className="-mt-px">
         <BattleQuestionHeader question={question} />
       </div>
-      <div className="-mt-px">
+      <div className="mt-3 sm:mt-4">
         <BattleAnswerGrid answers={answers} />
       </div>
     </div>
