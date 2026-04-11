@@ -101,6 +101,8 @@ export function initializeBattleSession(
     burstClicks: 0,
     currentBurstClicks: 0,
     burstUsesThisBattle: 0,
+    burstTimerStarted: false,
+    burstResolving: false,
     barrierActive: false,
     chainGuardActive: false,
     eliminatedOptionIndices: [],
@@ -138,6 +140,8 @@ export function nextQuestionState(battle: BattleSession): BattleSession {
     eliminatedOptionIndices: [],
     toolUsedThisTurn: false,
     currentBurstClicks: 0,
+    burstTimerStarted: false,
+    burstResolving: false,
     status: "question",
     pendingBurst: null,
   };
