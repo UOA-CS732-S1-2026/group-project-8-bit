@@ -17,7 +17,7 @@ export function MainHub() {
   }, [setLocation]);
 
   return (
-    <main className="flex h-full w-full flex-col overflow-auto bg-[radial-gradient(circle_at_top,#193728_0%,#101617_45%,#090b0f_100%)] px-4 pb-6 pt-24 text-stone-100 sm:px-6 lg:px-8">
+    <main className="flex h-full w-full flex-col overflow-auto bg-[radial-gradient(circle_at_top,#193728_0%,#101617_45%,#090b0f_100%)] px-4 py-5 text-stone-100 sm:px-6 sm:py-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6">
         <section className="rounded-[2rem] border border-amber-100/10 bg-stone-950/45 p-6 shadow-2xl shadow-black/25">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
