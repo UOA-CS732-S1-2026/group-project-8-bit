@@ -242,6 +242,8 @@ export function resolveAnswer(args: {
       ...updatedBattle,
       burstRemainingMs: BURST_DURATION_MS,
       currentBurstClicks: 0,
+      burstTimerStarted: false,
+      burstResolving: false,
       supportMenuOpen: false,
       isTimerPaused: true,
       status: "burst",
@@ -304,6 +306,8 @@ export function resolveBurst(
     burstClicks,
     burstUsesThisBattle: battle.burstUsesThisBattle + 1,
     currentBurstClicks: 0,
+    burstTimerStarted: false,
+    burstResolving: false,
     burstRemainingMs: 0,
     pendingBurst: null,
   };

@@ -33,7 +33,12 @@ export function BattleTimerBar({
 
   return (
     <div
-      className="relative ml-auto"
+      className={[
+        "relative ml-auto",
+        isWarning ? "animate-[battle-timer-urgent_850ms_ease-in-out_infinite]" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={{ width: "min(26rem, calc(100vw - 1rem))" }}
     >
       <section
@@ -155,6 +160,19 @@ export function BattleTimerBar({
           </div>
         </div>
       </section>
+      <style jsx>{`
+        @keyframes battle-timer-urgent {
+          0%,
+          100% {
+            transform: translateX(0);
+            filter: drop-shadow(0 0 0 rgba(182, 73, 34, 0));
+          }
+          50% {
+            transform: translateX(-1px);
+            filter: drop-shadow(0 0 14px rgba(182, 73, 34, 0.18));
+          }
+        }
+      `}</style>
     </div>
   );
 }
