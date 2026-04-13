@@ -27,10 +27,12 @@ const pathname = usePathname();
 const routeTitleMap: Record<string, string> = {
   "/game/foggyForest": "Foggy Forest",
   "/game/tavern": "Ashen Tavern - Last Light",
+  "/game/monolith": "The Monolith",
   "/game/mainHub": "Main Hub",
 };
 
-const pageTitle = routeTitleMap[pathname] ?? "The Oracle of Lost Knowledge";
+const pageTitle =
+  routeTitleMap[pathname] ?? formatLocation(player.location) ?? "The Oracle of Lost Knowledge";
 
 
   const panelFill = "bg-center bg-no-repeat bg-[length:100%_100%]";
@@ -93,7 +95,7 @@ const pageTitle = routeTitleMap[pathname] ?? "The Oracle of Lost Knowledge";
           className={`w-full bg-[url('/banners/game-title-banner.png')] px-3 py-4 ${panelFill}`}
         >
           <h2 className="truncate text-center text-xs font-semibold tracking-[0.08em] text-stone-200 sm:text-sm md:text-base">
-            {formatLocation(player.location)}
+            {pageTitle}
           </h2>
         </div>
       </div>

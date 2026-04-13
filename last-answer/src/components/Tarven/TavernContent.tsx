@@ -1,10 +1,18 @@
+"use client";
 
 import GameMainFooter from "@/components/game/GameMainFooter";
+import { useEffect } from "react";
+import { useMCStore } from "@/store/mcStore";
 import { TavernActionsRow } from "./TavernActionsRow";
 import { TavernNarrationPanel } from "./TavernNarrationPanel";
-import { url } from "inspector";
 
 export default function TavernContent() {
+  const setLocation = useMCStore((state) => state.setLocation);
+
+  useEffect(() => {
+    setLocation("tavern");
+  }, [setLocation]);
+
   return (
     <main
       className="relative min-h-screen bg-cover bg-center bg-no-repeat text-amber-100"
