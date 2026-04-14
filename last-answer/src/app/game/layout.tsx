@@ -12,9 +12,14 @@ export const runtime = "nodejs";
 
 export default async function GameLayout({ children }: GameLayoutProps) {
   const session = await getCurrentSession();
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
+  if (!session && !isDevelopment) {
+    redirect("/login");
+  }
 
   if (!session) {
-    redirect("/login");
+    return <>{children}</>;
   }
 
   const player = await ensurePlayerSave(session.user.id, session.user.username);

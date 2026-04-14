@@ -91,161 +91,15 @@ const COIN_ICON_CROP: CropRect = {
   sourceHeight: 1024,
 };
 
-const BUTTON_BASE_RIGHT_CROP: CropRect = {
-  x: 169,
-  y: 285,
-  width: 1197,
-  height: 453,
-  sourceWidth: 1536,
-  sourceHeight: 1024,
+const routeTitleMap: Record<string, string> = {
+  "/game/foggyForest": "Foggy Forest",
+  "/game/tavern": "Ashen Tavern - Last Light",
+  "/game/monolith": "The Monolith",
+  "/game/mainHub": "Main Hub",
 };
 
-const INFO_ICON_SCROLL_CROP: CropRect = {
-  x: 323,
-  y: 284,
-  width: 919,
-  height: 466,
-  sourceWidth: 1536,
-  sourceHeight: 1024,
-};
-
-const HUB_ICON_CASTLE_CROP: CropRect = {
-  x: 447,
-  y: 88,
-  width: 648,
-  height: 763,
-  sourceWidth: 1536,
-  sourceHeight: 1024,
-};
-
-const EXIT_ICON_DOOR_CROP: CropRect = {
-  x: 394,
-  y: 118,
-  width: 750,
-  height: 757,
-  sourceWidth: 1536,
-  sourceHeight: 1024,
-};
-
-const retroFontStyle: CSSProperties = {
-  fontFamily:
-    '"Goudy Old Style", "Palatino Linotype", "Book Antiqua", Garamond, Georgia, serif',
-};
-
-const STATUS_PANE_ZONES = {
-  // Measured from the visible crop of main_status_pane so content aligns to the
-  // embedded portrait frame, level plaque, and right content panel.
-  portraitFrame: {
-    left: "1.15%",
-    top: "2.2%",
-    width: "28.55%",
-    height: "72.3%",
-  } satisfies CSSProperties,
-  levelFrame: {
-    left: "1.15%",
-    top: "74.55%",
-    width: "28.55%",
-    height: "20.6%",
-  } satisfies CSSProperties,
-  rightPanel: {
-    left: "29.6%",
-    right: "3.2%",
-    top: "11.1%",
-    bottom: "11.2%",
-  } satisfies CSSProperties,
-} as const;
-
-function createCroppedBackground(src: string, crop: CropRect): CSSProperties {
-  const xRange = Math.max(1, crop.sourceWidth - crop.width);
-  const yRange = Math.max(1, crop.sourceHeight - crop.height);
-
-  return {
-    backgroundImage: `url('${src}')`,
-    backgroundRepeat: "no-repeat",
-    backgroundSize: `${(crop.sourceWidth / crop.width) * 100}% ${(crop.sourceHeight / crop.height) * 100}%`,
-    backgroundPosition: `${(crop.x / xRange) * 100}% ${(crop.y / yRange) * 100}%`,
-  };
-}
-
-function Meter({
-  shellSrc,
-  shellCrop,
-  fillSrc,
-  fillCrop,
-  percent = 0,
-  valueText,
-  valueClassName,
-  valueStyle,
-}: MeterProps) {
-  const shellStyle = createCroppedBackground(shellSrc, shellCrop);
-  const fillStyle =
-    fillSrc && fillCrop ? createCroppedBackground(fillSrc, fillCrop) : null;
-
-  return (
-    <div
-      className="relative w-full"
-      style={{
-        ...shellStyle,
-        aspectRatio: `${shellCrop.width} / ${shellCrop.height}`,
-      }}
-    >
-      {fillStyle ? (
-        <div className="absolute left-[30.2%] right-[7.1%] top-[28%] h-[43%] overflow-hidden rounded-full">
-          <div
-            className="h-full rounded-full shadow-[0_0_8px_rgba(255,255,255,0.08)] transition-[width] duration-500 ease-out"
-            style={{
-              ...fillStyle,
-              width: `${Math.max(0, Math.min(100, percent))}%`,
-            }}
-          />
-        </div>
-      ) : null}
-
-      {valueText ? (
-        <div
-          className={[
-            "absolute top-1/2 -translate-y-1/2 text-[clamp(0.9rem,1.18vw,1.18rem)] font-semibold tracking-[0.12em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.98)]",
-            valueClassName ?? "right-[9.4%] text-stone-100",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          style={{ ...retroFontStyle, ...valueStyle }}
-        >
-          {valueText}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function CoinReadout() {
-  return (
-    <div className="grid h-full w-[95%] grid-cols-[10%_16%_1fr] items-center justify-self-center pl-[4.5%]">
-      <div
-        className="relative h-[290%] aspect-square translate-y-[9%] justify-self-center self-center"
-        style={{
-          ...createCroppedBackground("/topbar/gold_coin_icon.png", COIN_ICON_CROP),
-        }}
-      />
-      <div
-        className="flex h-full items-center justify-center text-[clamp(0.524rem,0.72vw,0.676rem)] font-semibold uppercase tracking-[0.045em] text-[#e1c88e] drop-shadow-[0_1px_1px_rgba(0,0,0,0.98)] leading-none"
-        style={{ ...retroFontStyle, fontWeight: 600 }}
-      >
-        COIN
-      </div>
-      <div
-        className="flex h-full items-center justify-start pl-[9%] text-[clamp(0.702rem,0.968vw,0.944rem)] font-semibold tracking-[0.04em] text-[#ead29d] drop-shadow-[0_1px_1px_rgba(0,0,0,0.98)] leading-none"
-        style={{ ...retroFontStyle, fontWeight: 500 }}
-      >
-        999
-      </div>
-    </div>
-  );
-}
-
-export function GameMainBar() {
-  const player = useMCStore((state) => state.player);
-  const pathname = usePathname();
+const pageTitle =
+  routeTitleMap[pathname] ?? formatLocation(player.location) ?? "The Oracle of Lost Knowledge";
 
   const routeTitleMap: Record<string, string> = {
     "/game/foggyForest": "Foggy Forest",
@@ -350,11 +204,8 @@ export function GameMainBar() {
           className="flex w-full items-center justify-center overflow-hidden bg-[url('/panels/top_banner_seamless_1.png')] bg-[center_top] bg-repeat-x bg-[length:auto_100%] px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(0,0,0,0.65)] sm:px-6"
           style={{ height: topChromeHeight }}
         >
-          <h2
-            className="truncate px-6 text-center text-sm font-semibold tracking-[0.1em] text-stone-200 drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)] sm:text-base md:text-lg"
-            style={retroFontStyle}
-          >
-            {pageTitle || formatLocation(player.location)}
+          <h2 className="truncate text-center text-xs font-semibold tracking-[0.08em] text-stone-200 sm:text-sm md:text-base">
+            {pageTitle}
           </h2>
         </div>
       </div>
