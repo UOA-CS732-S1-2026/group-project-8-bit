@@ -76,7 +76,7 @@ export default function MonolithContent() {
             >
               <div className="absolute inset-0 flex items-center justify-center px-4">
                 <span className="bg-[linear-gradient(180deg,#fffdf4_0%,#fff0b8_30%,#ffd36e_68%,#ffab43_100%)] bg-clip-text px-2 text-center text-xl font-semibold uppercase tracking-[0.18em] text-transparent [text-shadow:0_2px_8px_rgba(0,0,0,0.95),0_0_22px_rgba(255,181,76,0.46)] sm:text-2xl">
-                  Return to Tavern
+                  Recover to Tavern
                 </span>
               </div>
             </button>
