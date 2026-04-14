@@ -10,17 +10,20 @@ export default function InteractBtn({
   className,
   onPress,
 }: ButtonProps) {
+  const actionBtnClass =
+    "w-full min-h-[5.5rem] bg-[length:100%_100%] bg-no-repeat bg-center px-4 py-3 m-[0.1px] flex flex-col justify-center items-center text-center transform transition-transform duration-150 ease-out hover:scale-105 active:scale-95";
+  const backgroundImage = "url('/panels/interact-panel.png')";
   return (
-    <div
-      className={` bg-[url('/panels/interact-panel.png')] bg-center bg-no-repeat bg-size-[100%_100%] p-3 ${className}`}
-    >
+    <div className={`${className}`}>
       <button
-        className={`flex flex-col text-center px-1 text-[10px] font-semibold text-stone-200 sm:text-xs`}
+        className={actionBtnClass}
+        style={{ backgroundImage }}
         onClick={onPress}
       >
-        <div>{title}</div>
-        <div className="h-0.5 bg-amber-100/50"></div>
-        <div className="w-full break-word whitespace-normal">{content}</div>
+        <div className="w-full truncate text-2xl text-stone-300">{title}</div>
+        <div className="line-clamp-2 h-10 w-full overflow-hidden text-sm leading-5 text-amber-200/80">
+          {content}
+        </div>
       </button>
     </div>
   );
