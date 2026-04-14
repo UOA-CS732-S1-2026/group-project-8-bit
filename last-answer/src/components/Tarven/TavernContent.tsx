@@ -1,10 +1,9 @@
 "use client";
 
-import GameMainFooter from "@/components/game/GameMainFooter";
 import { useEffect } from "react";
-import { useMCStore } from "@/store/mcStore";
 import { TavernActionsRow } from "./TavernActionsRow";
 import { TavernNarrationPanel } from "./TavernNarrationPanel";
+import { useMCStore } from "@/store/mcStore";
 
 export default function TavernContent() {
   const setLocation = useMCStore((state) => state.setLocation);
@@ -15,7 +14,7 @@ export default function TavernContent() {
 
   return (
     <main
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat text-amber-100"
+      className="relative h-full bg-cover bg-center bg-no-repeat text-amber-100"
       style={{ backgroundImage: "url('/backgrounds/Tavern_Background3.png')" }}
     >
       {/* whole page content */}
@@ -50,7 +49,6 @@ export default function TavernContent() {
   Objective: Find answers in the tavern | Day 5 | EXP 320/500
 </div>
         </footer>
-        <GameMainFooter />
       </div>
     </main>
   );

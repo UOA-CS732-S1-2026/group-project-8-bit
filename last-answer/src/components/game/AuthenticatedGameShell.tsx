@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import type { Player } from "@/game/core/types";
 import type { AuthUser } from "@/lib/auth-shared";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
 import { GameMainBar } from "./GameMainBar";
+import GameMainFooter, { GAME_MAIN_FOOTER_HEIGHT } from "./GameMainFooter";
 import { PlayerSaveSync } from "./PlayerSaveSync";
 
 type AuthenticatedGameShellProps = {
@@ -19,6 +21,7 @@ export function AuthenticatedGameShell({
   player,
   children,
 }: AuthenticatedGameShellProps) {
+  const pathname = usePathname();
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const hydratePlayer = useMCStore((state) => state.hydratePlayer);
@@ -41,15 +44,29 @@ export function AuthenticatedGameShell({
     );
   }
 
+  const showSharedChrome = !pathname.startsWith("/game/battle");
+  const shellStyle = {
+    "--game-footer-height": GAME_MAIN_FOOTER_HEIGHT,
+    "--game-topbar-height": "clamp(4.4rem, 9vw, 7.35rem)",
+  } as CSSProperties;
+
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden" style={shellStyle}>
       <PlayerSaveSync />
-      <header>
-        <div className="absolute top-0 left-0 right-0 z-10">
-          <GameMainBar />
-        </div>
-      </header>
-      {children}
+      <div className="grid h-full w-full grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden">
+        {showSharedChrome ? (
+          <div className="relative z-10 h-[var(--game-topbar-height)]">
+            <GameMainBar />
+          </div>
+        ) : null}
+        <div className="min-h-0">{children}</div>
+        {showSharedChrome ? (
+          <div aria-hidden="true" className="h-[var(--game-footer-height)]" />
+        ) : null}
+      </div>
+      {showSharedChrome ? (
+        <GameMainFooter />
+      ) : null}
     </div>
   );
 }

@@ -96,6 +96,8 @@ export type BattleSession = {
   burstClicks: number;
   currentBurstClicks: number;
   burstUsesThisBattle: number;
+  burstTimerStarted: boolean;
+  burstResolving: boolean;
   barrierActive: boolean;
   chainGuardActive: boolean;
   eliminatedOptionIndices: number[];

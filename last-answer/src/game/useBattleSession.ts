@@ -30,6 +30,7 @@ type BattleSessionControls = {
   reward: BattleReward | null;
   startSkirmishBattle: () => void;
   startBossBattle: () => void;
+  resumeQuestionTimer: () => void;
   setSupportMenuOpen: (isOpen: boolean) => void;
   activateSupportTool: (toolId: SupportToolId) => void;
   answerQuestion: (choiceIndex: number) => void;
@@ -38,9 +39,11 @@ type BattleSessionControls = {
 };
 
 export function useBattleSession(): BattleSessionControls {
+  const BURST_RESOLVE_DELAY_MS = 920;
   const [battle, setBattle] = useState<BattleSession | null>(null);
   const [battleReward, setBattleReward] = useState<BattleReward | null>(null);
   const battleRef = useRef<BattleSession | null>(battle);
+  const burstResolveTimeoutRef = useRef<number | null>(null);
 
   const syncBattle = useCallback((nextBattle: BattleSession | null) => {
     battleRef.current = nextBattle;
@@ -73,6 +76,14 @@ export function useBattleSession(): BattleSessionControls {
   useEffect(() => {
     battleRef.current = battle;
   }, [battle]);
+
+  useEffect(() => {
+    return () => {
+      if (burstResolveTimeoutRef.current !== null) {
+        window.clearTimeout(burstResolveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const currentQuestion = battle ? getCurrentQuestion(battle) : null;
   const battleStatus = battle?.status;
@@ -123,6 +134,8 @@ export function useBattleSession(): BattleSessionControls {
       if (
         !currentBattle ||
         currentBattle.status !== "burst" ||
+        !currentBattle.burstTimerStarted ||
+        currentBattle.burstResolving ||
         currentBattle.burstRemainingMs <= 0
       ) {
         return;
@@ -138,14 +151,49 @@ export function useBattleSession(): BattleSessionControls {
         return;
       }
 
-      const player = getMCStore().getState().readPlayer();
-      commitTransition(resolveBurst(currentBattle, player));
+      syncBattle({
+        ...currentBattle,
+        burstRemainingMs: 0,
+        burstTimerStarted: false,
+        burstResolving: true,
+      });
+
+      if (burstResolveTimeoutRef.current !== null) {
+        window.clearTimeout(burstResolveTimeoutRef.current);
+      }
+
+      burstResolveTimeoutRef.current = window.setTimeout(() => {
+        const resolvingBattle = battleRef.current;
+
+        if (!resolvingBattle || resolvingBattle.status !== "burst") {
+          return;
+        }
+
+        const player = getMCStore().getState().readPlayer();
+        const transition = resolveBurst(resolvingBattle, player);
+
+        if (transition.battle.status === "question" && !transition.completion) {
+          syncBattle({
+            ...transition.battle,
+            isTimerPaused: true,
+          });
+        } else {
+          commitTransition(transition);
+        }
+
+        burstResolveTimeoutRef.current = null;
+      }, BURST_RESOLVE_DELAY_MS);
     }, 100);
 
     return () => window.clearInterval(timerId);
   }, [battleStatus, commitTransition, syncBattle]);
 
   function startBattle(isBoss: boolean) {
+    if (burstResolveTimeoutRef.current !== null) {
+      window.clearTimeout(burstResolveTimeoutRef.current);
+      burstResolveTimeoutRef.current = null;
+    }
+
     const player = getMCStore().getState().readPlayer();
     const questionCount = getBattleTurnLimit(isBoss);
     const questions = pickBattleQuestions(questionCount);
@@ -220,9 +268,31 @@ export function useBattleSession(): BattleSessionControls {
       return;
     }
 
+    if (currentBattle.burstResolving) {
+      return;
+    }
+
     syncBattle({
       ...currentBattle,
+      burstTimerStarted: true,
       currentBurstClicks: currentBattle.currentBurstClicks + 1,
+    });
+  }
+
+  function resumeQuestionTimer() {
+    const currentBattle = battleRef.current;
+
+    if (
+      !currentBattle ||
+      currentBattle.status !== "question" ||
+      !currentBattle.isTimerPaused
+    ) {
+      return;
+    }
+
+    syncBattle({
+      ...currentBattle,
+      isTimerPaused: false,
     });
   }
 
@@ -237,6 +307,7 @@ export function useBattleSession(): BattleSessionControls {
     reward: battleReward,
     startSkirmishBattle,
     startBossBattle,
+    resumeQuestionTimer,
     setSupportMenuOpen,
     activateSupportTool,
     answerQuestion,

@@ -10,21 +10,32 @@ export type BattleAnswerOption = {
 
 type BattleQuestionPanelProps = {
   question: string;
+  questionMeta?: string;
   answers: BattleAnswerOption[];
   duration: number;
   remainingTime: number;
   warningThreshold?: number;
+  isTensionActive?: boolean;
 };
 
 export function BattleQuestionPanel({
   question,
+  questionMeta,
   answers,
   duration,
   remainingTime,
   warningThreshold,
+  isTensionActive = false,
 }: BattleQuestionPanelProps) {
   return (
-    <div className="relative z-[20] -mt-8 w-full space-y-0 sm:-mt-12 lg:-mt-16 xl:-mt-20">
+    <div
+      className={[
+        "relative z-[20] -mt-8 w-full space-y-0 sm:-mt-12 lg:-mt-16 xl:-mt-20",
+        isTensionActive ? "animate-[battle-tension-breathe_1.2s_ease-in-out_infinite]" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div
         className="mb-[-1.5rem]"
         style={{
@@ -41,11 +52,24 @@ export function BattleQuestionPanel({
         </div>
       </div>
       <div className="-mt-px">
-        <BattleQuestionHeader question={question} />
+        <BattleQuestionHeader question={question} eyebrow={questionMeta} />
       </div>
       <div className="mt-3 sm:mt-4">
         <BattleAnswerGrid answers={answers} />
       </div>
+      <style jsx>{`
+        @keyframes battle-tension-breathe {
+          0%,
+          100% {
+            transform: translateY(0);
+            filter: saturate(1);
+          }
+          50% {
+            transform: translateY(-2px);
+            filter: saturate(1.08);
+          }
+        }
+      `}</style>
     </div>
   );
 }

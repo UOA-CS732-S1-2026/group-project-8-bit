@@ -11,7 +11,7 @@ export function BattleTurnBanner({ turn }: BattleTurnBannerProps) {
         top: "0.75rem",
         left: "50%",
         transform: "translateX(-50%)",
-        zIndex: 2147483647,
+        zIndex: 30,
       }}
     >
       <div

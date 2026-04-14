@@ -6,7 +6,7 @@ export const STANDARD_TURN_LIMIT = 10;
 export const BOSS_TURN_LIMIT = 20;
 export const QUESTION_TIME_LIMIT_MS = 12_000;
 export const HOURGLASS_BONUS_MS = 4_000;
-export const BURST_DURATION_MS = 2_000;
+export const BURST_DURATION_MS = 3_000;
 
 export function getBattleTurnLimit(isBoss: boolean): number {
   return isBoss ? BOSS_TURN_LIMIT : STANDARD_TURN_LIMIT;
