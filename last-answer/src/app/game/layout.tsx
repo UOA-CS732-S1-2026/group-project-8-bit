@@ -1,32 +1,19 @@
+import { GameMainBar } from "@/components/game/GameMainBar";
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { AuthenticatedGameShell } from "@/components/game/AuthenticatedGameShell";
-import { getCurrentSession } from "@/lib/auth";
-import { ensurePlayerSave } from "@/lib/player-save";
 
 type GameLayoutProps = {
   children: ReactNode;
 };
 
-export const runtime = "nodejs";
-
-export default async function GameLayout({ children }: GameLayoutProps) {
-  const session = await getCurrentSession();
-  const isDevelopment = process.env.NODE_ENV !== "production";
-
-  if (!session && !isDevelopment) {
-    redirect("/login");
-  }
-
-  if (!session) {
-    return <>{children}</>;
-  }
-
-  const player = await ensurePlayerSave(session.user.id, session.user.username);
-
+export default function GameLayout({ children }: GameLayoutProps) {
   return (
-    <AuthenticatedGameShell user={session.user} player={player}>
+    <div className="relative h-full w-full">
+      <header>
+        <div className="absolute top-0 left-0 right-0 z-10">
+          <GameMainBar />
+        </div>
+      </header>
       {children}
-    </AuthenticatedGameShell>
+    </div>
   );
 }

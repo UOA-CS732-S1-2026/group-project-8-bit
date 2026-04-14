@@ -7,7 +7,7 @@ import type { AuthUser } from "@/lib/auth-shared";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
 import { GameMainBar } from "./GameMainBar";
-import GameMainFooter, { GAME_MAIN_FOOTER_HEIGHT } from "./GameMainFooter";
+import GameMainFooter from "./GameMainFooter";
 import { PlayerSaveSync } from "./PlayerSaveSync";
 
 type AuthenticatedGameShellProps = {
@@ -46,7 +46,6 @@ export function AuthenticatedGameShell({
 
   const showSharedChrome = !pathname.startsWith("/game/battle");
   const shellStyle = {
-    "--game-footer-height": GAME_MAIN_FOOTER_HEIGHT,
     "--game-topbar-height": "clamp(4.4rem, 9vw, 7.35rem)",
   } as CSSProperties;
 
@@ -64,9 +63,7 @@ export function AuthenticatedGameShell({
           <div aria-hidden="true" className="h-[var(--game-footer-height)]" />
         ) : null}
       </div>
-      {showSharedChrome ? (
-        <GameMainFooter />
-      ) : null}
+      {showSharedChrome ? <GameMainFooter /> : null}
     </div>
   );
 }

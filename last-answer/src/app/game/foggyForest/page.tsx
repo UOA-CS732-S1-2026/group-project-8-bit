@@ -1,4 +1,5 @@
 import FoggyForestContent from "@/components/game/FoggyForestContent";
+import GameMainFooter from "@/components/game/GameMainFooter";
 
 export default function foggyForest() {
   const backgroundImage = "url('/backgrounds/foggy-forest.png')";
@@ -8,9 +9,12 @@ export default function foggyForest() {
       style={{ backgroundImage }}
     >
       <div className="flex-1">{/* page content */}</div>
-      <div>
+      <div className="mb-3">
         <FoggyForestContent />
       </div>
+      <footer className="mt-auto">
+        <GameMainFooter />
+      </footer>
     </main>
   );
 }

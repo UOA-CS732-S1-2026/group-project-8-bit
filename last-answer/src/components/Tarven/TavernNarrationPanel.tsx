@@ -1,5 +1,5 @@
 export function TavernNarrationPanel() {
-  const backgroundImage = "url('/buttons/parchment-btn.png') ";
+  const backgroundImage = "url('/panels/question_panel_2.png') ";
 
   return (
     <section className="mt-auto mb-4 md:mb-6">
@@ -9,6 +9,6 @@ export function TavernNarrationPanel() {
       >
         The tavern breathes with low voices and flickering firelight.
       </div>
-    </section>  
+    </section>
   );
 }
