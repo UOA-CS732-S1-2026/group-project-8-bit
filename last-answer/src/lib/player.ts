@@ -75,7 +75,10 @@ const getBasePlayer = (player?: Partial<Player>): Player => ({
   inventory: normalizeInventory(player?.inventory),
 });
 
-const rebuildPlayerForTotalXp = (totalXp: number, template?: Player): Player => {
+const rebuildPlayerForTotalXp = (
+  totalXp: number,
+  template?: Player,
+): Player => {
   const safeXp = clampStat(totalXp);
   const leveledPlayer = applyLevelProgression(getBasePlayer(template), safeXp);
   const nextPlayer = leveledPlayer.player;
@@ -89,8 +92,7 @@ const rebuildPlayerForTotalXp = (totalXp: number, template?: Player): Player => 
     name: template?.name ?? defaultPlayer.name,
     location: template?.location ?? defaultPlayer.location,
     activeQuest: template?.activeQuest ?? defaultPlayer.activeQuest,
-    completedQuests:
-      template?.completedQuests ?? defaultPlayer.completedQuests,
+    completedQuests: template?.completedQuests ?? defaultPlayer.completedQuests,
     inventory: normalizeInventory(template?.inventory),
   };
 };
@@ -101,8 +103,13 @@ export const buildInitialPlayer = (name?: string) =>
     name: name ?? defaultPlayer.name,
   });
 
-export const createPlayerStorageKey = (userId?: string | null) =>
-  userId ? `${DEFAULT_STORAGE_KEY_PREFIX}:${userId}` : DEFAULT_STORAGE_KEY_PREFIX;
+export const createPlayerStorageKey = (
+  userId?: string | null,
+  slotId?: string | null,
+) =>
+  userId
+    ? `${DEFAULT_STORAGE_KEY_PREFIX}:${userId}-${slotId}`
+    : DEFAULT_STORAGE_KEY_PREFIX;
 
 export const normalizePlayer = (player?: Partial<Player> | null): Player => {
   const safeExp = clampStat(player?.exp ?? defaultPlayer.exp);
@@ -130,4 +137,3 @@ export const normalizePlayer = (player?: Partial<Player> | null): Player => {
 };
 
 export { clampHp, clampStat, normalizeInventory, normalizePropertyAmount };
-

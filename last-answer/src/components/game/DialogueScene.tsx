@@ -3,22 +3,22 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export interface DialogSingle {
+export interface DialogueSingle {
   character: string;
   dialogue: string;
 }
 
-interface DialogProps {
-  dialogues: DialogSingle[];
+interface DialogueProps {
+  dialogues: DialogueSingle[];
   backgroundImage: string;
   onFinish: () => void;
 }
 
-export default function DialogScene({
+export default function DialogueScene({
   dialogues,
   backgroundImage,
   onFinish,
-}: DialogProps) {
+}: DialogueProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentDialogue = dialogues[currentIndex];
 

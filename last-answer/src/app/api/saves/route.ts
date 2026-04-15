@@ -3,10 +3,12 @@ import type { Player } from "@/game/core/types";
 import { getCurrentSession } from "@/lib/auth";
 import { getConfigurationErrorMessage } from "@/lib/config";
 import { ensurePlayerSave, updatePlayerSave } from "@/lib/player-save";
+import { isPlayerSaveSlotId } from "@/lib/save-slots";
 
 export const runtime = "nodejs";
 
 type SaveRequestBody = {
+  saveId?: unknown;
   player?: unknown;
 };
 
@@ -15,17 +17,26 @@ export async function GET() {
     const session = await getCurrentSession();
 
     if (!session) {
-      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 },
+      );
     }
 
-    const player = await ensurePlayerSave(session.user.id, session.user.username);
+    const saveList = await ensurePlayerSave(
+      session.user.id,
+      session.user.username,
+    );
 
-    return NextResponse.json({ player });
+    return NextResponse.json({ saveList });
   } catch (error) {
     const configurationMessage = getConfigurationErrorMessage(error);
 
     if (configurationMessage) {
-      return NextResponse.json({ error: configurationMessage }, { status: 500 });
+      return NextResponse.json(
+        { error: configurationMessage },
+        { status: 500 },
+      );
     }
 
     console.error("Save fetch failed", error);
@@ -41,17 +52,40 @@ export async function PUT(request: Request) {
     const session = await getCurrentSession();
 
     if (!session) {
-      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 },
+      );
     }
 
-    const body = (await request.json()) as SaveRequestBody;
+    let body: SaveRequestBody;
+
+    try {
+      body = (await request.json()) as SaveRequestBody;
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid save payload." },
+        { status: 400 },
+      );
+    }
+
+    if (!isPlayerSaveSlotId(body.saveId)) {
+      return NextResponse.json(
+        { error: "Invalid save slot." },
+        { status: 400 },
+      );
+    }
 
     if (!body.player || typeof body.player !== "object") {
-      return NextResponse.json({ error: "Invalid player payload." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid player payload." },
+        { status: 400 },
+      );
     }
 
     const player = await updatePlayerSave(
       session.user.id,
+      body.saveId,
       body.player as Player,
     );
 
@@ -60,7 +94,10 @@ export async function PUT(request: Request) {
     const configurationMessage = getConfigurationErrorMessage(error);
 
     if (configurationMessage) {
-      return NextResponse.json({ error: configurationMessage }, { status: 500 });
+      return NextResponse.json(
+        { error: configurationMessage },
+        { status: 500 },
+      );
     }
 
     console.error("Save update failed", error);
