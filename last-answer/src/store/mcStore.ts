@@ -22,7 +22,8 @@ import type {
 const getInventoryProperty = (
   inventory: Property[],
   propertyId: SupportToolId,
-): Property | undefined => inventory.find((property) => property.id === propertyId);
+): Property | undefined =>
+  inventory.find((property) => property.id === propertyId);
 
 const updateInventoryProperty = (
   inventory: Property[],
@@ -81,9 +82,9 @@ type MCStore = {
   storageKey: string;
   userId: string | null;
   readPlayer: () => Player;
-  readPersistPlayer: () => Player | null;
+  readPersistPlayer: (slotId: string) => Player | null;
   savePlayer: (player: Player) => void;
-  savePersistPlayer: (player: Player) => void;
+  savePersistPlayer: (player: Player, slotId: string) => void;
   hydratePlayer: (userId: string, player: Player) => void;
   clearPlayerContext: () => void;
   updatePlayer: (updates: Partial<Player>) => void;
@@ -113,22 +114,22 @@ const createMCStore = () =>
 
     readPlayer: () => get().player,
 
-    readPersistPlayer: () => readPersistedPlayer(get().storageKey),
+    readPersistPlayer: (slotId) =>
+      readPersistedPlayer(createPlayerStorageKey(slotId)),
 
     savePlayer: (player) =>
       set({
         player: normalizePlayer(player),
       }),
 
-    savePersistPlayer: (player) => {
-      savePersistedPlayer(get().storageKey, player);
+    savePersistPlayer: (player, slotId) => {
+      savePersistedPlayer(createPlayerStorageKey(slotId), player);
     },
 
     hydratePlayer: (userId, player) => {
       const storageKey = createPlayerStorageKey(userId);
       const normalizedPlayer = normalizePlayer(player);
 
-      savePersistedPlayer(storageKey, normalizedPlayer);
       set({
         userId,
         storageKey,

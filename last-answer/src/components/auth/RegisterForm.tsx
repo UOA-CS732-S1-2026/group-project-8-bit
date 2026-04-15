@@ -9,8 +9,50 @@ type AuthResponse = {
   error?: string;
 };
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  returnTo?: string | null;
+  panel?: string | null;
+};
+
+const DEFAULT_AUTH_REDIRECT = "/game/mainHub";
+const CLOUD_SAVE_PANEL_PARAM = "cloudSave";
+
+function getSafeReturnTo(returnTo: string | null) {
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) {
+    return DEFAULT_AUTH_REDIRECT;
+  }
+
+  return returnTo;
+}
+
+function buildPostAuthRedirect(returnTo: string | null, panel: string | null) {
+  const redirectUrl = new URL(getSafeReturnTo(returnTo), "https://last-answer.local");
+
+  if (panel === CLOUD_SAVE_PANEL_PARAM) {
+    redirectUrl.searchParams.set("panel", CLOUD_SAVE_PANEL_PARAM);
+  }
+
+  return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+}
+
+function buildAuthLink(pathname: string, returnTo: string | null, panel: string | null) {
+  const params = new URLSearchParams();
+
+  if (returnTo && getSafeReturnTo(returnTo) === returnTo) {
+    params.set("returnTo", returnTo);
+  }
+
+  if (panel === CLOUD_SAVE_PANEL_PARAM) {
+    params.set("panel", panel);
+  }
+
+  const search = params.toString();
+  return search ? `${pathname}?${search}` : pathname;
+}
+
+export function RegisterForm({ returnTo = null, panel = null }: RegisterFormProps) {
   const router = useRouter();
+  const loginHref = buildAuthLink("/login", returnTo, panel);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -62,7 +104,7 @@ export function RegisterForm() {
         return;
       }
 
-      router.push("/game/mainHub");
+      router.push(buildPostAuthRedirect(returnTo, panel));
       router.refresh();
     } catch {
       setError("Unable to create account right now.");
@@ -145,7 +187,7 @@ export function RegisterForm() {
 
       <p className="mt-6 text-sm text-stone-300">
         Already registered?{" "}
-        <Link href="/login" className="font-semibold text-amber-200">
+        <Link href={loginHref} className="font-semibold text-amber-200">
           Log in here
         </Link>
       </p>

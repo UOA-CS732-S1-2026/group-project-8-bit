@@ -9,8 +9,57 @@ type AuthResponse = {
   error?: string;
 };
 
-export function LoginForm() {
+type LoginFormProps = {
+  returnTo?: string | null;
+  panel?: string | null;
+};
+
+const DEFAULT_AUTH_REDIRECT = "/game/mainHub";
+const CLOUD_SAVE_PANEL_PARAM = "cloudSave";
+
+function getSafeReturnTo(returnTo: string | null) {
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) {
+    return DEFAULT_AUTH_REDIRECT;
+  }
+
+  return returnTo;
+}
+
+function buildPostAuthRedirect(returnTo: string | null, panel: string | null) {
+  const redirectUrl = new URL(
+    getSafeReturnTo(returnTo),
+    "https://last-answer.local",
+  );
+  console.log("Redirecting to:", redirectUrl);
+  if (panel === CLOUD_SAVE_PANEL_PARAM) {
+    redirectUrl.searchParams.set("panel", CLOUD_SAVE_PANEL_PARAM);
+  }
+
+  return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+}
+
+function buildAuthLink(
+  pathname: string,
+  returnTo: string | null,
+  panel: string | null,
+) {
+  const params = new URLSearchParams();
+
+  if (returnTo && getSafeReturnTo(returnTo) === returnTo) {
+    params.set("returnTo", returnTo);
+  }
+
+  if (panel === CLOUD_SAVE_PANEL_PARAM) {
+    params.set("panel", panel);
+  }
+
+  const search = params.toString();
+  return search ? `${pathname}?${search}` : pathname;
+}
+
+export function LoginForm({ returnTo = null, panel = null }: LoginFormProps) {
   const router = useRouter();
+  const registerHref = buildAuthLink("/register", returnTo, panel);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,18 +94,18 @@ export function LoginForm() {
           username: trimmedUsername,
           password,
         }),
-        });
+      });
 
       if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as
-          | AuthResponse
-          | null;
+        const payload = (await response
+          .json()
+          .catch(() => null)) as AuthResponse | null;
 
         setError(payload?.error ?? "Unable to log in.");
         return;
       }
 
-      router.push("/game/mainHub");
+      router.push(buildPostAuthRedirect(returnTo, panel));
       router.refresh();
     } catch {
       setError("Unable to log in right now.");
@@ -75,7 +124,8 @@ export function LoginForm() {
           Continue your run
         </h2>
         <p className="text-sm leading-6 text-stone-300">
-          Sign in to resume your saved character, inventory, and battle progress.
+          Sign in to resume your saved character, inventory, and battle
+          progress.
         </p>
       </div>
 
@@ -124,7 +174,7 @@ export function LoginForm() {
 
       <p className="mt-6 text-sm text-stone-300">
         New here?{" "}
-        <Link href="/register" className="font-semibold text-amber-200">
+        <Link href={registerHref} className="font-semibold text-amber-200">
           Create an account
         </Link>
       </p>

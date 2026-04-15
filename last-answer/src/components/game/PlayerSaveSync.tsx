@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { PLAYER_SAVE_SLOT_IDS, type PlayerSaveSlotId } from "@/lib/save-slots";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
 
-export function PlayerSaveSync() {
+type PlayerSaveSyncProps = {
+  saveId?: PlayerSaveSlotId;
+};
+
+export function PlayerSaveSync({
+  saveId = PLAYER_SAVE_SLOT_IDS[0],
+}: PlayerSaveSyncProps) {
   const user = useAuthStore((state) => state.user);
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const player = useMCStore((state) => state.player);
@@ -20,7 +27,7 @@ export function PlayerSaveSync() {
       return;
     }
 
-    savePersistPlayer(player);
+    savePersistPlayer(player, saveId);
 
     if (skipFirstSyncRef.current) {
       skipFirstSyncRef.current = false;
@@ -35,7 +42,7 @@ export function PlayerSaveSync() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ player }),
+          body: JSON.stringify({ saveId, player }),
           signal: controller.signal,
         });
       } catch {
@@ -47,8 +54,7 @@ export function PlayerSaveSync() {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [isHydrated, player, savePersistPlayer, user]);
+  }, [isHydrated, player, saveId, savePersistPlayer, user]);
 
   return null;
 }
-

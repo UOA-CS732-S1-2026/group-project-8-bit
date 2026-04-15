@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { useMCStore } from "@/store/mcStore";
 import InteractBtn from "./InteractBtn";
-import DialogScene, { type DialogSingle } from "./DialogueScene";
+import DialogueScene, { type DialogueSingle } from "./DialogueScene";
 
-const defaultDialogues: DialogSingle[] = [
+const defaultDialogues: DialogueSingle[] = [
   { character: "Officer", dialogue: "Stay alert, the forest is dangerous." },
   {
     character: "Hunter",
@@ -14,8 +14,9 @@ const defaultDialogues: DialogSingle[] = [
 
 export default function FoggyForestContent() {
   const setLocation = useMCStore((state) => state.setLocation);
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogues, setDialogues] = useState<DialogSingle[]>(defaultDialogues);
+  const [showDialogue, setShowDialogue] = useState(false);
+  const [dialogues, setDialogues] =
+    useState<DialogueSingle[]>(defaultDialogues);
   const [dialogBackgroundImage, setDialogBackgroundImage] = useState(
     "url('/backgrounds/the-opening.png')",
   );
@@ -29,20 +30,20 @@ export default function FoggyForestContent() {
       { character: "Explorer", dialogue: "I will brave the unknown!" },
     ]);
     setDialogBackgroundImage("url('/backgrounds/city-hub.png')");
-    setShowDialog(true);
+    setShowDialogue(true);
   };
 
   const talkOfficer = () => {
-    setShowDialog(true);
+    setShowDialogue(true);
   };
   const btnClass = "w-full max-w-[25%] min-h-[3rem] max-h-[6rem]";
   return (
     <main>
-      {showDialog && (
-        <DialogScene
+      {showDialogue && (
+        <DialogueScene
           dialogues={dialogues}
           backgroundImage={dialogBackgroundImage}
-          onFinish={() => setShowDialog(false)}
+          onFinish={() => setShowDialogue(false)}
         />
       )}
       <div className="flex flex-row gap-2">

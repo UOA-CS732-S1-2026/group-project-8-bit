@@ -1,14 +1,24 @@
 import type { QueryResultRow } from "pg";
 import type { Player } from "@/game/core/types";
+import { PLAYER_SAVE_SLOT_IDS, type PlayerSaveSlotId } from "./save-slots";
 import { query, type Queryable } from "./db";
 import { buildInitialPlayer, normalizePlayer } from "./player";
 
 type SaveRow = QueryResultRow & {
   user_id: string;
+  save_id: PlayerSaveSlotId;
   save_data: Player;
 };
 
 const defaultQueryable: Queryable = { query };
+
+function buildSaveList(rows: SaveRow[]): Array<Player | null> {
+  const savesBySlot = new Map(
+    rows.map((save) => [save.save_id, normalizePlayer(save.save_data)]),
+  );
+
+  return PLAYER_SAVE_SLOT_IDS.map((saveId) => savesBySlot.get(saveId) ?? null);
+}
 
 export async function createInitialPlayerSave(
   userId: string,
@@ -18,9 +28,13 @@ export async function createInitialPlayerSave(
   const initialPlayer = buildInitialPlayer(username);
 
   await db.query(
-    `INSERT INTO player_saves (user_id, save_data, updated_at)
-     VALUES ($1, $2::jsonb, NOW())`,
-    [userId, JSON.stringify(initialPlayer)],
+    `INSERT INTO player_saves (user_id, save_id, save_data, updated_at)
+     VALUES ($1, $2, $3::jsonb, NOW())
+     ON CONFLICT (user_id, save_id)
+     DO UPDATE SET
+       save_data = EXCLUDED.save_data,
+       updated_at = NOW()`,
+    [userId, PLAYER_SAVE_SLOT_IDS[0], JSON.stringify(initialPlayer)],
   );
 
   return initialPlayer;
@@ -31,15 +45,14 @@ export async function getPlayerSave(
   db: Queryable = defaultQueryable,
 ) {
   const result = await db.query<SaveRow>(
-    `SELECT user_id, save_data
+    `SELECT user_id, save_id, save_data
        FROM player_saves
       WHERE user_id = $1
-      LIMIT 1`,
+      ORDER BY save_id`,
     [userId],
   );
 
-  const save = result.rows[0];
-  return save ? normalizePlayer(save.save_data) : null;
+  return buildSaveList(result.rows);
 }
 
 export async function ensurePlayerSave(
@@ -47,32 +60,33 @@ export async function ensurePlayerSave(
   username: string,
   db: Queryable = defaultQueryable,
 ) {
-  const existingSave = await getPlayerSave(userId, db);
+  const existingSaves = await getPlayerSave(userId, db);
 
-  if (existingSave) {
-    return existingSave;
+  if (existingSaves.some(Boolean)) {
+    return existingSaves;
   }
 
-  return createInitialPlayerSave(userId, username, db);
+  await createInitialPlayerSave(userId, username, db);
+  return getPlayerSave(userId, db);
 }
 
 export async function updatePlayerSave(
   userId: string,
+  saveId: string,
   player: Player,
   db: Queryable = defaultQueryable,
 ) {
   const normalizedPlayer = normalizePlayer(player);
 
   await db.query(
-    `INSERT INTO player_saves (user_id, save_data, updated_at)
-     VALUES ($1, $2::jsonb, NOW())
-     ON CONFLICT (user_id)
+    `INSERT INTO player_saves (user_id, save_id, save_data, updated_at)
+     VALUES ($1, $2, $3::jsonb, NOW())
+     ON CONFLICT (user_id, save_id)
      DO UPDATE SET
        save_data = EXCLUDED.save_data,
        updated_at = NOW()`,
-    [userId, JSON.stringify(normalizedPlayer)],
+    [userId, saveId, JSON.stringify(normalizedPlayer)],
   );
 
   return normalizedPlayer;
 }
-
