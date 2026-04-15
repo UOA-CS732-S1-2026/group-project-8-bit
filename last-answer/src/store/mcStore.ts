@@ -103,7 +103,7 @@ type MCStore = {
   setLocation: (location: string) => void;
   startQuest: (quest: Quest) => void;
   completeQuest: (quest: Quest) => void;
-  resetPlayer: () => void;
+  resetPlayer: (name?: string) => void;
 };
 
 const createMCStore = () =>
@@ -354,9 +354,9 @@ const createMCStore = () =>
         },
       })),
 
-    resetPlayer: () =>
+    resetPlayer: (name) =>
       set((state) => ({
-        player: buildInitialPlayer(state.player.name),
+        player: buildInitialPlayer(name?.trim() || state.player.name),
       })),
   }));
 
