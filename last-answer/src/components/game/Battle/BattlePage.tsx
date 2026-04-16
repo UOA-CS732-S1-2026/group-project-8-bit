@@ -9,13 +9,14 @@ import {
   useSyncExternalStore,
 } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { createPortal } from "react-dom";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BURST_DURATION_MS, supportToolConfigs } from "@/game/core/battleCore";
-import type {
-  BattleSession,
-  SupportToolId,
-} from "@/game/core/types";
+import type { BattleSession, Enemy, SupportToolId } from "@/game/core/types";
+import {
+  getCorrectAnswerIndex,
+  getQuestionOptions,
+  getQuestionPrompt,
+} from "@/game/core/battleUtil";
 import { useBattleSession } from "@/game/useBattleSession";
 import { useMCStore } from "@/store/mcStore";
 import { BattleBottomBar } from "./BattleBottomBar";
@@ -48,11 +49,21 @@ const battleScenes = {
 
 function resolveBattleScene(location: string) {
   return (
-    battleScenes[location as keyof typeof battleScenes] ?? battleScenes.foggyForest
+    battleScenes[location as keyof typeof battleScenes] ??
+    battleScenes.foggyForest
   );
 }
 
-export function BattlePage() {
+type BattlePageProps = {
+  enemy?: Enemy | null;
+  onFinish?: () => void;
+};
+
+export function BattlePage({
+  enemy: initialEnemy = null,
+  onFinish,
+}: BattlePageProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const AUTO_LOG_LIMIT = 12;
   const FEEDBACK_DURATION_MS = 1600;
@@ -89,7 +100,9 @@ export function BattlePage() {
   const [impactFlashTone, setImpactFlashTone] = useState<
     "none" | "playerHit" | "enemyHit"
   >("none");
-  const [enemyHitTier, setEnemyHitTier] = useState<"normal" | "burst">("normal");
+  const [enemyHitTier, setEnemyHitTier] = useState<"normal" | "burst">(
+    "normal",
+  );
   const [hitStopActive, setHitStopActive] = useState(false);
   const [isResolvingAnswer, setIsResolvingAnswer] = useState(false);
   const [burstIntroActive, setBurstIntroActive] = useState(false);
@@ -120,8 +133,7 @@ export function BattlePage() {
     battle,
     currentQuestion,
     reward,
-    startSkirmishBattle,
-    startBossBattle,
+    startBattleWithEnemy,
     resumeQuestionTimer,
     setSupportMenuOpen,
     activateSupportTool,
@@ -152,7 +164,10 @@ export function BattlePage() {
     battle.correctStreak >= 5 &&
     (battle.enemy.isBoss || battle.burstUsesThisBattle === 0);
   const availableItemCount = battle
-    ? Object.values(battle.supportTools).reduce((sum, amount) => sum + amount, 0)
+    ? Object.values(battle.supportTools).reduce(
+        (sum, amount) => sum + amount,
+        0,
+      )
     : 0;
   const debugSupportOpen = searchParams.get("debugSupport") === "1";
 
@@ -266,59 +281,38 @@ export function BattlePage() {
     [pushLogs],
   );
 
-  const startBattle = useCallback(
-    (mode: "skirmish" | "boss") => {
-      if (answerDelayTimeoutRef.current !== null) {
-        window.clearTimeout(answerDelayTimeoutRef.current);
-        answerDelayTimeoutRef.current = null;
-      }
-      setLogEntries([]);
-      setSelectedAnswerIndex(null);
-      setResolvedAnswerIndex(null);
-      setResolvedAnswerWasCorrect(null);
-      setIsResolvingAnswer(false);
-      setBurstIntroActive(false);
-      setBurstOutroState({ active: false, damage: null });
-      setOutcomeVisible(false);
-      setFloatingTexts([]);
-      setStageShakeTone("none");
-      setImpactFlashTone("none");
-      setEnemyHitTier("normal");
-      setHitStopActive(false);
-      prevBattleRef.current = null;
-      prevPlayerHpRef.current = player.hp;
+  const startBattle = useCallback(() => {
+    if (answerDelayTimeoutRef.current !== null) {
+      window.clearTimeout(answerDelayTimeoutRef.current);
+      answerDelayTimeoutRef.current = null;
+    }
+    setLogEntries([]);
+    setSelectedAnswerIndex(null);
+    setResolvedAnswerIndex(null);
+    setResolvedAnswerWasCorrect(null);
+    setIsResolvingAnswer(false);
+    setBurstIntroActive(false);
+    setBurstOutroState({ active: false, damage: null });
+    setOutcomeVisible(false);
+    setFloatingTexts([]);
+    setStageShakeTone("none");
+    setImpactFlashTone("none");
+    setEnemyHitTier("normal");
+    setHitStopActive(false);
+    prevBattleRef.current = null;
+    prevPlayerHpRef.current = player.hp;
 
-      if (mode === "boss") {
-        startBossBattle();
-        return;
-      }
+    startBattleWithEnemy(initialEnemy);
+  }, [initialEnemy, player.hp, startBattleWithEnemy]);
 
-      startSkirmishBattle();
-    },
-    [player.hp, startBossBattle, startSkirmishBattle],
-  );
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const appHeader = document.querySelector("body section header") as
-      | HTMLElement
-      | null;
-    const previousHeaderDisplay = appHeader?.style.display;
-
-    document.body.style.overflow = "hidden";
-
-    if (appHeader) {
-      appHeader.style.display = "none";
+  const handleFinish = useCallback(() => {
+    if (onFinish) {
+      onFinish();
+      return;
     }
 
-    return () => {
-      document.body.style.overflow = previousOverflow;
-
-      if (appHeader) {
-        appHeader.style.display = previousHeaderDisplay ?? "";
-      }
-    };
-  }, []);
+    router.back();
+  }, [onFinish, router]);
 
   useEffect(() => {
     if (hasAutoStartedRef.current || battle) {
@@ -327,7 +321,7 @@ export function BattlePage() {
 
     const timerId = window.setTimeout(() => {
       hasAutoStartedRef.current = true;
-      startBattle(scene.label === "Monolith" ? "boss" : "skirmish");
+      startBattle();
     }, 0);
 
     return () => window.clearTimeout(timerId);
@@ -393,7 +387,10 @@ export function BattlePage() {
         }
       });
 
-      const enemyDamageTaken = Math.max(0, previousBattle.enemy.hp - battle.enemy.hp);
+      const enemyDamageTaken = Math.max(
+        0,
+        previousBattle.enemy.hp - battle.enemy.hp,
+      );
 
       if (enemyDamageTaken > 0) {
         triggerEnemyHit(`-${enemyDamageTaken}`);
@@ -436,7 +433,10 @@ export function BattlePage() {
           });
         }
 
-        if (previousBattle.chainGuardActive && battle.correctStreak === previousBattle.correctStreak) {
+        if (
+          previousBattle.chainGuardActive &&
+          battle.correctStreak === previousBattle.correctStreak
+        ) {
           nextLogs.push({
             kind: "player",
             text: "Chain Guard preserved your combo.",
@@ -473,8 +473,12 @@ export function BattlePage() {
       }
 
       if (previousBattle.status === "burst" && battle.status === "question") {
-        const burstClicksAdded = battle.burstClicks - previousBattle.burstClicks;
-        const burstDamage = Math.max(0, previousBattle.enemy.hp - battle.enemy.hp);
+        const burstClicksAdded =
+          battle.burstClicks - previousBattle.burstClicks;
+        const burstDamage = Math.max(
+          0,
+          previousBattle.enemy.hp - battle.enemy.hp,
+        );
 
         if (burstClicksAdded > 0) {
           nextLogs.push({
@@ -493,7 +497,10 @@ export function BattlePage() {
           });
         }
 
-        setBurstOutroState({ active: true, damage: burstDamage > 0 ? burstDamage : null });
+        setBurstOutroState({
+          active: true,
+          damage: burstDamage > 0 ? burstDamage : null,
+        });
         if (burstOutroTimeoutRef.current !== null) {
           window.clearTimeout(burstOutroTimeoutRef.current);
         }
@@ -504,7 +511,10 @@ export function BattlePage() {
         setBurstIntroActive(false);
       }
 
-      if (battle.currentQuestionIndex > previousBattle.currentQuestionIndex && currentQuestion) {
+      if (
+        battle.currentQuestionIndex > previousBattle.currentQuestionIndex &&
+        currentQuestion
+      ) {
         setSelectedAnswerIndex(null);
         setResolvedAnswerIndex(null);
         setResolvedAnswerWasCorrect(null);
@@ -525,7 +535,10 @@ export function BattlePage() {
           setOutcomeVisible(true);
         }, OUTCOME_DELAY_MS);
         if (previousBattle.status === "burst") {
-          const burstDamage = Math.max(0, previousBattle.enemy.hp - battle.enemy.hp);
+          const burstDamage = Math.max(
+            0,
+            previousBattle.enemy.hp - battle.enemy.hp,
+          );
 
           if (burstDamage > 0) {
             triggerBurstFinishImpact();
@@ -537,7 +550,10 @@ export function BattlePage() {
             });
           }
 
-          setBurstOutroState({ active: true, damage: burstDamage > 0 ? burstDamage : null });
+          setBurstOutroState({
+            active: true,
+            damage: burstDamage > 0 ? burstDamage : null,
+          });
           if (burstOutroTimeoutRef.current !== null) {
             window.clearTimeout(burstOutroTimeoutRef.current);
           }
@@ -593,6 +609,11 @@ export function BattlePage() {
     triggerPlayerHit,
   ]);
 
+  const currentQuestionOptions = useMemo(
+    () => (currentQuestion ? getQuestionOptions(currentQuestion) : []),
+    [currentQuestion],
+  );
+
   const handleAnswer = useCallback(
     (choiceIndex: number) => {
       if (!battle || !currentQuestion || battle.status !== "question") {
@@ -607,7 +628,9 @@ export function BattlePage() {
         return;
       }
 
-      const isCorrect = currentQuestion.answerIndex === choiceIndex;
+      const selectedAnswerText =
+        currentQuestionOptions[choiceIndex] ?? "that answer";
+      const isCorrect = getCorrectAnswerIndex(currentQuestion) === choiceIndex;
       battleAudio.arm();
       if (isCorrect) {
         battleAudio.playCorrect();
@@ -621,8 +644,8 @@ export function BattlePage() {
       appendLog(
         isCorrect ? "player" : "enemy",
         isCorrect
-          ? `You chose the correct answer: ${currentQuestion.options[choiceIndex]}.`
-          : `You chose ${currentQuestion.options[choiceIndex]}. It was incorrect.`,
+          ? `You chose the correct answer: ${selectedAnswerText}.`
+          : `You chose ${selectedAnswerText}. It was incorrect.`,
       );
       answerDelayTimeoutRef.current = window.setTimeout(() => {
         answerQuestion(choiceIndex);
@@ -636,6 +659,7 @@ export function BattlePage() {
       appendLog,
       battle,
       currentQuestion,
+      currentQuestionOptions,
       isResolvingAnswer,
     ],
   );
@@ -671,7 +695,7 @@ export function BattlePage() {
       }));
     }
 
-    return (currentQuestion?.options ?? []).map((option, index) => {
+    return currentQuestionOptions.map((option, index) => {
       const isEliminated = battle.eliminatedOptionIndices.includes(index);
       let tone: "idle" | "selected" | "correct" | "wrong" | "dim" = "idle";
 
@@ -694,7 +718,7 @@ export function BattlePage() {
         title: option,
         subtitle: isEliminated
           ? "This wrong answer has been removed."
-          : currentQuestion?.category ?? "Battle Quiz",
+          : (currentQuestion?.category ?? "Battle Quiz"),
         onClick: () => handleAnswer(index),
         disabled:
           battle.status !== "question" ||
@@ -708,6 +732,7 @@ export function BattlePage() {
   }, [
     battle,
     currentQuestion,
+    currentQuestionOptions,
     handleAnswer,
     resolvedAnswerIndex,
     resolvedAnswerWasCorrect,
@@ -718,7 +743,9 @@ export function BattlePage() {
   const questionText =
     battle?.status === "burst"
       ? "Burst phase: ignite the sigil with rapid taps before the window closes."
-      : currentQuestion?.prompt ?? "Preparing next battle question...";
+      : currentQuestion
+        ? getQuestionPrompt(currentQuestion)
+        : "Preparing next battle question...";
   const questionMeta =
     battle?.status === "burst"
       ? `Burst Window | ${battle.currentBurstClicks} hits`
@@ -734,13 +761,12 @@ export function BattlePage() {
     return null;
   }
 
-  return createPortal(
+  return (
     <main
       className={[
-        "fixed inset-0 overflow-x-hidden bg-black text-stone-100",
+        "relative h-full min-h-0 w-full overflow-x-hidden bg-black text-stone-100",
         battle?.supportMenuOpen ? "overflow-y-hidden" : "overflow-y-auto",
       ].join(" ")}
-      style={{ zIndex: 2147483647 }}
     >
       <div className="absolute inset-0">
         <Image
@@ -768,8 +794,8 @@ export function BattlePage() {
         />
       ) : null}
 
-      <div className="relative z-10 flex min-h-screen w-full flex-col px-2 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5">
-        <div className="flex min-h-full w-full flex-1 flex-col gap-3">
+      <div className="relative z-10 flex h-full min-h-0 w-full flex-col px-2 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5">
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-3">
           <BattleStage
             backgroundLabel={scene.label}
             enemy={
@@ -817,9 +843,9 @@ export function BattlePage() {
                 ? BURST_MUTED_CLASSES
                 : burstOutroState.active
                   ? "opacity-60 blur-[1px] saturate-[0.9]"
-                : isTensionActive
-                  ? "saturate-[1.05]"
-                : "",
+                  : isTensionActive
+                    ? "saturate-[1.05]"
+                    : "",
             ]
               .filter(Boolean)
               .join(" ")}
@@ -870,8 +896,7 @@ export function BattlePage() {
           status={battle.status}
           reward={reward}
           summary={outcomeSummary}
-          onRetry={() => startBattle("skirmish")}
-          onChallengeBoss={() => startBattle("boss")}
+          onFinish={handleFinish}
         />
       ) : null}
       <style jsx>{`
@@ -885,8 +910,6 @@ export function BattlePage() {
           }
         }
       `}</style>
-    </main>,
-    document.body
+    </main>
   );
 }
-

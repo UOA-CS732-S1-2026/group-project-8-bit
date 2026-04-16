@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { EnemyTier } from "./level";
+import type { categoryKey, Difficulty, QuestionType } from "@/store/game-store";
 
 export type QuestId = string;
 
@@ -23,16 +24,16 @@ export type Property = {
   leftNumber: number;
   price: number;
 };
-export type GameMode = "hub" | "dialogue" | "battle" | "reward";
 export type BattleStatus = "idle" | "question" | "burst" | "won" | "lost";
 export type SupportToolId = "analyze" | "hourglass" | "barrier" | "chainGuard";
 
 export type Question = {
-  id: string;
-  prompt: string;
-  options: string[];
-  answerIndex: number;
-  category?: string;
+  type: QuestionType;
+  difficulty: Difficulty;
+  category: categoryKey;
+  question: string;
+  correct_answer: string;
+  incorrect_answers: string[];
 };
 
 export type Enemy = {

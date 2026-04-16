@@ -19,17 +19,18 @@ import type {
   BattleReward,
   BattleSession,
   BattleTransitionResult,
+  Enemy,
   Question,
   SupportToolId,
 } from "@/game/core/types";
+import { useGameStore } from "@/store/game-store";
 import { getMCStore } from "@/store/mcStore";
 
 type BattleSessionControls = {
   battle: BattleSession | null;
   currentQuestion: Question | null;
   reward: BattleReward | null;
-  startSkirmishBattle: () => void;
-  startBossBattle: () => void;
+  startBattleWithEnemy: (enemyOverride?: Enemy | null) => void;
   resumeQuestionTimer: () => void;
   setSupportMenuOpen: (isOpen: boolean) => void;
   activateSupportTool: (toolId: SupportToolId) => void;
@@ -44,6 +45,7 @@ export function useBattleSession(): BattleSessionControls {
   const [battleReward, setBattleReward] = useState<BattleReward | null>(null);
   const battleRef = useRef<BattleSession | null>(battle);
   const burstResolveTimeoutRef = useRef<number | null>(null);
+  const questionRequestIdRef = useRef(0);
 
   const syncBattle = useCallback((nextBattle: BattleSession | null) => {
     battleRef.current = nextBattle;
@@ -79,6 +81,8 @@ export function useBattleSession(): BattleSessionControls {
 
   useEffect(() => {
     return () => {
+      questionRequestIdRef.current += 1;
+
       if (burstResolveTimeoutRef.current !== null) {
         window.clearTimeout(burstResolveTimeoutRef.current);
       }
@@ -188,27 +192,36 @@ export function useBattleSession(): BattleSessionControls {
     return () => window.clearInterval(timerId);
   }, [battleStatus, commitTransition, syncBattle]);
 
-  function startBattle(isBoss: boolean) {
+  async function startBattleWithEnemy(enemyOverride?: Enemy | null) {
     if (burstResolveTimeoutRef.current !== null) {
       window.clearTimeout(burstResolveTimeoutRef.current);
       burstResolveTimeoutRef.current = null;
     }
 
+    const requestId = questionRequestIdRef.current + 1;
+    questionRequestIdRef.current = requestId;
     const player = getMCStore().getState().readPlayer();
-    const questionCount = getBattleTurnLimit(isBoss);
-    const questions = pickBattleQuestions(questionCount);
-    const enemy = createDemoEnemy(player, isBoss);
+    const enemy = enemyOverride ?? createDemoEnemy(player, false);
+    const questionCount = getBattleTurnLimit(enemy.isBoss);
+    const { category, difficulty, type } = useGameStore
+      .getState()
+      .readGameSettings();
+
+    syncBattle(null);
+    setBattleReward(null);
+
+    const questions = await pickBattleQuestions({
+      amount: questionCount,
+      category,
+      difficulty,
+      type,
+    });
+
+    if (requestId !== questionRequestIdRef.current) {
+      return;
+    }
 
     syncBattle(createBattle({ enemy, questions, player }));
-    setBattleReward(null);
-  }
-
-  function startSkirmishBattle() {
-    startBattle(false);
-  }
-
-  function startBossBattle() {
-    startBattle(true);
   }
 
   function setSupportMenuOpen(isOpen: boolean) {
@@ -235,7 +248,8 @@ export function useBattleSession(): BattleSessionControls {
     const nextTransition = handleSupportToolActivation(currentBattle, toolId);
     const nextBattle = nextTransition.battle;
     const toolWasConsumed =
-      nextBattle.supportTools[toolId] === currentBattle.supportTools[toolId] - 1;
+      nextBattle.supportTools[toolId] ===
+      currentBattle.supportTools[toolId] - 1;
 
     syncBattle(nextBattle);
 
@@ -305,8 +319,7 @@ export function useBattleSession(): BattleSessionControls {
     battle,
     currentQuestion,
     reward: battleReward,
-    startSkirmishBattle,
-    startBossBattle,
+    startBattleWithEnemy,
     resumeQuestionTimer,
     setSupportMenuOpen,
     activateSupportTool,

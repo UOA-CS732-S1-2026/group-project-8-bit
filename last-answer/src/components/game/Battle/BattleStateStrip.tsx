@@ -55,7 +55,7 @@ export function BattleStateStrip({
         .filter(Boolean)
         .join(" ")}
       style={{
-        position: "fixed",
+        position: "absolute",
         top: "0.35rem",
         left: "50%",
         transform: "translateX(-50%)",

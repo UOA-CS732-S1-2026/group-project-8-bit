@@ -32,6 +32,7 @@ export const CATEGORYCODE = {
 } as const;
 
 export type CategoryCode = (typeof CATEGORYCODE)[keyof typeof CATEGORYCODE];
+export type categoryKey = keyof typeof CATEGORYCODE;
 export type Difficulty = "easy" | "medium" | "hard";
 export type QuestionType = "multiple" | "boolean";
 
