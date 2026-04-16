@@ -5,12 +5,24 @@ import {
   supportToolConfigs,
 } from "./battleCore";
 import { defaultBattleQuestions } from "./questions";
+import type { CategoryCode, Difficulty, QuestionType } from "@/store/game-store";
 import type {
   BattleSession,
   PendingBurst,
   Player,
   Question,
 } from "./types";
+
+type PickBattleQuestionsOptions = {
+  amount: number;
+  category: CategoryCode | null;
+  difficulty: Difficulty | null;
+  type: QuestionType | null;
+};
+
+type QuestionsApiResponse = {
+  questions?: unknown;
+};
 
 function shuffleArray<T>(items: T[]): T[] {
   const nextItems = [...items];
@@ -25,20 +37,104 @@ function shuffleArray<T>(items: T[]): T[] {
   return nextItems;
 }
 
-export function pickBattleQuestions(count: number): Question[] {
-  if (count <= 0 || defaultBattleQuestions.length === 0) {
+function sampleQuestions(pool: Question[], count: number): Question[] {
+  if (count <= 0 || pool.length === 0) {
     return [];
   }
 
   const questions: Question[] = [];
 
   while (questions.length < count) {
-    const shuffledBatch = shuffleArray(defaultBattleQuestions);
+    const shuffledBatch = shuffleArray(pool);
     const remainingCount = count - questions.length;
     questions.push(...shuffledBatch.slice(0, remainingCount));
   }
 
   return questions;
+}
+
+function isQuestion(value: unknown): value is Question {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const question = value as Partial<Question>;
+
+  return (
+    typeof question.type === "string" &&
+    typeof question.difficulty === "string" &&
+    typeof question.category === "string" &&
+    typeof question.question === "string" &&
+    typeof question.correct_answer === "string" &&
+    Array.isArray(question.incorrect_answers) &&
+    question.incorrect_answers.every((answer) => typeof answer === "string")
+  );
+}
+
+function buildBattleQuestionsUrl(options: PickBattleQuestionsOptions): string {
+  const params = new URLSearchParams({ amount: String(options.amount) });
+
+  if (options.category !== null) {
+    params.set("category", options.category);
+  }
+
+  if (options.difficulty !== null) {
+    params.set("difficulty", options.difficulty);
+  }
+
+  if (options.type !== null) {
+    params.set("type", options.type);
+  }
+
+  return `/api/questions?${params}`;
+}
+
+export async function pickBattleQuestions(
+  options: PickBattleQuestionsOptions,
+): Promise<Question[]> {
+  if (options.amount <= 0) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(buildBattleQuestionsUrl(options));
+
+    if (!response.ok) {
+      return sampleQuestions(defaultBattleQuestions, options.amount);
+    }
+
+    const data: QuestionsApiResponse | null = await response
+      .json()
+      .catch(() => null);
+    const apiQuestions = Array.isArray(data?.questions)
+      ? data.questions.filter(isQuestion)
+      : [];
+
+    if (apiQuestions.length > 0) {
+      return sampleQuestions(apiQuestions, options.amount);
+    }
+  } catch {
+    // Fall through to local defaults when the route or network is unavailable.
+  }
+
+  return sampleQuestions(defaultBattleQuestions, options.amount);
+}
+
+export function getQuestionPrompt(question: Question): string {
+  return question.question;
+}
+
+export function getQuestionOptions(question: Question): string[] {
+  return [question.correct_answer, ...question.incorrect_answers];
+}
+
+export function getCorrectAnswerIndex(question: Question): number {
+  void question;
+  return 0;
+}
+
+export function getQuestionKey(question: Question): string {
+  return question.question;
 }
 
 function getInventoryUses(
@@ -175,7 +271,7 @@ export function createPendingBurst(
   }
 
   return {
-    questionId: question.id,
+    questionId: getQuestionKey(question),
     timeLeftMs: battle.timeRemainingMs,
     timeLimitMs: battle.timeLimitMs,
     streak,

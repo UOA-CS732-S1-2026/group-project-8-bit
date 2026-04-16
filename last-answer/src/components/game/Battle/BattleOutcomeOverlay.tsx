@@ -11,8 +11,7 @@ type BattleOutcomeOverlayProps = {
     bestCombo: number;
     burstClicks: number;
   } | null;
-  onRetry: () => void;
-  onChallengeBoss: () => void;
+  onFinish: () => void;
 };
 
 function formatAvgTime(ms: number): string {
@@ -23,8 +22,7 @@ export function BattleOutcomeOverlay({
   status,
   reward,
   summary,
-  onRetry,
-  onChallengeBoss,
+  onFinish,
 }: BattleOutcomeOverlayProps) {
   const isVictory = status === "won";
   const accuracy =
@@ -101,20 +99,13 @@ export function BattleOutcomeOverlay({
             </div>
           )}
 
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex justify-end">
             <button
               type="button"
-              onClick={onRetry}
-              className="rounded-[0.8rem] border border-[#d3b07b]/65 bg-[rgba(87,59,31,0.5)] px-4 py-2 text-sm font-semibold text-[#f3e0bb] transition hover:bg-[rgba(115,79,43,0.62)]"
+              onClick={onFinish}
+              className="rounded-[0.8rem] border border-[#d3b07b]/65 bg-[rgba(87,59,31,0.5)] px-4 py-2 text-sm font-semibold lowercase text-[#f3e0bb] transition hover:bg-[rgba(115,79,43,0.62)]"
             >
-              Retry Skirmish
-            </button>
-            <button
-              type="button"
-              onClick={onChallengeBoss}
-              className="rounded-[0.8rem] border border-[#8d6a46]/65 bg-[rgba(42,29,19,0.6)] px-4 py-2 text-sm font-semibold text-[#e6d0a6] transition hover:bg-[rgba(72,50,33,0.72)]"
-            >
-              Challenge Boss
+              finish
             </button>
           </div>
           </div>

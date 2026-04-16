@@ -249,7 +249,7 @@ export function BattleSupportOverlay({
 
   return (
     <>
-      <div className="fixed inset-0 z-[35] overflow-y-auto overflow-x-hidden bg-[rgba(0,0,0,0.68)] px-3 pb-5 pt-24 backdrop-blur-[6px] sm:px-4 sm:pt-32 lg:pt-36">
+      <div className="absolute inset-0 z-[35] overflow-y-auto overflow-x-hidden bg-[rgba(0,0,0,0.68)] px-3 pb-5 pt-24 backdrop-blur-[6px] sm:px-4 sm:pt-32 lg:pt-36">
       <button
         type="button"
         aria-label="Close item menu"

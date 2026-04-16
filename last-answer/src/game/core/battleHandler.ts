@@ -9,7 +9,9 @@ import {
 import { finalizeDefeat, finalizeVictory } from "./battleResultHandler";
 import {
   createPendingBurst,
+  getCorrectAnswerIndex,
   getCurrentQuestion,
+  getQuestionOptions,
   initializeBattleSession,
   nextQuestionState,
   preserveOrBreakCombo,
@@ -145,11 +147,12 @@ export function activateSupportTool(
   let chainGuardActive = battle.chainGuardActive;
 
   if (toolId === "analyze") {
-    const wrongOptions = currentQuestion.options
+    const correctAnswerIndex = getCorrectAnswerIndex(currentQuestion);
+    const wrongOptions = getQuestionOptions(currentQuestion)
       .map((_, index) => index)
       .filter(
         (index) =>
-          index !== currentQuestion.answerIndex &&
+          index !== correctAnswerIndex &&
           !battle.eliminatedOptionIndices.includes(index),
       )
       .slice(0, 2);
@@ -209,7 +212,7 @@ export function resolveAnswer(args: {
   const turnsRemaining = Math.max(0, battle.turnLimit - turnsUsed);
   const answerTimeMs = battle.timeLimitMs - battle.timeRemainingMs;
   const speedRatio = battle.timeRemainingMs / battle.timeLimitMs;
-  const isCorrect = choiceIndex === currentQuestion.answerIndex;
+  const isCorrect = choiceIndex === getCorrectAnswerIndex(currentQuestion);
 
   if (!isCorrect) {
     return resolveFailureState(battle, player, battle.timeRemainingMs);

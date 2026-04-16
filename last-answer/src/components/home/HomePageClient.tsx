@@ -25,7 +25,7 @@ export function HomePageClient({ user }: HomePageClientProps) {
       return;
     }
 
-    console.log(mode);
+    router.push("/arcade");
   }
 
   return (
