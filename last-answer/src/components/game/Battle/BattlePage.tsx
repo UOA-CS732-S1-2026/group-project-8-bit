@@ -28,39 +28,17 @@ import { BattleStage } from "./BattleStage";
 import { BattleSupportOverlay } from "./BattleSupportOverlay";
 import { useBattleAudio } from "./useBattleAudio";
 
-const battleScenes = {
-  mainHub: {
-    backgroundImage: "/backgrounds/city-hub.png",
-    label: "City Hub",
-  },
-  cityHub: {
-    backgroundImage: "/backgrounds/city-hub.png",
-    label: "City Hub",
-  },
-  foggyForest: {
-    backgroundImage: "/backgrounds/foggy-forest.png",
-    label: "Foggy Forest",
-  },
-  monolith: {
-    backgroundImage: "/backgrounds/monolith.png",
-    label: "Monolith",
-  },
-} as const;
-
-function resolveBattleScene(location: string) {
-  return (
-    battleScenes[location as keyof typeof battleScenes] ??
-    battleScenes.foggyForest
-  );
-}
-
 type BattlePageProps = {
   enemy?: Enemy | null;
+  backgroundImage?: string;
+  label?: string;
   onFinish?: () => void;
 };
 
 export function BattlePage({
   enemy: initialEnemy = null,
+  backgroundImage = "/backgrounds/foggy-forest.png",
+  label = "battle",
   onFinish,
 }: BattlePageProps) {
   const router = useRouter();
@@ -140,7 +118,6 @@ export function BattlePage({
     answerQuestion,
     registerBurstClick,
   } = useBattleSession();
-  const scene = resolveBattleScene(player.location);
   const playerBattleStats = {
     name: player.name || "Bruce",
     level: player.level,
@@ -325,7 +302,7 @@ export function BattlePage({
     }, 0);
 
     return () => window.clearTimeout(timerId);
-  }, [battle, scene.label, startBattle]);
+  }, [battle, label, startBattle]);
 
   useEffect(() => {
     if (
@@ -770,8 +747,8 @@ export function BattlePage({
     >
       <div className="absolute inset-0">
         <Image
-          src={scene.backgroundImage}
-          alt={`${scene.label} background`}
+          src={backgroundImage}
+          alt={`${label} background`}
           fill
           priority
           sizes="100vw"
@@ -797,7 +774,7 @@ export function BattlePage({
       <div className="relative z-10 flex h-full min-h-0 w-full flex-col px-2 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5">
         <div className="flex min-h-0 w-full flex-1 flex-col gap-3">
           <BattleStage
-            backgroundLabel={scene.label}
+            backgroundLabel={label}
             enemy={
               battle?.enemy ?? {
                 name: "Awaiting Battle",
