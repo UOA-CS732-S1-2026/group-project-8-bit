@@ -10,7 +10,6 @@ import {
 import { validatePassword, validateUsername } from "@/lib/auth-shared";
 import { getConfigurationErrorMessage } from "@/lib/config";
 import { withTransaction } from "@/lib/db";
-import { createInitialPlayerSave } from "@/lib/player-save";
 
 export const runtime = "nodejs";
 
@@ -61,7 +60,6 @@ export async function POST(request: Request) {
         [userId, username, passwordHash],
       );
 
-      const player = await createInitialPlayerSave(userId, username, client);
       const session = await createSession(userId, client);
 
       return {
@@ -69,7 +67,6 @@ export async function POST(request: Request) {
           id: userId,
           username,
         },
-        player,
         session,
       };
     });
@@ -77,7 +74,6 @@ export async function POST(request: Request) {
     const response = NextResponse.json(
       {
         user: result.user,
-        player: result.player,
       },
       { status: 201 },
     );

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { Player } from "@/game/core/types";
 import { getCurrentSession } from "@/lib/auth";
 import { getConfigurationErrorMessage } from "@/lib/config";
-import { ensurePlayerSave, updatePlayerSave } from "@/lib/player-save";
+import { getPlayerSave, updatePlayerSave } from "@/lib/player-save";
 import { isPlayerSaveSlotId } from "@/lib/save-slots";
 
 export const runtime = "nodejs";
@@ -23,10 +23,7 @@ export async function GET() {
       );
     }
 
-    const saveList = await ensurePlayerSave(
-      session.user.id,
-      session.user.username,
-    );
+    const saveList = await getPlayerSave(session.user.id);
 
     return NextResponse.json({ saveList });
   } catch (error) {

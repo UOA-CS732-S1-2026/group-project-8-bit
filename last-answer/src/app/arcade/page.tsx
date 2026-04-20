@@ -17,6 +17,35 @@ import { defaultPlayer, getMCStore, useMCStore } from "@/store/mcStore";
 const difficultyOptions: Difficulty[] = ["easy", "medium", "hard"];
 const questionTypeOptions: QuestionType[] = ["multiple", "boolean"];
 const categoryCodeValues = Object.values(CATEGORYCODE);
+const backgroundOptions = [
+  {
+    id: "forest",
+    label: "Forest",
+    path: "/backgrounds/foggy-forest.png",
+  },
+  {
+    id: "mainHub",
+    label: "Main Hub",
+    path: "/backgrounds/city-hub.png",
+  },
+  {
+    id: "tavern",
+    label: "Tavern",
+    path: "/backgrounds/Tavern_Background3.png",
+  },
+  {
+    id: "cave",
+    label: "Cave",
+    path: "/backgrounds/cave-background.png",
+  },
+  {
+    id: "source",
+    label: "Source",
+    path: "/backgrounds/source-background.png",
+  },
+] as const;
+
+type BackgroundOptionId = (typeof backgroundOptions)[number]["id"];
 
 const fieldClass = "space-y-2";
 const labelClass =
@@ -83,6 +112,8 @@ export default function ArcadePage() {
   const setType = useGameStore((state) => state.setType);
   const [fightBoss, setFightBoss] = useState(false);
   const [resetBeforeFight, setResetBeforeFight] = useState(false);
+  const [selectedBackgroundId, setSelectedBackgroundId] =
+    useState<BackgroundOptionId>("mainHub");
   const [battleEnemy, setBattleEnemy] = useState<Enemy | null>(null);
   const [battleStarted, setBattleStarted] = useState(false);
 
@@ -91,6 +122,13 @@ export default function ArcadePage() {
   const selectedCategoryLabel = useMemo(
     () => getCategoryLabel(category),
     [category],
+  );
+  const selectedBackground = useMemo(
+    () =>
+      backgroundOptions.find(
+        (background) => background.id === selectedBackgroundId,
+      ) ?? backgroundOptions[0],
+    [selectedBackgroundId],
   );
 
   const handleFight = () => {
@@ -103,6 +141,7 @@ export default function ArcadePage() {
         `Type: ${formatSetting(type)}`,
         `Boss fight: ${fightBoss ? "Yes" : "No"}`,
         `Reset player: ${resetBeforeFight ? "Yes" : "No"}`,
+        `Background: ${selectedBackground.label}`,
         `Enemy: ${enemyName}`,
         `Enemy level: ${enemyLevel}`,
       ].join("\n"),
@@ -136,7 +175,14 @@ export default function ArcadePage() {
   };
 
   if (battleStarted && battleEnemy) {
-    return <BattlePage enemy={battleEnemy} onFinish={handleBattleFinish} />;
+    return (
+      <BattlePage
+        enemy={battleEnemy}
+        backgroundImage={selectedBackground.path}
+        label={selectedBackground.label}
+        onFinish={handleBattleFinish}
+      />
+    );
   }
 
   return (
@@ -247,8 +293,29 @@ export default function ArcadePage() {
               </select>
             </label>
 
+            <label className={fieldClass}>
+              <span className={labelClass}>Background</span>
+              <select
+                value={selectedBackgroundId}
+                onChange={(event) =>
+                  setSelectedBackgroundId(
+                    event.target.value as BackgroundOptionId,
+                  )
+                }
+                className={selectClass}
+              >
+                {backgroundOptions.map((background) => (
+                  <option key={background.id} value={background.id}>
+                    {background.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <div className="rounded-md border border-amber-200/20 bg-black/35 px-4 py-3 text-sm leading-6 text-stone-300">
               Enemy preview: {enemyName}, level {enemyLevel}
+              <br />
+              Battle background: {selectedBackground.label}
             </div>
           </div>
 

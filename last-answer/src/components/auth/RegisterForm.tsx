@@ -14,7 +14,7 @@ type RegisterFormProps = {
   panel?: string | null;
 };
 
-const DEFAULT_AUTH_REDIRECT = "/game/mainHub";
+const DEFAULT_AUTH_REDIRECT = "/";
 const CLOUD_SAVE_PANEL_PARAM = "cloudSave";
 
 function getSafeReturnTo(returnTo: string | null) {
@@ -26,7 +26,10 @@ function getSafeReturnTo(returnTo: string | null) {
 }
 
 function buildPostAuthRedirect(returnTo: string | null, panel: string | null) {
-  const redirectUrl = new URL(getSafeReturnTo(returnTo), "https://last-answer.local");
+  const redirectUrl = new URL(
+    getSafeReturnTo(returnTo),
+    "https://last-answer.local",
+  );
 
   if (panel === CLOUD_SAVE_PANEL_PARAM) {
     redirectUrl.searchParams.set("panel", CLOUD_SAVE_PANEL_PARAM);
@@ -35,7 +38,11 @@ function buildPostAuthRedirect(returnTo: string | null, panel: string | null) {
   return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
 }
 
-function buildAuthLink(pathname: string, returnTo: string | null, panel: string | null) {
+function buildAuthLink(
+  pathname: string,
+  returnTo: string | null,
+  panel: string | null,
+) {
   const params = new URLSearchParams();
 
   if (returnTo && getSafeReturnTo(returnTo) === returnTo) {
@@ -50,7 +57,10 @@ function buildAuthLink(pathname: string, returnTo: string | null, panel: string 
   return search ? `${pathname}?${search}` : pathname;
 }
 
-export function RegisterForm({ returnTo = null, panel = null }: RegisterFormProps) {
+export function RegisterForm({
+  returnTo = null,
+  panel = null,
+}: RegisterFormProps) {
   const router = useRouter();
   const loginHref = buildAuthLink("/login", returnTo, panel);
   const [username, setUsername] = useState("");
@@ -93,12 +103,12 @@ export function RegisterForm({ returnTo = null, panel = null }: RegisterFormProp
           username: trimmedUsername,
           password,
         }),
-        });
+      });
 
       if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as
-          | AuthResponse
-          | null;
+        const payload = (await response
+          .json()
+          .catch(() => null)) as AuthResponse | null;
 
         setError(payload?.error ?? "Unable to create account.");
         return;
@@ -123,8 +133,8 @@ export function RegisterForm({ returnTo = null, panel = null }: RegisterFormProp
           Create your adventurer
         </h2>
         <p className="text-sm leading-6 text-stone-300">
-          Your username becomes the initial player identity until character setup
-          is expanded.
+          Your username becomes the initial player identity until character
+          setup is expanded.
         </p>
       </div>
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import LoadPanel, { type LoadPanelTab } from "./saveLoad/LoadPanel";
 import NewGamePanel from "./NewGamePanel";
 import SettingPanel from "./SettingPanel";
+import StartScene from "./StartScene";
 
 type LoadPanelState = {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function GameStartPage({
   });
   const [isNewGameOpen, setIsNewGameOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isStartOpen, setIsStartOpen] = useState(false);
 
   useEffect(() => {
     if (!shouldClearLoadPanelParams) {
@@ -52,7 +54,7 @@ export function GameStartPage({
   }, [router, shouldClearLoadPanelParams]);
 
   return (
-    <main className="flex h-full min-h-0 w-full items-center justify-center bg-black px-4 text-amber-100">
+    <main className="relative flex h-full min-h-0 w-full items-center justify-center overflow-hidden bg-black px-4 text-amber-100">
       <div className="flex flex-col items-center gap-3">
         <button
           type="button"
@@ -97,11 +99,26 @@ export function GameStartPage({
       ) : null}
 
       {isNewGameOpen ? (
-        <NewGamePanel onClose={() => setIsNewGameOpen(false)} />
+        <NewGamePanel
+          onClose={() => setIsNewGameOpen(false)}
+          onCreated={() => {
+            setIsNewGameOpen(false);
+            setIsStartOpen(true);
+          }}
+        />
       ) : null}
 
       {isSettingsOpen ? (
         <SettingPanel onClose={() => setIsSettingsOpen(false)} />
+      ) : null}
+
+      {isStartOpen ? (
+        <StartScene
+          onClose={() => {
+            setIsStartOpen(false);
+            router.push("/game/tavern");
+          }}
+        />
       ) : null}
     </main>
   );

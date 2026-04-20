@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { supportToolConfigs } from "@/game/core/battleCore";
 import { defaultPlayer } from "@/lib/player";
@@ -8,6 +7,7 @@ import { useMCStore } from "@/store/mcStore";
 
 type NewGamePanelProps = {
   onClose: () => void;
+  onCreated: () => void;
 };
 
 const statCardClass =
@@ -16,8 +16,7 @@ const statCardClass =
 const actionButtonClass =
   "rounded-md border border-amber-200/30 bg-black/35 px-5 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-amber-200/30 disabled:hover:bg-black/35 disabled:active:translate-y-0 disabled:active:scale-100";
 
-export default function NewGamePanel({ onClose }: NewGamePanelProps) {
-  const router = useRouter();
+export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) {
   const resetPlayer = useMCStore((state) => state.resetPlayer);
   const [characterName, setCharacterName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,8 +42,7 @@ export default function NewGamePanel({ onClose }: NewGamePanelProps) {
 
     resetPlayer(pendingName);
     setPendingName(null);
-    onClose();
-    router.push("/game/mainHub");
+    onCreated();
   };
 
   return (

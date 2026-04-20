@@ -7,7 +7,6 @@ import {
 } from "@/lib/auth";
 import { validatePassword, validateUsername } from "@/lib/auth-shared";
 import { getConfigurationErrorMessage } from "@/lib/config";
-import { ensurePlayerSave } from "@/lib/player-save";
 
 export const runtime = "nodejs";
 
@@ -58,13 +57,11 @@ export async function POST(request: Request) {
     }
 
     const session = await createSession(user.id);
-    const player = await ensurePlayerSave(user.id, user.username);
     const response = NextResponse.json({
       user: {
         id: user.id,
         username: user.username,
       },
-      player,
     });
 
     applySessionCookie(response, session.token, session.expiresAt);

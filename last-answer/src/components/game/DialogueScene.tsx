@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export interface DialogueSingle {
-  character: string;
+  character: string | null;
   dialogue: string;
 }
 
