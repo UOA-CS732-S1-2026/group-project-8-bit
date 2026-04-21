@@ -33,12 +33,12 @@ export default function SaveLoadMenu({
             }`}
             aria-pressed={isSelected}
           >
-            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-200/85">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-100/85">
               Slot {index + 1}
             </div>
             {save ? (
               <div className="mt-2 space-y-1 text-sm">
-                <div className="truncate font-semibold text-stone-100">
+                <div className="truncate font-semibold text-amber-100">
                   {save.name}
                 </div>
                 <div>Level {save.level}</div>
