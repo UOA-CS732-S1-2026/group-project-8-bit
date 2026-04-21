@@ -61,7 +61,7 @@ export default function SaveLoadLocalPanel({ onClose }: SaveLoadLocalPanelProps)
       onClick={onClose}
     >
       <section
-        className="relative w-full max-w-4xl bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-7 py-8 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative w-full max-w-4xl bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="dialog"
         aria-modal="true"
         aria-label="Save and load local panel"

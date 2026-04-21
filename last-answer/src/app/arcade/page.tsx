@@ -49,11 +49,11 @@ type BackgroundOptionId = (typeof backgroundOptions)[number]["id"];
 
 const fieldClass = "space-y-2";
 const labelClass =
-  "block text-xs font-semibold uppercase tracking-[0.18em] text-amber-200";
+  "block text-base font-black uppercase tracking-[0.22em] text-amber-950";
 const selectClass =
-  "w-full rounded-md border border-amber-200/25 bg-black/55 px-3 py-2 text-sm text-stone-100 outline-none transition focus:border-amber-100/70";
+  "w-full rounded border border-stone-600/55 bg-stone-800/65 px-3 py-2.5 text-sm font-medium text-amber-100 outline-none transition focus:border-stone-500/70";
 const actionButtonClass =
-  "rounded-md border border-amber-200/35 bg-black/45 px-6 py-2.5 text-sm font-semibold uppercase tracking-[0.16em] text-amber-100 transition duration-150 hover:border-amber-100/70 hover:bg-amber-200/15 active:translate-y-[1px] active:scale-[0.98]";
+  "rounded border border-stone-600/55 bg-stone-800/70 px-6 py-2.5 text-sm font-bold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98]";
 
 function toCategoryCode(value: string): CategoryCode | null {
   if (!value) {
@@ -194,18 +194,19 @@ export default function ArcadePage() {
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,5,0.48)_0%,rgba(8,6,5,0.28)_35%,rgba(7,5,4,0.78)_100%)]" />
 
       <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-4 py-10">
-        <div className="bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-6 py-8 shadow-[0_24px_70px_rgba(0,0,0,0.65)] sm:px-10 sm:py-10">
-          <p className="text-sm uppercase tracking-[0.35em] text-amber-300/80">
+        <div className="bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] shadow-[0_24px_70px_rgba(0,0,0,0.65)]">
+          <p className="text-center font-serif text-xs font-bold uppercase tracking-[0.5em] text-amber-950">
             Arcade
           </p>
-          <h1 className="mt-3 font-serif text-3xl font-semibold text-stone-50 sm:text-4xl">
+          <h1 className="mt-2 text-center font-serif text-4xl font-extrabold tracking-wide text-amber-950 sm:text-5xl">
             Choose your fight
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-300">
+          <div className="mt-4 border-t border-stone-600/30" />
+          <p className="mt-4 max-w-2xl text-base italic leading-relaxed text-amber-950">
             Prepare the next battle and step in when the setup feels right.
           </p>
 
-          <div className="mt-7 rounded-md border border-amber-200/20 bg-black/35 px-4 py-3 text-sm text-amber-100/85">
+          <div className="mt-6 rounded border border-stone-600/40 bg-stone-800/55 px-4 py-3 text-sm font-medium text-amber-100">
             Current player: {player.name || defaultPlayer.name} | Level{" "}
             {player.level} | HP {player.hp}/{player.maxHp}
           </div>
@@ -312,7 +313,7 @@ export default function ArcadePage() {
               </select>
             </label>
 
-            <div className="rounded-md border border-amber-200/20 bg-black/35 px-4 py-3 text-sm leading-6 text-stone-300">
+            <div className="rounded border border-stone-600/35 bg-stone-800/50 px-4 py-3 text-sm italic leading-relaxed text-amber-100/90">
               Enemy preview: {enemyName}, level {enemyLevel}
               <br />
               Battle background: {selectedBackground.label}

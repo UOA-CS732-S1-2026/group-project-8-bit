@@ -24,7 +24,7 @@ export default function InfoPanel({ onClose }: InfoPanelProps) {
       onClick={onClose}
     >
       <section
-        className="relative w-full max-w-3xl bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-7 py-8 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative w-full max-w-3xl bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="dialog"
         aria-modal="true"
         aria-label="Player information"

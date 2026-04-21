@@ -29,13 +29,13 @@ type SavesResponse = {
 const emptySlots = () => gameSlots.slice(0, 10).map(() => null);
 
 const panelButtonClass =
-  "rounded-md border border-amber-200/30 bg-black/35 px-5 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-amber-200/30 disabled:hover:bg-black/35 disabled:active:translate-y-0 disabled:active:scale-100";
+  "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
 
 const tabButtonClass =
-  "rounded-md border px-5 py-2 text-sm font-semibold uppercase tracking-[0.16em] transition duration-150 hover:-translate-y-0.5 hover:border-amber-100/65 hover:bg-amber-200/15 active:translate-y-[1px] active:scale-[0.98]";
+  "rounded border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition duration-150 hover:-translate-y-0.5 hover:border-stone-500/65 hover:bg-stone-700/60 active:translate-y-[1px] active:scale-[0.98]";
 
 const tabPanelClass =
-  "mt-7 min-h-[18rem] rounded-md border border-amber-100/10 bg-black/20 p-4";
+  "mt-7 min-h-[18rem] rounded border border-stone-600/25 bg-stone-800/20 p-4";
 
 function resolvePlayerRoute(location: string | undefined) {
   switch (location) {
@@ -210,23 +210,24 @@ export default function LoadPanel({
       onClick={onClose}
     >
       <section
-        className="relative max-h-[calc(100vh-2rem)] w-full max-w-4xl overflow-y-auto bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-7 py-8 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative max-h-[calc(100vh-2rem)] w-full max-w-4xl overflow-y-auto bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="dialog"
         aria-modal="true"
         aria-label="Load game panel"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 className="text-center text-2xl font-semibold text-stone-100">
+        <h2 className="text-center font-serif text-4xl font-extrabold tracking-wide text-amber-950 sm:text-5xl">
           Load Game
         </h2>
+        <div className="mt-3 border-t border-stone-600/30" />
 
         <div className="mt-6 flex justify-center gap-3">
           <button
             type="button"
             className={`${tabButtonClass} ${
               activeTab === "local"
-                ? "border-amber-100 bg-amber-200/20 text-stone-50 shadow-[0_0_16px_rgba(251,191,36,0.22)]"
-                : "border-amber-200/25 bg-black/35 text-amber-100"
+                ? "border-stone-500 bg-stone-700/70 text-amber-100"
+                : "border-stone-600/40 bg-stone-800/50 text-amber-100/70"
             }`}
             aria-pressed={activeTab === "local"}
             onClick={() => handleTabClick("local")}
@@ -237,8 +238,8 @@ export default function LoadPanel({
             type="button"
             className={`${tabButtonClass} ${
               activeTab === "cloud"
-                ? "border-amber-100 bg-amber-200/20 text-stone-50 shadow-[0_0_16px_rgba(251,191,36,0.22)]"
-                : "border-amber-200/25 bg-black/35 text-amber-100"
+                ? "border-stone-500 bg-stone-700/70 text-amber-100"
+                : "border-stone-600/40 bg-stone-800/50 text-amber-100/70"
             }`}
             aria-pressed={activeTab === "cloud"}
             onClick={() => handleTabClick("cloud")}
@@ -266,7 +267,7 @@ export default function LoadPanel({
 
               {!isCheckingSession && cloudAuthRequired ? (
                 <div className="flex min-h-[15rem] flex-col items-center justify-center gap-4 text-center">
-                  <p className="max-w-md text-sm leading-6 text-amber-100/75">
+                  <p className="max-w-md text-sm italic leading-relaxed text-stone-600">
                     Log in to load cloud saves, then return here with the Cloud
                     tab open.
                   </p>

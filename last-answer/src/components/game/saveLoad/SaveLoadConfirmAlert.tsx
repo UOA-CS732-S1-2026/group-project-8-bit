@@ -23,7 +23,7 @@ export function SaveLoadConfirmAlert({
       onClick={onClose}
     >
       <section
-        className="relative w-full max-w-sm bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-6 py-7 text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative w-full max-w-sm bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="alertdialog"
         aria-modal="true"
         aria-label="Confirm save load action"

@@ -20,11 +20,11 @@ const categoryCodeValues = Object.values(CATEGORYCODE);
 
 const fieldClass = "space-y-2";
 const labelClass =
-  "block text-xs font-semibold uppercase tracking-[0.18em] text-amber-200";
+  "block text-base font-black uppercase tracking-[0.22em] text-amber-950";
 const selectClass =
-  "w-full rounded-md border border-amber-200/25 bg-black/45 px-3 py-2 text-sm text-stone-100 outline-none transition focus:border-amber-100/70";
+  "w-full rounded border border-stone-600/55 bg-stone-800/65 px-3 py-2.5 text-sm text-amber-100 outline-none transition focus:border-stone-500/70";
 const panelButtonClass =
-  "rounded-md border border-amber-200/30 bg-black/35 px-5 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-amber-200/30 disabled:hover:bg-black/35 disabled:active:translate-y-0 disabled:active:scale-100";
+  "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
 
 function toCategoryCode(value: string): CategoryCode | null {
   if (!value) {
@@ -100,7 +100,7 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
       onClick={onClose}
     >
       <section
-        className="relative w-full max-w-xl bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-7 py-8 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative w-full max-w-xl bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="dialog"
         aria-modal="true"
         aria-label="Game settings"
@@ -109,15 +109,16 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-5 top-5 rounded-md border border-amber-100/30 bg-black/35 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-100 transition hover:border-amber-100/65 hover:bg-amber-100/15 active:scale-95"
+          className="absolute right-5 top-5 rounded border border-stone-600/50 bg-stone-800/65 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-100 transition hover:bg-stone-700/75 hover:border-stone-500/65 active:scale-95"
         >
           Close
         </button>
 
-        <h2 className="text-center text-2xl font-semibold text-stone-100">
+        <h2 className="text-center font-serif text-4xl font-extrabold tracking-wide text-amber-950 sm:text-5xl">
           Settings
         </h2>
-        <p className="mt-3 text-center text-sm text-amber-100/70">
+        <div className="mt-3 border-t border-stone-600/30" />
+        <p className="mt-3 text-center text-base italic text-amber-950">
           Choose your quiz settings.
         </p>
 
@@ -184,7 +185,7 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
         </div>
 
         {savedMessage ? (
-          <p className="mt-5 text-center text-sm font-semibold text-emerald-200">
+          <p className="mt-5 text-center text-sm italic font-semibold text-emerald-300">
             {savedMessage}
           </p>
         ) : null}

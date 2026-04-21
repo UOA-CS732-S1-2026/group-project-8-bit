@@ -106,7 +106,7 @@ export default function FoggyForestContent() {
           onClick={() => setShowExplorePanel(false)}
         >
           <div
-            className="w-full max-w-md rounded-md border border-amber-200/35 bg-black/80 bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat p-6 text-stone-100 shadow-[0_20px_60px_rgba(0,0,0,0.65)]"
+            className="w-full max-w-md rounded-md border border-amber-200/35 bg-black/80 bg-[url('/panels/menu-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-stone-100 shadow-[0_20px_60px_rgba(0,0,0,0.65)]"
             role="dialog"
             aria-modal="true"
             aria-label="Choose forest area"
