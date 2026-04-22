@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
+import { Cinzel } from "next/font/google";
 import "./globals.css";
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["700", "900"],
+  variable: "--font-cinzel",
+});
 
 export const metadata: Metadata = {
   title: "The Oracle of Lost Knowledge",
@@ -13,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+      <body className={`${cinzel.variable} min-h-full flex flex-col`}>
         <section className="flex min-h-screen items-center justify-center bg-black p-4">
           <div
             className="aspect-video w-full overflow-hidden bg-black shadow-2xl"

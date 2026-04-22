@@ -10,10 +10,57 @@ type HomePageClientProps = {
 };
 
 const authButtonClass =
-  "inline-flex min-h-10 items-center justify-center rounded-lg border border-lime-200/35 bg-black/45 px-4 py-2 text-sm font-semibold text-lime-50 shadow-[0_8px_18px_rgba(0,0,0,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-lime-100/70 hover:bg-lime-300/15 active:translate-y-0 active:scale-95";
+  "inline-flex min-h-10 items-center justify-center rounded-lg border border-lime-200/35 bg-black/45 px-4 py-2 text-sm font-semibold text-lime-50 shadow-[0_8px_18px_rgba(0,0,0,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-lime-100/70 hover:bg-lime-300/15 active:translate-y-0 active:scale-95 font-[family-name:var(--font-cinzel)]";
 
 const modeButtonClass =
-  "group relative inline-flex min-h-16 w-56 items-center justify-center overflow-hidden rounded-lg border border-cyan-100/35 bg-black/55 px-6 py-4 text-lg font-bold text-stone-50 shadow-[0_16px_32px_rgba(0,0,0,0.45)] transition duration-200 hover:-translate-y-1 hover:scale-[1.03] hover:border-cyan-100/80 hover:bg-cyan-300/15 active:translate-y-0 active:scale-95 sm:w-64 sm:text-xl";
+  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 w-[clamp(160px,18vw,288px)] text-[clamp(0.85rem,1.3vw,1.25rem)] px-[clamp(1rem,1.8vw,1.5rem)] py-[clamp(0.75rem,1.2vw,1rem)] font-[family-name:var(--font-cinzel)]";
+
+type EmberConfig = {
+  left: string;
+  bottom: string;
+  delay: string;
+  duration: string;
+  drift: string;
+  size: number;
+};
+
+const EMBERS: EmberConfig[] = [
+  { left: "8%",  bottom: "2%", delay: "0s",    duration: "7s",   drift: "25px",  size: 3   },
+  { left: "14%", bottom: "5%", delay: "1.5s",  duration: "5.5s", drift: "-20px", size: 2.5 },
+  { left: "22%", bottom: "1%", delay: "0.8s",  duration: "8s",   drift: "30px",  size: 4   },
+  { left: "31%", bottom: "3%", delay: "2.3s",  duration: "6s",   drift: "-15px", size: 2   },
+  { left: "38%", bottom: "2%", delay: "0.3s",  duration: "9s",   drift: "20px",  size: 3   },
+  { left: "45%", bottom: "4%", delay: "1.8s",  duration: "6.5s", drift: "-25px", size: 2.5 },
+  { left: "52%", bottom: "1%", delay: "3.1s",  duration: "7.5s", drift: "15px",  size: 3   },
+  { left: "60%", bottom: "3%", delay: "0.6s",  duration: "5s",   drift: "-30px", size: 2   },
+  { left: "67%", bottom: "2%", delay: "2.0s",  duration: "8.5s", drift: "25px",  size: 4   },
+  { left: "75%", bottom: "5%", delay: "1.2s",  duration: "6s",   drift: "-20px", size: 2.5 },
+  { left: "82%", bottom: "1%", delay: "3.5s",  duration: "7s",   drift: "30px",  size: 3   },
+  { left: "88%", bottom: "3%", delay: "0.9s",  duration: "5.5s", drift: "-15px", size: 2   },
+  { left: "93%", bottom: "2%", delay: "4.2s",  duration: "8s",   drift: "20px",  size: 3   },
+  { left: "12%", bottom: "4%", delay: "2.8s",  duration: "6.5s", drift: "-25px", size: 2.5 },
+  { left: "28%", bottom: "1%", delay: "1.0s",  duration: "9s",   drift: "15px",  size: 4   },
+  { left: "42%", bottom: "2%", delay: "3.8s",  duration: "5s",   drift: "-30px", size: 2   },
+  { left: "58%", bottom: "5%", delay: "0.4s",  duration: "7.5s", drift: "25px",  size: 3   },
+  { left: "72%", bottom: "3%", delay: "2.5s",  duration: "6s",   drift: "-20px", size: 2.5 },
+  { left: "86%", bottom: "1%", delay: "1.7s",  duration: "8.5s", drift: "30px",  size: 3   },
+  { left: "5%",  bottom: "2%", delay: "3.2s",  duration: "7s",   drift: "-15px", size: 2   },
+  { left: "96%", bottom: "4%", delay: "0.2s",  duration: "6.5s", drift: "20px",  size: 4   },
+  { left: "18%", bottom: "1%", delay: "4.5s",  duration: "5.5s", drift: "-25px", size: 2.5 },
+  { left: "35%", bottom: "3%", delay: "2.1s",  duration: "8s",   drift: "15px",  size: 3   },
+  { left: "50%", bottom: "2%", delay: "1.4s",  duration: "6s",   drift: "-30px", size: 2   },
+  { left: "78%", bottom: "5%", delay: "3.6s",  duration: "9s",   drift: "25px",  size: 4   },
+  { left: "10%", bottom: "3%", delay: "5.0s",  duration: "6s",   drift: "18px",  size: 3   },
+  { left: "20%", bottom: "1%", delay: "4.8s",  duration: "7.5s", drift: "-22px", size: 2   },
+  { left: "33%", bottom: "4%", delay: "5.3s",  duration: "5s",   drift: "28px",  size: 3.5 },
+  { left: "47%", bottom: "2%", delay: "4.1s",  duration: "8s",   drift: "-18px", size: 2.5 },
+  { left: "55%", bottom: "3%", delay: "5.7s",  duration: "6.5s", drift: "22px",  size: 3   },
+  { left: "63%", bottom: "1%", delay: "4.6s",  duration: "7s",   drift: "-28px", size: 2   },
+  { left: "70%", bottom: "4%", delay: "5.2s",  duration: "5.5s", drift: "18px",  size: 3.5 },
+  { left: "80%", bottom: "2%", delay: "4.9s",  duration: "8.5s", drift: "-22px", size: 2.5 },
+  { left: "91%", bottom: "3%", delay: "5.5s",  duration: "6s",   drift: "25px",  size: 3   },
+  { left: "3%",  bottom: "1%", delay: "4.3s",  duration: "7.5s", drift: "-18px", size: 2   },
+];
 
 export function HomePageClient({ user }: HomePageClientProps) {
   const router = useRouter();
@@ -24,12 +71,39 @@ export function HomePageClient({ user }: HomePageClientProps) {
       router.push("/game");
       return;
     }
-
     router.push("/arcade");
   }
 
   return (
     <main className="relative h-full w-full overflow-hidden bg-black text-stone-50">
+      {/* 背景层 */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/backgrounds/game-cover.png')" }}
+      />
+
+      {/* 火星粒子层 */}
+      {EMBERS.map((e, i) => (
+        <span
+          key={i}
+          className="animate-ember pointer-events-none absolute rounded-full"
+          style={
+            {
+              left: e.left,
+              bottom: e.bottom,
+              width: `${e.size}px`,
+              height: `${e.size}px`,
+              backgroundColor: "#fb923c",
+              boxShadow: `0 0 ${e.size * 2}px #f97316, 0 0 ${e.size * 4}px #f59e0b`,
+              "--ember-duration": e.duration,
+              "--ember-delay": e.delay,
+              "--ember-drift": e.drift,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+
+      {/* 内容层 */}
       <div className="relative z-10 flex h-full w-full flex-col px-5 py-4 sm:px-8 sm:py-6">
         <header className="flex items-start justify-end">
           {!user ? (
@@ -46,16 +120,13 @@ export function HomePageClient({ user }: HomePageClientProps) {
           )}
         </header>
 
-        <section className="flex flex-1 flex-col items-center justify-center gap-8 pb-8 text-center sm:gap-10">
-          <div className="w-full max-w-[36rem] px-2">
-            <h1>The Last Answer</h1>
-          </div>
-
-          <div className="flex flex-col items-center gap-4 sm:gap-6">
+        <section className="flex flex-1 flex-col items-end justify-end pb-16 text-center sm:pb-20">
+          <div className="flex w-full flex-col items-center gap-5">
             <button
               type="button"
               onClick={() => handleModeClick("Story Mode")}
               className={modeButtonClass}
+              style={{ animation: "btn-enter 1.1s cubic-bezier(0.16,1,0.3,1) 0.3s both, border-pulse 3s ease-in-out 1.4s infinite" }}
             >
               Story Mode
             </button>
@@ -64,6 +135,7 @@ export function HomePageClient({ user }: HomePageClientProps) {
               type="button"
               onClick={() => handleModeClick("Arcade Mode")}
               className={modeButtonClass}
+              style={{ animation: "btn-enter 1.1s cubic-bezier(0.16,1,0.3,1) 0.55s both, border-pulse 3s ease-in-out 1.65s infinite" }}
             >
               Arcade Mode
             </button>
