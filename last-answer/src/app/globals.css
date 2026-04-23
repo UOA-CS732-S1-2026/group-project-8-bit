@@ -28,6 +28,31 @@ body {
   font-family: var(--font-sans);
 }
 
+@keyframes btn-enter {
+  0%   { transform: translateY(60px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes border-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(180, 120, 0, 0.12); }
+  50%       { box-shadow: 0 0 20px rgba(210, 140, 0, 0.35), 0 0 40px rgba(210, 140, 0, 0.1); }
+}
+
+@keyframes ember-rise {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(-90vh) translateX(var(--ember-drift)) scale(0.2); opacity: 0; }
+}
+
+.animate-border-pulse {
+  animation: border-pulse 3s ease-in-out infinite;
+}
+
+.animate-ember {
+  animation: ember-rise var(--ember-duration) ease-in var(--ember-delay) infinite;
+}
+
 @keyframes candle-flame-flicker {
   0% {
     transform: translate(-50%, 0) scale(0.96, 1.02) rotate(-2deg);
