@@ -13,7 +13,7 @@ const authButtonClass =
   "inline-flex min-h-10 items-center justify-center rounded-lg border border-lime-200/35 bg-black/45 px-4 py-2 text-sm font-semibold text-lime-50 shadow-[0_8px_18px_rgba(0,0,0,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-lime-100/70 hover:bg-lime-300/15 active:translate-y-0 active:scale-95 font-[family-name:var(--font-cinzel)]";
 
 const modeButtonClass =
-  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 w-[clamp(160px,18vw,288px)] text-[clamp(0.85rem,1.3vw,1.25rem)] px-[clamp(1rem,1.8vw,1.5rem)] py-[clamp(0.75rem,1.2vw,1rem)] font-[family-name:var(--font-cinzel)]";
+  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 w-[clamp(8.5rem,18cqw,18rem)] min-h-[clamp(2.5rem,7cqh,4.2rem)] px-[clamp(0.8rem,2.2cqw,1.5rem)] py-[clamp(0.55rem,1.8cqh,1rem)] text-[clamp(0.72rem,1.55cqw,1.25rem)] font-[family-name:var(--font-cinzel)]";
 
 type EmberConfig = {
   left: string;
@@ -75,7 +75,7 @@ export function HomePageClient({ user }: HomePageClientProps) {
   }
 
   return (
-    <main className="relative h-full w-full overflow-hidden bg-black text-stone-50">
+    <main className="relative h-full w-full overflow-hidden bg-black text-stone-50 [container-type:size]">
       {/* 背景层 */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -104,7 +104,7 @@ export function HomePageClient({ user }: HomePageClientProps) {
       ))}
 
       {/* 内容层 */}
-      <div className="relative z-10 flex h-full w-full flex-col px-5 py-4 sm:px-8 sm:py-6">
+      <div className="relative z-10 flex h-full w-full flex-col px-[clamp(1rem,3cqw,2rem)] py-[clamp(0.75rem,3cqh,1.5rem)]">
         <header className="flex items-start justify-end">
           {!user ? (
             <Link href="/login?returnTo=%2F" className={authButtonClass}>
@@ -120,8 +120,8 @@ export function HomePageClient({ user }: HomePageClientProps) {
           )}
         </header>
 
-        <section className="flex flex-1 flex-col items-end justify-end pb-16 text-center sm:pb-20">
-          <div className="flex w-full flex-col items-center gap-5">
+        <section className="flex flex-1 flex-col items-end justify-end pb-[clamp(2rem,11cqh,5rem)] text-center">
+          <div className="flex w-full flex-col items-center gap-[clamp(0.75rem,3cqh,1.25rem)]">
             <button
               type="button"
               onClick={() => handleModeClick("Story Mode")}
