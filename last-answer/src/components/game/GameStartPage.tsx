@@ -19,7 +19,7 @@ type GameStartPageProps = {
 };
 
 const menuButtonClass =
-  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 font-[family-name:var(--font-cinzel)] w-[clamp(140px,15vw,240px)] text-[clamp(0.75rem,1.1vw,1rem)] px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.6rem,1vw,0.875rem)]";
+  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 font-[family-name:var(--font-cinzel)] w-[clamp(4rem,15cqw,15rem)] min-h-[clamp(1.1rem,5.6cqh,3.5rem)] px-[clamp(0.25rem,1.8cqw,1.25rem)] py-[clamp(0.15rem,1.2cqh,0.875rem)] text-[clamp(0.42rem,1.2cqw,1rem)] leading-none";
 
 type EmberConfig = {
   left: string;
@@ -104,7 +104,7 @@ export function GameStartPage({
   }
 
   return (
-    <main className="relative flex h-full min-h-0 w-full items-center justify-center overflow-hidden bg-black text-amber-100">
+    <main className="relative flex h-full min-h-0 w-full items-center justify-center overflow-hidden bg-black text-amber-100 [container-type:size]">
       {/* 背景层 */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -133,7 +133,7 @@ export function GameStartPage({
       ))}
 
       {/* 按钮组 */}
-      <div className="relative z-10 flex h-full w-full flex-col items-center justify-end gap-3 pb-[clamp(2.5rem,8vh,5rem)]">
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-end gap-[clamp(0.12rem,1.6cqh,0.75rem)] pb-[clamp(0.35rem,6cqh,5rem)]">
         {MENU_BUTTONS.map(({ label, delay }) => (
           <button
             key={label}

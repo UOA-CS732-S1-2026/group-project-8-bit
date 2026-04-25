@@ -1,7 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { Player } from "@/game/core/types";
 import type { AuthUser } from "@/lib/auth-shared";
 import { gameSlots } from "@/store/game-store";
@@ -28,6 +35,11 @@ type SavesResponse = {
 
 const emptySlots = () => gameSlots.slice(0, 10).map(() => null);
 
+const LOAD_PANEL_DESIGN_WIDTH = 760;
+const LOAD_PANEL_FALLBACK_HEIGHT = 520;
+const LOAD_PANEL_GAP_X = 20;
+const LOAD_PANEL_GAP_Y = 20;
+
 const panelButtonClass =
   "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
 
@@ -35,7 +47,101 @@ const tabButtonClass =
   "rounded border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition duration-150 hover:-translate-y-0.5 hover:border-stone-500/65 hover:bg-stone-700/60 active:translate-y-[1px] active:scale-[0.98]";
 
 const tabPanelClass =
-  "mt-7 min-h-[18rem] rounded border border-stone-600/25 bg-stone-800/20 p-4";
+  "mt-7 rounded border border-stone-600/25 bg-stone-800/20 p-4";
+
+function ScaledLoadPanel({ children }: { children: ReactNode }) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [metrics, setMetrics] = useState({
+    height: LOAD_PANEL_FALLBACK_HEIGHT,
+    scale: 1,
+  });
+
+  useLayoutEffect(() => {
+    const updateScale = () => {
+      const frame = frameRef.current;
+      const content = contentRef.current;
+
+      if (!frame || !content) {
+        return;
+      }
+
+      const contentHeight =
+        content.scrollHeight ||
+        content.offsetHeight ||
+        LOAD_PANEL_FALLBACK_HEIGHT;
+      const availableWidth = Math.max(frame.clientWidth - LOAD_PANEL_GAP_X, 1);
+      const availableHeight = Math.max(
+        frame.clientHeight - LOAD_PANEL_GAP_Y,
+        1,
+      );
+      const nextScale = Math.min(
+        availableWidth / LOAD_PANEL_DESIGN_WIDTH,
+        availableHeight / contentHeight,
+        1,
+      );
+
+      setMetrics((currentMetrics) => {
+        const heightChanged =
+          Math.abs(currentMetrics.height - contentHeight) > 0.5;
+        const scaleChanged =
+          Math.abs(currentMetrics.scale - nextScale) > 0.001;
+
+        if (!heightChanged && !scaleChanged) {
+          return currentMetrics;
+        }
+
+        return {
+          height: contentHeight,
+          scale: nextScale,
+        };
+      });
+    };
+
+    updateScale();
+
+    const resizeObserver = new ResizeObserver(updateScale);
+
+    if (frameRef.current) {
+      resizeObserver.observe(frameRef.current);
+    }
+
+    if (contentRef.current) {
+      resizeObserver.observe(contentRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={frameRef}
+      className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden"
+    >
+      <div
+        className="relative shrink-0"
+        style={{
+          flex: "0 0 auto",
+          width: LOAD_PANEL_DESIGN_WIDTH * metrics.scale,
+          height: metrics.height * metrics.scale,
+        }}
+      >
+        <div
+          ref={contentRef}
+          className="absolute left-0 top-0 origin-top-left"
+          style={{
+            width: LOAD_PANEL_DESIGN_WIDTH,
+            transform: `scale(${metrics.scale})`,
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function resolvePlayerRoute(location: string | undefined) {
   switch (location) {
@@ -206,17 +312,18 @@ export default function LoadPanel({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
+      className="absolute inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
+      <ScaledLoadPanel>
       <section
-        className="relative max-h-[calc(100vh-2rem)] w-full max-w-4xl overflow-y-auto bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative flex w-full flex-col overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="dialog"
         aria-modal="true"
         aria-label="Load game panel"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 className="text-center font-serif text-4xl font-extrabold tracking-wide text-amber-950 sm:text-5xl">
+        <h2 className="text-center font-serif text-5xl font-extrabold tracking-wide text-amber-950">
           Load Game
         </h2>
         <div className="mt-3 border-t border-stone-600/30" />
@@ -320,6 +427,7 @@ export default function LoadPanel({
           </button>
         </div>
       </section>
+      </ScaledLoadPanel>
     </div>
   );
 }
