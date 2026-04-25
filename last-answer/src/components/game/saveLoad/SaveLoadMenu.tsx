@@ -8,7 +8,7 @@ type SaveLoadMenuProps = {
 };
 
 const slotButtonClass =
-  "min-h-24 rounded-md border bg-black/35 px-3 py-2 text-left text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
+  "min-h-20 overflow-hidden rounded-md border bg-black/35 px-3 py-2 text-left text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
 
 export default function SaveLoadMenu({
   saveList,
@@ -16,7 +16,7 @@ export default function SaveLoadMenu({
   onSlotClick,
 }: SaveLoadMenuProps) {
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-5 gap-3">
       {gameSlots.slice(0, 10).map((slotId, index) => {
         const save = saveList[index] ?? null;
         const isSelected = selectedSlot === index;
@@ -37,7 +37,7 @@ export default function SaveLoadMenu({
               Slot {index + 1}
             </div>
             {save ? (
-              <div className="mt-2 space-y-1 text-sm">
+              <div className="mt-2 space-y-1 text-sm leading-tight">
                 <div className="truncate font-semibold text-amber-100">
                   {save.name}
                 </div>

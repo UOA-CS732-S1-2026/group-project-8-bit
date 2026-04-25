@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { supportToolConfigs } from "@/game/core/battleCore";
 import { defaultPlayer } from "@/lib/player";
 import { useMCStore } from "@/store/mcStore";
@@ -15,6 +21,112 @@ const statCardClass =
 
 const actionButtonClass =
   "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
+
+const NEW_GAME_PANEL_DESIGN_WIDTH = 760;
+const NEW_GAME_PANEL_FALLBACK_HEIGHT = 680;
+const CONFIRM_PANEL_DESIGN_WIDTH = 384;
+const CONFIRM_PANEL_FALLBACK_HEIGHT = 220;
+const PANEL_GAP_X = 20;
+const PANEL_GAP_Y = 20;
+
+type ScaledPanelFrameProps = {
+  children: ReactNode;
+  designWidth: number;
+  fallbackHeight: number;
+};
+
+function ScaledPanelFrame({
+  children,
+  designWidth,
+  fallbackHeight,
+}: ScaledPanelFrameProps) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [metrics, setMetrics] = useState({
+    height: fallbackHeight,
+    scale: 1,
+  });
+
+  useLayoutEffect(() => {
+    const updateScale = () => {
+      const frame = frameRef.current;
+      const content = contentRef.current;
+
+      if (!frame || !content) {
+        return;
+      }
+
+      const contentHeight =
+        content.scrollHeight || content.offsetHeight || fallbackHeight;
+      const availableWidth = Math.max(frame.clientWidth - PANEL_GAP_X, 1);
+      const availableHeight = Math.max(frame.clientHeight - PANEL_GAP_Y, 1);
+      const nextScale = Math.min(
+        availableWidth / designWidth,
+        availableHeight / contentHeight,
+        1,
+      );
+
+      setMetrics((currentMetrics) => {
+        const heightChanged =
+          Math.abs(currentMetrics.height - contentHeight) > 0.5;
+        const scaleChanged =
+          Math.abs(currentMetrics.scale - nextScale) > 0.001;
+
+        if (!heightChanged && !scaleChanged) {
+          return currentMetrics;
+        }
+
+        return {
+          height: contentHeight,
+          scale: nextScale,
+        };
+      });
+    };
+
+    updateScale();
+
+    const resizeObserver = new ResizeObserver(updateScale);
+
+    if (frameRef.current) {
+      resizeObserver.observe(frameRef.current);
+    }
+
+    if (contentRef.current) {
+      resizeObserver.observe(contentRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [designWidth, fallbackHeight]);
+
+  return (
+    <div
+      ref={frameRef}
+      className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden"
+    >
+      <div
+        className="relative shrink-0"
+        style={{
+          flex: "0 0 auto",
+          width: designWidth * metrics.scale,
+          height: metrics.height * metrics.scale,
+        }}
+      >
+        <div
+          ref={contentRef}
+          className="absolute left-0 top-0 origin-top-left"
+          style={{
+            width: designWidth,
+            transform: `scale(${metrics.scale})`,
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) {
   const resetPlayer = useMCStore((state) => state.resetPlayer);
@@ -47,25 +159,21 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
+      className="absolute inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
+      <ScaledPanelFrame
+        designWidth={NEW_GAME_PANEL_DESIGN_WIDTH}
+        fallbackHeight={NEW_GAME_PANEL_FALLBACK_HEIGHT}
+      >
       <section
-        className="relative max-h-[calc(100vh-2rem)] w-full max-w-3xl overflow-y-auto bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="relative w-full overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
         role="dialog"
         aria-modal="true"
         aria-label="Create new character"
         onClick={(event) => event.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-5 top-5 rounded border border-stone-600/50 bg-stone-800/65 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-100 transition hover:bg-stone-700/75 hover:border-stone-500/65 active:scale-95"
-        >
-          Close
-        </button>
-
-        <h2 className="text-center font-serif text-3xl font-extrabold tracking-wide text-amber-950 sm:text-4xl">
+        <h2 className="text-center font-serif text-4xl font-extrabold tracking-wide text-amber-950">
           Create New Character
         </h2>
         <div className="mt-3 border-t border-stone-600/30" />
@@ -95,7 +203,7 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
             <p className="text-sm font-semibold text-rose-200">{error}</p>
           ) : null}
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className={statCardClass}>
               <p className="text-base font-black uppercase tracking-[0.22em] text-amber-950">
                 Max HP
@@ -126,7 +234,7 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
             <h3 className="text-base font-black uppercase tracking-[0.28em] text-amber-950">
               Inventory
             </h3>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid grid-cols-2 gap-3">
               {defaultPlayer.inventory.map((property) => {
                 const tool = supportToolConfigs[property.id];
 
@@ -169,17 +277,22 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
           </div>
         </form>
       </section>
+      </ScaledPanelFrame>
 
       {pendingName ? (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm"
+          className="absolute inset-0 z-[70] overflow-hidden bg-black/55 backdrop-blur-sm"
           onClick={(event) => {
             event.stopPropagation();
             setPendingName(null);
           }}
         >
+          <ScaledPanelFrame
+            designWidth={CONFIRM_PANEL_DESIGN_WIDTH}
+            fallbackHeight={CONFIRM_PANEL_FALLBACK_HEIGHT}
+          >
           <section
-            className="relative w-full max-w-sm bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            className="relative w-full bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
             role="alertdialog"
             aria-modal="true"
             aria-label="Confirm new character"
@@ -209,6 +322,7 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
               </button>
             </div>
           </section>
+          </ScaledPanelFrame>
         </div>
       ) : null}
     </div>

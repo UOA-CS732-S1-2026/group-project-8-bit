@@ -10,10 +10,10 @@ type HomePageClientProps = {
 };
 
 const authButtonClass =
-  "inline-flex min-h-10 items-center justify-center rounded-lg border border-lime-200/35 bg-black/45 px-4 py-2 text-sm font-semibold text-lime-50 shadow-[0_8px_18px_rgba(0,0,0,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-lime-100/70 hover:bg-lime-300/15 active:translate-y-0 active:scale-95 font-[family-name:var(--font-cinzel)]";
+  "inline-flex min-h-[clamp(1.25rem,5cqh,2.5rem)] items-center justify-center rounded-lg border border-lime-200/35 bg-black/45 px-[clamp(0.45rem,1.6cqw,1rem)] py-[clamp(0.25rem,1cqh,0.5rem)] text-[clamp(0.5rem,1.15cqw,0.875rem)] font-semibold leading-none text-lime-50 shadow-[0_8px_18px_rgba(0,0,0,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-lime-100/70 hover:bg-lime-300/15 active:translate-y-0 active:scale-95 font-[family-name:var(--font-cinzel)]";
 
 const modeButtonClass =
-  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 w-[clamp(8.5rem,18cqw,18rem)] min-h-[clamp(2.5rem,7cqh,4.2rem)] px-[clamp(0.8rem,2.2cqw,1.5rem)] py-[clamp(0.55rem,1.8cqh,1rem)] text-[clamp(0.72rem,1.55cqw,1.25rem)] font-[family-name:var(--font-cinzel)]";
+  "inline-flex items-center justify-center rounded-xl border border-amber-400/60 bg-black/55 font-bold tracking-widest text-amber-100 backdrop-blur-[2px] transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 w-[clamp(5.25rem,18cqw,18rem)] min-h-[clamp(1.35rem,7cqh,4.2rem)] px-[clamp(0.35rem,2.2cqw,1.5rem)] py-[clamp(0.2rem,1.6cqh,1rem)] text-[clamp(0.45rem,1.45cqw,1.25rem)] leading-none font-[family-name:var(--font-cinzel)]";
 
 type EmberConfig = {
   left: string;
@@ -104,15 +104,15 @@ export function HomePageClient({ user }: HomePageClientProps) {
       ))}
 
       {/* 内容层 */}
-      <div className="relative z-10 flex h-full w-full flex-col px-[clamp(1rem,3cqw,2rem)] py-[clamp(0.75rem,3cqh,1.5rem)]">
+      <div className="relative z-10 flex h-full w-full flex-col px-[clamp(0.5rem,3cqw,2rem)] py-[clamp(0.4rem,3cqh,1.5rem)]">
         <header className="flex items-start justify-end">
           {!user ? (
             <Link href="/login?returnTo=%2F" className={authButtonClass}>
               Login
             </Link>
           ) : (
-            <div className="flex items-center gap-3 rounded-lg border border-stone-100/18 bg-black/45 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.32)]">
-              <span className="max-w-48 truncate text-sm font-semibold text-stone-100 sm:max-w-64">
+            <div className="flex items-center gap-[clamp(0.3rem,1.2cqw,0.75rem)] rounded-lg border border-stone-100/18 bg-black/45 px-[clamp(0.4rem,1.5cqw,0.75rem)] py-[clamp(0.25rem,1cqh,0.5rem)] shadow-[0_8px_18px_rgba(0,0,0,0.32)]">
+              <span className="max-w-[clamp(5rem,16cqw,16rem)] truncate text-[clamp(0.5rem,1.15cqw,0.875rem)] font-semibold leading-none text-stone-100">
                 {playerName}
               </span>
               <LogoutButton className={authButtonClass} showError={false} />
@@ -120,8 +120,8 @@ export function HomePageClient({ user }: HomePageClientProps) {
           )}
         </header>
 
-        <section className="flex flex-1 flex-col items-end justify-end pb-[clamp(2rem,11cqh,5rem)] text-center">
-          <div className="flex w-full flex-col items-center gap-[clamp(0.75rem,3cqh,1.25rem)]">
+        <section className="flex flex-1 flex-col items-end justify-end pb-[clamp(0.6rem,9cqh,5rem)] text-center">
+          <div className="flex w-full flex-col items-center gap-[clamp(0.25rem,2.2cqh,1.25rem)]">
             <button
               type="button"
               onClick={() => handleModeClick("Story Mode")}
