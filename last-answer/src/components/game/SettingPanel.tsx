@@ -14,6 +14,7 @@ import {
   type QuestionType,
   useGameStore,
 } from "@/store/game-store";
+import ModalPortal from "./ModalPortal";
 
 type SettingPanelProps = {
   onClose: () => void;
@@ -100,7 +101,10 @@ function ScaledSettingsPanel({ children }: { children: ReactNode }) {
       resizeObserver.observe(contentRef.current);
     }
 
+    window.addEventListener("resize", updateScale);
+
     return () => {
+      window.removeEventListener("resize", updateScale);
       resizeObserver.disconnect();
     };
   }, []);
@@ -202,8 +206,9 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
   };
 
   return (
+    <ModalPortal>
     <div
-      className="absolute inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <ScaledSettingsPanel>
@@ -310,5 +315,6 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
         </section>
       </ScaledSettingsPanel>
     </div>
+    </ModalPortal>
   );
 }

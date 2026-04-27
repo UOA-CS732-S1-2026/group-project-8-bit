@@ -14,6 +14,7 @@ import type { AuthUser } from "@/lib/auth-shared";
 import { gameSlots } from "@/store/game-store";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
+import ModalPortal from "../ModalPortal";
 import SaveLoadMenu from "./SaveLoadMenu";
 
 export type LoadPanelTab = "local" | "cloud";
@@ -44,7 +45,7 @@ const panelButtonClass =
   "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
 
 const tabButtonClass =
-  "rounded border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition duration-150 hover:-translate-y-0.5 hover:border-stone-500/65 hover:bg-stone-700/60 active:translate-y-[1px] active:scale-[0.98]";
+  "rounded border border-stone-700/45 bg-stone-900/55 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-stone-300/65 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-amber-100/65 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98] data-[active=true]:border-amber-100/65 data-[active=true]:bg-amber-200/15 data-[active=true]:text-amber-50 data-[active=true]:shadow-[0_0_16px_rgba(251,191,36,0.22)]";
 
 const tabPanelClass =
   "mt-7 rounded border border-stone-600/25 bg-stone-800/20 p-4";
@@ -110,7 +111,10 @@ function ScaledLoadPanel({ children }: { children: ReactNode }) {
       resizeObserver.observe(contentRef.current);
     }
 
+    window.addEventListener("resize", updateScale);
+
     return () => {
+      window.removeEventListener("resize", updateScale);
       resizeObserver.disconnect();
     };
   }, []);
@@ -311,8 +315,9 @@ export default function LoadPanel({
   };
 
   return (
+    <ModalPortal>
     <div
-      className="absolute inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <ScaledLoadPanel>
@@ -331,24 +336,18 @@ export default function LoadPanel({
         <div className="mt-6 flex justify-center gap-3">
           <button
             type="button"
-            className={`${tabButtonClass} ${
-              activeTab === "local"
-                ? "border-stone-500 bg-stone-700/70 text-amber-100"
-                : "border-stone-600/40 bg-stone-800/50 text-amber-100/70"
-            }`}
+            className={tabButtonClass}
             aria-pressed={activeTab === "local"}
+            data-active={activeTab === "local"}
             onClick={() => handleTabClick("local")}
           >
             Local
           </button>
           <button
             type="button"
-            className={`${tabButtonClass} ${
-              activeTab === "cloud"
-                ? "border-stone-500 bg-stone-700/70 text-amber-100"
-                : "border-stone-600/40 bg-stone-800/50 text-amber-100/70"
-            }`}
+            className={tabButtonClass}
             aria-pressed={activeTab === "cloud"}
+            data-active={activeTab === "cloud"}
             onClick={() => handleTabClick("cloud")}
           >
             Cloud
@@ -429,5 +428,6 @@ export default function LoadPanel({
       </section>
       </ScaledLoadPanel>
     </div>
+    </ModalPortal>
   );
 }
