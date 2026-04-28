@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { Player } from "@/game/core/types";
 import type { AuthUser } from "@/lib/auth-shared";
+import { stopMainInterfaceMusicNow } from "@/lib/mainInterfaceMusic";
 import { gameSlots } from "@/store/game-store";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
@@ -311,6 +312,7 @@ export default function LoadPanel({
       return;
     }
 
+    stopMainInterfaceMusicNow();
     savePlayer(selectedSave);
     onClose();
     router.push(resolvePlayerRoute(selectedSave.location));

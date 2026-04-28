@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import type { AuthUser } from "@/lib/auth-shared";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import {
+  releaseMainInterfaceMusic,
+  retainMainInterfaceMusic,
+} from "@/lib/mainInterfaceMusic";
 
 type HomePageClientProps = {
   user: AuthUser | null;
@@ -65,6 +70,14 @@ const EMBERS: EmberConfig[] = [
 export function HomePageClient({ user }: HomePageClientProps) {
   const router = useRouter();
   const playerName = user?.username || user?.id || null;
+
+  useEffect(() => {
+    retainMainInterfaceMusic();
+
+    return () => {
+      releaseMainInterfaceMusic();
+    };
+  }, []);
 
   function handleModeClick(mode: "Story Mode" | "Arcade Mode") {
     if (mode === "Story Mode") {
