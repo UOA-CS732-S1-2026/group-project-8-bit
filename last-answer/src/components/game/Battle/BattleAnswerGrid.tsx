@@ -14,7 +14,7 @@ type BattleAnswerGridProps = {
 
 export function BattleAnswerGrid({ answers }: BattleAnswerGridProps) {
   return (
-    <section className="grid grid-cols-2 gap-4 md:gap-6 xl:grid-cols-4 xl:gap-10">
+    <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4 xl:grid-cols-4 xl:gap-5">
       {answers.map((answer) => (
         <div key={answer.key} className="min-w-0">
           <BattleAnswerButton

@@ -19,7 +19,7 @@ export function BattleAnswerButton({
 }: BattleAnswerButtonProps) {
   const toneClasses =
     tone === "correct"
-      ? "scale-[1.03] ring-4 ring-[#e3b86d] shadow-[0_0_38px_rgba(97,55,18,0.28)]"
+      ? "scale-[1.045] ring-4 ring-[#f1d08a] shadow-[0_0_42px_rgba(179,123,42,0.42),0_0_80px_rgba(126,74,23,0.18)]"
       : tone === "wrong"
         ? "scale-[0.982] ring-4 ring-[#8c4637] shadow-[0_0_30px_rgba(71,23,18,0.34)]"
         : tone === "selected"
@@ -33,14 +33,9 @@ export function BattleAnswerButton({
       : tone === "wrong"
         ? "text-[#efc5bc]"
         : "text-[#ead8b8]";
-  const subtitleToneClass =
-    tone === "correct"
-      ? "text-[#e7cb96]"
-      : tone === "wrong"
-        ? "text-[#cf9d92]"
-        : "text-[#cdb590]";
   const showSeal = tone === "correct" || tone === "selected";
   const showSlash = tone === "wrong";
+  const showCorrectBurst = tone === "correct";
 
   return (
     <button
@@ -48,7 +43,7 @@ export function BattleAnswerButton({
       onClick={onClick}
       disabled={disabled}
       className={[
-        "group relative block min-h-[5.5rem] w-full overflow-hidden bg-[linear-gradient(180deg,rgba(25,20,17,0.97)_0%,rgba(11,10,10,0.99)_100%)] px-3 py-3 text-[#e6cfaa] shadow-[0_10px_20px_rgba(0,0,0,0.42)] transition duration-200 sm:min-h-[6.2rem] sm:px-4 sm:py-3.5 xl:min-h-[7.3rem] xl:px-5 xl:py-4",
+        "group relative block min-h-[4.2rem] w-full overflow-hidden bg-[linear-gradient(180deg,rgba(25,20,17,0.97)_0%,rgba(11,10,10,0.99)_100%)] px-2.5 py-2 text-[#e6cfaa] shadow-[0_10px_20px_rgba(0,0,0,0.42)] transition duration-200 sm:min-h-[4.8rem] sm:px-3 sm:py-2.5 xl:min-h-[5.5rem] xl:px-4 xl:py-3",
         disabled
           ? "cursor-not-allowed opacity-50"
           : "hover:-translate-y-0.5 hover:brightness-[1.02] hover:shadow-[0_12px_22px_rgba(0,0,0,0.46),0_0_6px_rgba(214,154,84,0.08)]",
@@ -64,7 +59,7 @@ export function BattleAnswerButton({
           className={[
             "pointer-events-none absolute inset-0",
             tone === "correct"
-              ? "bg-[radial-gradient(circle_at_center,rgba(120,76,28,0.58)_0%,rgba(66,40,16,0.46)_48%,rgba(22,16,12,0.24)_100%)]"
+              ? "bg-[radial-gradient(circle_at_center,rgba(188,131,45,0.5)_0%,rgba(108,66,24,0.46)_40%,rgba(22,16,12,0.2)_100%)]"
               : tone === "wrong"
                 ? "bg-[linear-gradient(180deg,rgba(78,31,24,0.7)_0%,rgba(42,18,14,0.56)_100%)]"
                 : tone === "selected"
@@ -73,17 +68,30 @@ export function BattleAnswerButton({
           ].join(" ")}
         />
       ) : null}
+      {showCorrectBurst ? (
+        <>
+          <div className="pointer-events-none absolute inset-0 z-[8] animate-[battle-answer-correct-flare_560ms_ease-out_forwards] bg-[radial-gradient(circle_at_center,rgba(255,239,191,0.62)_0%,rgba(234,184,89,0.32)_28%,rgba(234,184,89,0)_64%)]" />
+          <div className="pointer-events-none absolute inset-y-0 left-[-20%] z-[9] w-[42%] rotate-[18deg] animate-[battle-answer-correct-sweep_760ms_cubic-bezier(0.22,1,0.36,1)_forwards] bg-[linear-gradient(90deg,rgba(255,241,214,0)_0%,rgba(255,241,214,0.08)_24%,rgba(255,241,214,0.78)_52%,rgba(255,214,142,0.22)_76%,rgba(255,214,142,0)_100%)] mix-blend-screen" />
+          <div className="pointer-events-none absolute inset-x-[8%] top-[12%] z-[9] h-px animate-[battle-answer-correct-flare_480ms_ease-out_forwards] bg-[linear-gradient(90deg,rgba(255,233,182,0)_0%,rgba(255,233,182,0.95)_50%,rgba(255,233,182,0)_100%)]" />
+        </>
+      ) : null}
       {showSeal ? (
-        <div className="pointer-events-none absolute right-3 top-3 z-20">
+        <div className="pointer-events-none absolute right-2.5 top-2.5 z-20">
           <div
             className={[
-              "flex h-8 w-8 items-center justify-center rounded-full border shadow-[0_8px_18px_rgba(0,0,0,0.24)]",
+              "flex h-6 w-6 items-center justify-center rounded-full border shadow-[0_8px_18px_rgba(0,0,0,0.24)] sm:h-7 sm:w-7",
               tone === "correct"
-                ? "animate-[battle-answer-seal_360ms_ease-out_forwards] border-[#d7af67]/80 bg-[radial-gradient(circle,rgba(118,71,25,0.96)_0%,rgba(70,42,17,0.94)_100%)]"
+                ? "animate-[battle-answer-seal_360ms_ease-out_forwards] border-[#f0d08f]/88 bg-[radial-gradient(circle,rgba(161,110,31,0.98)_0%,rgba(88,53,19,0.95)_100%)]"
                 : "border-[#c59e68]/72 bg-[radial-gradient(circle,rgba(94,60,27,0.9)_0%,rgba(54,35,16,0.88)_100%)]",
             ].join(" ")}
           >
-            <div className="h-2.5 w-2.5 rounded-full border border-[#f1ddb4]/70" />
+            {tone === "correct" ? (
+              <div className="text-[0.6rem] font-black leading-none text-[#fff2cc] sm:text-[0.72rem]">
+                +
+              </div>
+            ) : (
+              <div className="h-2 w-2 rounded-full border border-[#f1ddb4]/70 sm:h-2.5 sm:w-2.5" />
+            )}
           </div>
         </div>
       ) : null}
@@ -102,19 +110,11 @@ export function BattleAnswerButton({
       <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
         <div
           className={[
-            "font-serif text-[clamp(1rem,1.9vw,1.72rem)] font-semibold leading-none tracking-[0.01em] transition duration-200 group-hover:text-[#eeddb9]",
+            "font-serif text-[clamp(0.94rem,1.45vw,1.36rem)] font-semibold leading-[1.05] tracking-[0.01em] transition duration-200 group-hover:text-[#eeddb9]",
             titleToneClass,
           ].join(" ")}
         >
           {answer.key} {answer.title}
-        </div>
-        <div
-          className={[
-            "mt-2 max-w-[16rem] text-[0.7rem] leading-4 sm:text-[0.78rem] sm:leading-[1.1rem]",
-            subtitleToneClass,
-          ].join(" ")}
-        >
-          {isEliminated ? "Eliminated by support tool" : answer.subtitle}
         </div>
       </div>
       <style jsx>{`
@@ -133,6 +133,34 @@ export function BattleAnswerButton({
             opacity: 1;
             transform: scale(1) rotate(0);
             filter: blur(0);
+          }
+        }
+
+        @keyframes battle-answer-correct-flare {
+          0% {
+            opacity: 0;
+            transform: scale(0.92);
+          }
+          35% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.08);
+          }
+        }
+
+        @keyframes battle-answer-correct-sweep {
+          0% {
+            transform: translateX(-18%) rotate(18deg);
+            opacity: 0;
+          }
+          20% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(270%) rotate(18deg);
+            opacity: 0;
           }
         }
       `}</style>

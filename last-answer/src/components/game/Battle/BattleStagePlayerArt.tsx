@@ -33,8 +33,25 @@ export function BattleStagePlayerArt({
       }}
     >
       <div className="relative h-full w-full">
+        {isAttacking ? (
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-[43%] top-[12%] h-[56%] w-[66%] animate-[battle-player-moon-slash_620ms_cubic-bezier(0.2,0.9,0.24,1)_forwards] opacity-0">
+              <div className="absolute inset-0 rounded-[50%] border-t-[5px] border-r-[5px] border-[#fff1c5] blur-[0.2px]" />
+              <div className="absolute inset-[8%] rounded-[50%] border-t-[3px] border-r-[3px] border-[#f1c970]/90" />
+              <div className="absolute inset-[18%] rounded-[50%] border-t-[2px] border-r-[2px] border-[#fff6dd]/80" />
+            </div>
+            <div className="absolute left-[56%] top-[24%] h-[0.7rem] w-[44%] rotate-[-18deg] animate-[battle-player-sword-trail_620ms_cubic-bezier(0.2,0.9,0.24,1)_forwards] rounded-full bg-[linear-gradient(90deg,rgba(255,243,214,0)_0%,rgba(255,243,214,0.3)_14%,rgba(255,249,235,1)_44%,rgba(244,205,132,0.96)_66%,rgba(244,205,132,0)_100%)] shadow-[0_0_26px_rgba(244,205,132,0.68)]" />
+            <div className="absolute left-[66%] top-[25%] h-[18%] w-[18%] animate-[battle-player-impact-star_420ms_ease-out_forwards] opacity-0">
+              <div className="absolute left-1/2 top-1/2 h-[0.28rem] w-full -translate-x-1/2 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,rgba(255,246,224,0)_0%,rgba(255,246,224,1)_50%,rgba(255,246,224,0)_100%)] shadow-[0_0_16px_rgba(255,233,176,0.72)]" />
+              <div className="absolute left-1/2 top-1/2 h-full w-[0.28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[linear-gradient(180deg,rgba(255,246,224,0)_0%,rgba(255,246,224,1)_50%,rgba(255,246,224,0)_100%)] shadow-[0_0_16px_rgba(255,233,176,0.72)]" />
+            </div>
+          </div>
+        ) : null}
         {isHit ? (
-          <div className="absolute inset-[18%_18%_10%_18%] animate-[battle-player-bruise_360ms_ease-out_forwards] rounded-full bg-[radial-gradient(circle,rgba(68,15,12,0.38)_0%,rgba(36,10,9,0.24)_42%,rgba(0,0,0,0)_72%)] blur-[8px]" />
+          <>
+            <div className="absolute inset-[18%_18%_10%_18%] animate-[battle-player-bruise_360ms_ease-out_forwards] rounded-full bg-[radial-gradient(circle,rgba(68,15,12,0.38)_0%,rgba(36,10,9,0.24)_42%,rgba(0,0,0,0)_72%)] blur-[8px]" />
+            <div className="absolute left-[24%] top-[42%] h-[0.2rem] w-[42%] rotate-[18deg] animate-[battle-player-hit-mark_420ms_ease-out_forwards] rounded-full bg-[linear-gradient(90deg,rgba(255,214,203,0)_0%,rgba(255,214,203,0.96)_46%,rgba(214,103,84,0.9)_54%,rgba(214,103,84,0)_100%)] shadow-[0_0_16px_rgba(214,103,84,0.34)]" />
+          </>
         ) : null}
         {isDefeated ? (
           <div
@@ -152,6 +169,66 @@ export function BattleStagePlayerArt({
           100% {
             opacity: 0;
             transform: scale(1.12);
+          }
+        }
+
+        @keyframes battle-player-hit-mark {
+          0% {
+            opacity: 0;
+            transform: scale(0.9) rotate(18deg);
+          }
+          30% {
+            opacity: 1;
+            transform: scale(1.08) rotate(18deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.14) rotate(18deg);
+          }
+        }
+
+        @keyframes battle-player-sword-trail {
+          0% {
+            opacity: 0;
+            transform: translate3d(-24px, 18px, 0) rotate(-18deg) scaleX(0.42);
+          }
+          30% {
+            opacity: 1;
+            transform: translate3d(12px, -8px, 0) rotate(-18deg) scaleX(1.08);
+          }
+          100% {
+            opacity: 0;
+            transform: translate3d(70px, -26px, 0) rotate(-18deg) scaleX(1.2);
+          }
+        }
+
+        @keyframes battle-player-moon-slash {
+          0% {
+            opacity: 0;
+            transform: translate3d(-18px, 10px, 0) rotate(-14deg) scale(0.74);
+          }
+          24% {
+            opacity: 1;
+            transform: translate3d(4px, -8px, 0) rotate(-4deg) scale(1.02);
+          }
+          100% {
+            opacity: 0;
+            transform: translate3d(38px, -22px, 0) rotate(8deg) scale(1.16);
+          }
+        }
+
+        @keyframes battle-player-impact-star {
+          0% {
+            opacity: 0;
+            transform: scale(0.4);
+          }
+          36% {
+            opacity: 1;
+            transform: scale(1.08);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.28);
           }
         }
       `}</style>

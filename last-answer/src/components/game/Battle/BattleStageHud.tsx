@@ -24,8 +24,8 @@ export function BattleStageHud({ children, anchor }: BattleStageHudProps) {
         zIndex: 20,
         width:
           anchor === "enemy"
-            ? "min(clamp(19.5rem, 27vw, 26rem), calc(100vw - 1rem))"
-            : "min(19.5rem, calc(100vw - 1rem))",
+            ? "min(clamp(19.5rem, 27vw, 26rem), calc(100% - 1rem))"
+            : "min(19.5rem, calc(100% - 1rem))",
         ...positionStyle,
       }}
     >

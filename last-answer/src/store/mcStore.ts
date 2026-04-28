@@ -13,6 +13,7 @@ import {
 } from "@/lib/player";
 import type {
   BattleReward,
+  LastBattleResult,
   Player,
   Property,
   Quest,
@@ -81,9 +82,12 @@ type MCStore = {
   player: Player;
   storageKey: string;
   userId: string | null;
+  lastBattleResult: LastBattleResult | null;
   readPlayer: () => Player;
+  readLastBattleResult: () => LastBattleResult | null;
   readPersistPlayer: (slotId: string) => Player | null;
   savePlayer: (player: Player) => void;
+  setLastBattleResult: (result: LastBattleResult | null) => void;
   savePersistPlayer: (player: Player, slotId: string) => void;
   hydratePlayer: (userId: string, player: Player) => void;
   clearPlayerContext: () => void;
@@ -100,6 +104,7 @@ type MCStore = {
   buyProperty: (propertyId: SupportToolId, amount?: number) => boolean;
   addProperty: (propertyId: SupportToolId, amount?: number) => boolean;
   reduceProperty: (propertyId: SupportToolId, amount?: number) => boolean;
+  restockSupportTools: (minimumAmount?: number) => void;
   setLocation: (location: string) => void;
   startQuest: (quest: Quest) => void;
   completeQuest: (quest: Quest) => void;
@@ -111,8 +116,10 @@ const createMCStore = () =>
     player: defaultPlayer,
     storageKey: createPlayerStorageKey(),
     userId: null,
+    lastBattleResult: null,
 
     readPlayer: () => get().player,
+    readLastBattleResult: () => get().lastBattleResult,
 
     readPersistPlayer: (slotId) =>
       readPersistedPlayer(createPlayerStorageKey(slotId)),
@@ -120,6 +127,11 @@ const createMCStore = () =>
     savePlayer: (player) =>
       set({
         player: normalizePlayer(player),
+      }),
+
+    setLastBattleResult: (result) =>
+      set({
+        lastBattleResult: result,
       }),
 
     savePersistPlayer: (player, slotId) => {
@@ -134,6 +146,7 @@ const createMCStore = () =>
         userId,
         storageKey,
         player: normalizedPlayer,
+        lastBattleResult: null,
       });
     },
 
@@ -142,6 +155,7 @@ const createMCStore = () =>
         userId: null,
         storageKey: createPlayerStorageKey(),
         player: defaultPlayer,
+        lastBattleResult: null,
       }),
 
     updatePlayer: (updates) =>
@@ -296,6 +310,27 @@ const createMCStore = () =>
       return true;
     },
 
+    restockSupportTools: (minimumAmount = 1) => {
+      const normalizedMinimum = normalizePropertyAmount(minimumAmount);
+
+      if (!normalizedMinimum) {
+        return;
+      }
+
+      const player = get().player;
+      const nextInventory = player.inventory.map((property) => ({
+        ...property,
+        leftNumber: Math.max(property.leftNumber, normalizedMinimum),
+      }));
+
+      set({
+        player: {
+          ...player,
+          inventory: nextInventory,
+        },
+      });
+    },
+
     reduceProperty: (propertyId, amount = 1) => {
       const normalizedAmount = normalizePropertyAmount(amount);
 
@@ -357,6 +392,7 @@ const createMCStore = () =>
     resetPlayer: (name) =>
       set((state) => ({
         player: buildInitialPlayer(name?.trim() || state.player.name),
+        lastBattleResult: null,
       })),
   }));
 

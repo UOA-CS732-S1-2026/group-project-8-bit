@@ -124,13 +124,58 @@ export function getQuestionPrompt(question: Question): string {
   return question.question;
 }
 
+function hashString(value: string): number {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+}
+
+function createSeededRandom(seed: number): () => number {
+  let state = seed || 1;
+
+  return () => {
+    state = Math.imul(state, 1664525) + 1013904223;
+    return (state >>> 0) / 0x100000000;
+  };
+}
+
+function getStableQuestionSeed(question: Question): number {
+  return hashString(
+    [
+      question.type,
+      question.difficulty,
+      question.category,
+      question.question,
+      question.correct_answer,
+      ...question.incorrect_answers,
+    ].join("::"),
+  );
+}
+
 export function getQuestionOptions(question: Question): string[] {
-  return [question.correct_answer, ...question.incorrect_answers];
+  const options = [question.correct_answer, ...question.incorrect_answers];
+  const nextOptions = [...options];
+  const random = createSeededRandom(getStableQuestionSeed(question));
+
+  for (let index = nextOptions.length - 1; index > 0; index -= 1) {
+    const targetIndex = Math.floor(random() * (index + 1));
+    const currentItem = nextOptions[index];
+    nextOptions[index] = nextOptions[targetIndex];
+    nextOptions[targetIndex] = currentItem;
+  }
+
+  return nextOptions;
 }
 
 export function getCorrectAnswerIndex(question: Question): number {
-  void question;
-  return 0;
+  return getQuestionOptions(question).findIndex(
+    (option) => option === question.correct_answer,
+  );
 }
 
 export function getQuestionKey(question: Question): string {

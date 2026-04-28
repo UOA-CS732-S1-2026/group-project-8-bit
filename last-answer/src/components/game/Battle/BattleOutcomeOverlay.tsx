@@ -3,6 +3,7 @@ import type { BattleReward } from "@/game/core/types";
 type BattleOutcomeOverlayProps = {
   status: "won" | "lost";
   reward: BattleReward | null;
+  scale?: number;
   summary: {
     enemyName: string;
     turnsUsed: number;
@@ -21,21 +22,29 @@ function formatAvgTime(ms: number): string {
 export function BattleOutcomeOverlay({
   status,
   reward,
+  scale = 1,
   summary,
   onFinish,
 }: BattleOutcomeOverlayProps) {
   const isVictory = status === "won";
+  const contentScale = Math.min(Math.max(scale * 0.94, 0.42), 1);
   const accuracy =
     summary && summary.turnsUsed > 0
       ? Math.round((summary.correctAnswers / summary.turnsUsed) * 100)
       : null;
 
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/52 px-3 backdrop-blur-[4px]">
-      <section className="relative w-[min(92vw,52rem)] overflow-hidden rounded-[1rem] bg-[linear-gradient(180deg,rgba(33,23,17,0.98)_0%,rgba(12,10,9,0.99)_100%)] shadow-[0_24px_60px_rgba(0,0,0,0.58)] animate-[battle-outcome-settle_360ms_cubic-bezier(0.18,0.9,0.22,1)_forwards]">
-        <div className="absolute inset-0 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat opacity-90" />
-        <div className="relative p-6 sm:p-7">
-          <div className="rounded-[0.9rem] border border-[#7b5e40]/45 bg-black/5 px-6 py-6 sm:px-8 sm:py-8">
+    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/52 px-6 py-8 backdrop-blur-[4px]">
+      <div
+        className="origin-center"
+        style={{
+          transform: `scale(${contentScale})`,
+        }}
+      >
+        <section className="relative w-[52rem] max-w-[52rem] overflow-hidden rounded-[1rem] bg-[linear-gradient(180deg,rgba(33,23,17,0.98)_0%,rgba(12,10,9,0.99)_100%)] shadow-[0_24px_60px_rgba(0,0,0,0.58)] animate-[battle-outcome-settle_360ms_cubic-bezier(0.18,0.9,0.22,1)_forwards]">
+          <div className="absolute inset-0 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat opacity-90" />
+          <div className="relative p-6 sm:p-7">
+            <div className="rounded-[0.9rem] border border-[#7b5e40]/45 bg-black/5 px-6 py-6 sm:px-8 sm:py-8">
           <div className="text-[0.68rem] uppercase tracking-[0.3em] text-[#c8ab7f]">
             {isVictory ? "Battle Complete" : "Battle Failed"}
           </div>
@@ -108,25 +117,26 @@ export function BattleOutcomeOverlay({
               finish
             </button>
           </div>
+            </div>
           </div>
-        </div>
-        <style jsx>{`
-          @keyframes battle-outcome-settle {
-            0% {
-              opacity: 0;
-              transform: scale(0.94);
+          <style jsx>{`
+            @keyframes battle-outcome-settle {
+              0% {
+                opacity: 0;
+                transform: scale(0.94);
+              }
+              60% {
+                opacity: 1;
+                transform: scale(1.025);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1);
+              }
             }
-            60% {
-              opacity: 1;
-              transform: scale(1.025);
-            }
-            100% {
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-        `}</style>
-      </section>
+          `}</style>
+        </section>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -11,7 +12,12 @@ import {
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BURST_DURATION_MS, supportToolConfigs } from "@/game/core/battleCore";
-import type { BattleSession, Enemy, SupportToolId } from "@/game/core/types";
+import type {
+  BattleOutcome,
+  BattleSession,
+  Enemy,
+  SupportToolId,
+} from "@/game/core/types";
 import {
   getCorrectAnswerIndex,
   getQuestionOptions,
@@ -32,7 +38,7 @@ type BattlePageProps = {
   enemy?: Enemy | null;
   backgroundImage?: string;
   label?: string;
-  onFinish?: () => void;
+  onFinish?: (outcome: BattleOutcome) => void;
 };
 
 export function BattlePage({
@@ -41,11 +47,16 @@ export function BattlePage({
   label = "battle",
   onFinish,
 }: BattlePageProps) {
+  const BATTLE_CANVAS_WIDTH = 1660;
+  const BATTLE_CANVAS_HEIGHT = 940;
+  const BATTLE_CANVAS_PADDING_X = 24;
+  const BATTLE_CANVAS_PADDING_Y = 20;
   const router = useRouter();
   const searchParams = useSearchParams();
   const AUTO_LOG_LIMIT = 12;
   const FEEDBACK_DURATION_MS = 1600;
   const ANSWER_LOCK_DELAY_MS = 260;
+  const ATTACK_WINDUP_MS = 120;
   const HIT_STOP_MS = 90;
   const BURST_INTRO_MS = 820;
   const BURST_OUTRO_MS = 1500;
@@ -72,6 +83,7 @@ export function BattlePage({
   const [playerHitFlash, setPlayerHitFlash] = useState(false);
   const [enemyHitFlash, setEnemyHitFlash] = useState(false);
   const [playerAttackFlash, setPlayerAttackFlash] = useState(false);
+  const [enemyAttackFlash, setEnemyAttackFlash] = useState(false);
   const [stageShakeTone, setStageShakeTone] = useState<
     "none" | "playerHit" | "enemyHit"
   >("none");
@@ -89,6 +101,17 @@ export function BattlePage({
     damage: number | null;
   }>({ active: false, damage: null });
   const [outcomeVisible, setOutcomeVisible] = useState(false);
+  const [viewportScale, setViewportScale] = useState(1);
+  const [battleVisualHeight, setBattleVisualHeight] = useState(
+    BATTLE_CANVAS_HEIGHT,
+  );
+  const [actionCue, setActionCue] = useState<{
+    id: string;
+    title: string;
+    detail: string;
+    tone: "player" | "enemy" | "system";
+  } | null>(null);
+  const [isBattleLogCollapsed, setIsBattleLogCollapsed] = useState(false);
   const [floatingTexts, setFloatingTexts] = useState<
     Array<{
       id: string;
@@ -99,12 +122,15 @@ export function BattlePage({
     }>
   >([]);
   const hasAutoStartedRef = useRef(false);
+  const battleFrameRef = useRef<HTMLDivElement | null>(null);
+  const battleContentRef = useRef<HTMLDivElement | null>(null);
   const prevBattleRef = useRef<BattleSession | null>(null);
   const prevPlayerHpRef = useRef<number | null>(null);
   const answerDelayTimeoutRef = useRef<number | null>(null);
   const burstIntroTimeoutRef = useRef<number | null>(null);
   const burstOutroTimeoutRef = useRef<number | null>(null);
   const outcomeTimeoutRef = useRef<number | null>(null);
+  const actionCueTimeoutRef = useRef<number | null>(null);
   const player = useMCStore((state) => state.player);
   const battleAudio = useBattleAudio();
   const {
@@ -139,7 +165,7 @@ export function BattlePage({
   const burstReady =
     !!battle &&
     battle.correctStreak >= 5 &&
-    (battle.enemy.isBoss || battle.burstUsesThisBattle === 0);
+    battle.correctStreak % 5 === 0;
   const availableItemCount = battle
     ? Object.values(battle.supportTools).reduce(
         (sum, amount) => sum + amount,
@@ -164,35 +190,55 @@ export function BattlePage({
     [FEEDBACK_DURATION_MS],
   );
 
+  const pushActionCue = useCallback(
+    (entry: { title: string; detail: string; tone: "player" | "enemy" | "system" }) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      setActionCue({ id, ...entry });
+      if (actionCueTimeoutRef.current !== null) {
+        window.clearTimeout(actionCueTimeoutRef.current);
+      }
+      actionCueTimeoutRef.current = window.setTimeout(() => {
+        setActionCue((current) => (current?.id === id ? null : current));
+        actionCueTimeoutRef.current = null;
+      }, 1250);
+    },
+    [],
+  );
+
   const triggerEnemyHit = useCallback(
     (text?: string) => {
-      setHitStopActive(true);
-      setImpactFlashTone("enemyHit");
-      setEnemyHitTier("normal");
+      setPlayerAttackFlash(true);
+      window.setTimeout(() => {
+        setHitStopActive(true);
+        setImpactFlashTone("enemyHit");
+        setEnemyHitTier("normal");
+      }, ATTACK_WINDUP_MS);
       window.setTimeout(() => {
         setHitStopActive(false);
         setEnemyHitFlash(true);
-        setPlayerAttackFlash(true);
         setStageShakeTone("enemyHit");
         battleAudio.playEnemyHit();
         if (text) {
           pushFloatingText({ target: "enemy", text, tone: "damage" });
         }
-      }, HIT_STOP_MS);
+      }, ATTACK_WINDUP_MS + HIT_STOP_MS);
       window.setTimeout(() => {
         setEnemyHitFlash(false);
         setPlayerAttackFlash(false);
         setStageShakeTone("none");
         setImpactFlashTone("none");
-      }, FEEDBACK_DURATION_MS);
+      }, ATTACK_WINDUP_MS + FEEDBACK_DURATION_MS);
     },
-    [FEEDBACK_DURATION_MS, HIT_STOP_MS, battleAudio, pushFloatingText],
+    [ATTACK_WINDUP_MS, FEEDBACK_DURATION_MS, HIT_STOP_MS, battleAudio, pushFloatingText],
   );
 
   const triggerPlayerHit = useCallback(
     (text?: string) => {
-      setHitStopActive(true);
-      setImpactFlashTone("playerHit");
+      setEnemyAttackFlash(true);
+      window.setTimeout(() => {
+        setHitStopActive(true);
+        setImpactFlashTone("playerHit");
+      }, ATTACK_WINDUP_MS);
       window.setTimeout(() => {
         setHitStopActive(false);
         setPlayerHitFlash(true);
@@ -201,14 +247,15 @@ export function BattlePage({
         if (text) {
           pushFloatingText({ target: "player", text, tone: "damage" });
         }
-      }, HIT_STOP_MS);
+      }, ATTACK_WINDUP_MS + HIT_STOP_MS);
       window.setTimeout(() => {
+        setEnemyAttackFlash(false);
         setPlayerHitFlash(false);
         setStageShakeTone("none");
         setImpactFlashTone("none");
-      }, FEEDBACK_DURATION_MS);
+      }, ATTACK_WINDUP_MS + FEEDBACK_DURATION_MS);
     },
-    [FEEDBACK_DURATION_MS, HIT_STOP_MS, battleAudio, pushFloatingText],
+    [ATTACK_WINDUP_MS, FEEDBACK_DURATION_MS, HIT_STOP_MS, battleAudio, pushFloatingText],
   );
 
   const triggerBurstFinishImpact = useCallback(() => {
@@ -220,12 +267,17 @@ export function BattlePage({
       setHitStopActive(false);
       setStageShakeTone("enemyHit");
     }, HIT_STOP_MS);
+    pushActionCue({
+      title: "Burst Release",
+      detail: "Stored combo energy detonates on impact.",
+      tone: "system",
+    });
     window.setTimeout(() => {
       setStageShakeTone("none");
       setImpactFlashTone("none");
       setEnemyHitTier("normal");
     }, 520);
-  }, [HIT_STOP_MS, battleAudio]);
+  }, [HIT_STOP_MS, battleAudio, pushActionCue]);
 
   const pushLogs = useCallback(
     (entries: Array<{ kind: "player" | "enemy"; text: string }>) => {
@@ -271,11 +323,13 @@ export function BattlePage({
     setBurstIntroActive(false);
     setBurstOutroState({ active: false, damage: null });
     setOutcomeVisible(false);
+    setIsBattleLogCollapsed(false);
     setFloatingTexts([]);
     setStageShakeTone("none");
     setImpactFlashTone("none");
     setEnemyHitTier("normal");
     setHitStopActive(false);
+    setEnemyAttackFlash(false);
     prevBattleRef.current = null;
     prevPlayerHpRef.current = player.hp;
 
@@ -283,13 +337,23 @@ export function BattlePage({
   }, [initialEnemy, player.hp, startBattleWithEnemy]);
 
   const handleFinish = useCallback(() => {
+    const outcome =
+      battle?.status === "won" || battle?.status === "lost"
+        ? battle.status
+        : null;
+
+    if (!outcome) {
+      router.back();
+      return;
+    }
+
     if (onFinish) {
-      onFinish();
+      onFinish(outcome);
       return;
     }
 
     router.back();
-  }, [onFinish, router]);
+  }, [battle, onFinish, router]);
 
   useEffect(() => {
     if (hasAutoStartedRef.current || battle) {
@@ -321,10 +385,82 @@ export function BattlePage({
     return () => window.clearTimeout(timerId);
   }, [battle, debugSupportOpen, setSupportMenuOpen]);
 
+  useLayoutEffect(() => {
+    const measureVisualBounds = () => {
+      const frame = battleFrameRef.current;
+      const content = battleContentRef.current;
+
+      if (!frame || !content) {
+        return;
+      }
+
+      const measuredHeight = Math.max(
+        BATTLE_CANVAS_HEIGHT,
+        Math.ceil(content.scrollHeight || 0),
+        Math.ceil(content.offsetHeight || 0),
+      );
+      const availableWidth = Math.max(
+        frame.clientWidth - BATTLE_CANVAS_PADDING_X * 2,
+        1,
+      );
+      const availableHeight = Math.max(
+        frame.clientHeight - BATTLE_CANVAS_PADDING_Y * 2,
+        1,
+      );
+      const scaleX = availableWidth / BATTLE_CANVAS_WIDTH;
+      const scaleY = availableHeight / measuredHeight;
+      const nextScale = Math.min(1, scaleX, scaleY);
+
+      setBattleVisualHeight((currentHeight) => {
+        return Math.abs(currentHeight - measuredHeight) > 1
+          ? measuredHeight
+          : currentHeight;
+      });
+      setViewportScale((currentScale) => {
+        const safeScale = nextScale > 0 ? nextScale : 1;
+        return Math.abs(currentScale - safeScale) > 0.001
+          ? safeScale
+          : currentScale;
+      });
+    };
+
+    measureVisualBounds();
+    const resizeObserver = new ResizeObserver(measureVisualBounds);
+
+    if (battleFrameRef.current) {
+      resizeObserver.observe(battleFrameRef.current);
+    }
+
+    if (battleContentRef.current) {
+      resizeObserver.observe(battleContentRef.current);
+    }
+
+    window.addEventListener("resize", measureVisualBounds);
+    window.visualViewport?.addEventListener("resize", measureVisualBounds);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", measureVisualBounds);
+      window.visualViewport?.removeEventListener("resize", measureVisualBounds);
+    };
+  }, [
+    BATTLE_CANVAS_HEIGHT,
+    BATTLE_CANVAS_PADDING_X,
+    BATTLE_CANVAS_PADDING_Y,
+    BATTLE_CANVAS_WIDTH,
+    battle,
+    actionCue,
+    burstOutroState.active,
+    logEntries.length,
+  ]);
+
   useEffect(() => {
     return () => {
       if (answerDelayTimeoutRef.current !== null) {
         window.clearTimeout(answerDelayTimeoutRef.current);
+      }
+      if (actionCueTimeoutRef.current !== null) {
+        window.clearTimeout(actionCueTimeoutRef.current);
       }
       if (burstIntroTimeoutRef.current !== null) {
         window.clearTimeout(burstIntroTimeoutRef.current);
@@ -578,6 +714,7 @@ export function BattlePage({
     battleAudio,
     currentQuestion,
     player.hp,
+    pushActionCue,
     pushFloatingText,
     pushLogs,
     resumeQuestionTimer,
@@ -739,12 +876,7 @@ export function BattlePage({
   }
 
   return (
-    <main
-      className={[
-        "relative h-full min-h-0 w-full overflow-x-hidden bg-black text-stone-100",
-        battle?.supportMenuOpen ? "overflow-y-hidden" : "overflow-y-auto",
-      ].join(" ")}
-    >
+    <main className="relative h-full min-h-0 w-full overflow-hidden bg-black text-stone-100">
       <div className="absolute inset-0">
         <Image
           src={backgroundImage}
@@ -755,123 +887,168 @@ export function BattlePage({
           className="object-cover object-center"
         />
       </div>
-      <div className="absolute inset-0 bg-white/12 backdrop-blur-[6px]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,5,0.28)_0%,rgba(8,6,5,0.12)_24%,rgba(8,6,5,0.3)_62%,rgba(7,5,4,0.62)_100%)]" />
+      <div className="absolute inset-0 bg-[rgba(255,244,226,0.04)] backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(238,205,155,0.05)_0%,rgba(238,205,155,0.02)_30%,rgba(0,0,0,0)_68%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,5,0.2)_0%,rgba(8,6,5,0.22)_32%,rgba(8,6,5,0.28)_68%,rgba(7,5,4,0.5)_100%)]" />
       {isTensionActive ? (
         <div className="pointer-events-none absolute inset-0 z-[8] bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(117,31,18,0.08)_54%,rgba(117,31,18,0.18)_100%)] animate-[battle-danger-pulse_900ms_ease-in-out_infinite]" />
       ) : null}
-      {battle ? (
-        <BattleStateStrip
-          turn={Math.min(battle.turnsUsed + 1, battle.turnLimit)}
-          turnLimit={battle.turnLimit}
-          combo={battle.correctStreak}
-          burstReady={burstReady}
-          isBossBattle={battle.enemy.isBoss}
-          muted={battle.status === "burst"}
-        />
-      ) : null}
-
-      <div className="relative z-10 flex h-full min-h-0 w-full flex-col px-2 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5">
-        <div className="flex min-h-0 w-full flex-1 flex-col gap-3">
-          <BattleStage
-            backgroundLabel={label}
-            enemy={
-              battle?.enemy ?? {
-                name: "Awaiting Battle",
-                hp: 0,
-                maxHp: 1,
-                attack: 0,
-                defense: 0,
-              }
-            }
-            playerHit={playerHitFlash}
-            enemyHit={enemyHitFlash}
-            playerAttacking={playerAttackFlash}
-            burstActive={false}
-            floatingTexts={floatingTexts}
-            shakeTone={stageShakeTone}
-            hitStopActive={hitStopActive}
-            impactFlashTone={impactFlashTone}
-            enemyHitTier={enemyHitTier}
-            enemyDefeated={battle?.status === "won"}
-            playerDefeated={battle?.status === "lost"}
-            hudMuted={battle?.status === "burst"}
-            defeatAnimationMs={DEFEAT_ANIMATION_MS}
-          />
-          {battle?.status === "burst" || burstOutroState.active ? (
-            <BattleBurstOverlay
-              comboCount={battle?.correctStreak ?? 0}
-              remainingMs={battle?.burstRemainingMs ?? 0}
-              durationMs={BURST_DURATION_MS}
-              currentBurstClicks={battle?.currentBurstClicks ?? 0}
-              timerStarted={battle?.burstTimerStarted ?? false}
-              resolving={battle?.burstResolving ?? false}
-              introActive={burstIntroActive}
-              outroActive={burstOutroState.active}
-              outroDamage={burstOutroState.damage}
-              onBurstClick={handleBurstClick}
-            />
-          ) : null}
-
+      <div
+        ref={battleFrameRef}
+        className="relative z-10 flex h-full w-full items-center justify-center overflow-hidden"
+      >
+        <div
+          className="relative shrink-0"
+          style={{
+            width: `${BATTLE_CANVAS_WIDTH * viewportScale}px`,
+            height: `${battleVisualHeight * viewportScale}px`,
+          }}
+        >
           <div
-            className={[
-              "pt-[clamp(0.75rem,3vh,2.5rem)] transition duration-300",
-              battle?.status === "burst"
-                ? BURST_MUTED_CLASSES
-                : burstOutroState.active
-                  ? "opacity-60 blur-[1px] saturate-[0.9]"
-                  : isTensionActive
-                    ? "saturate-[1.05]"
-                    : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
+            className="absolute left-0 top-0"
+            style={{
+              width: `${BATTLE_CANVAS_WIDTH}px`,
+              height: `${battleVisualHeight}px`,
+            }}
           >
-            <BattleQuestionPanel
-              answers={answerOptions}
-              question={questionText}
-              questionMeta={questionMeta}
-              duration={(battle?.timeLimitMs ?? 12_000) / 1000}
-              remainingTime={
-                battle?.status === "burst"
-                  ? battle.burstRemainingMs / 1000
-                  : (battle?.timeRemainingMs ?? 12_000) / 1000
-              }
-              warningThreshold={3}
-              isTensionActive={!!isTensionActive}
-            />
-            <div className="flex justify-start pt-4 sm:pt-6 xl:pt-8">
-              <BattleBottomBar
-                player={playerBattleStats}
-                logEntries={logEntries}
-                onToggleItems={() =>
-                  battle?.status === "question"
-                    ? setSupportMenuOpen(!battle.supportMenuOpen)
-                    : undefined
-                }
-                itemsDisabled={!battle || battle.status !== "question"}
-                itemCount={availableItemCount}
-                itemsOpen={battle?.supportMenuOpen ?? false}
-                itemsOverlay={
-                  battle?.supportMenuOpen ? (
-                    <BattleSupportOverlay
-                      battle={battle}
-                      onActivateTool={handleSupportTool}
-                      onClose={() => setSupportMenuOpen(false)}
+            <div
+              className="absolute left-0 top-0"
+              style={{
+                width: `${BATTLE_CANVAS_WIDTH}px`,
+                height: `${battleVisualHeight}px`,
+                transform: `scale(${viewportScale})`,
+                transformOrigin: "top left",
+              }}
+            >
+              <div
+                ref={battleContentRef}
+                className="relative flex min-h-[940px] w-full flex-col px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4"
+                style={{
+                  width: `${BATTLE_CANVAS_WIDTH}px`,
+                }}
+              >
+                {battle ? (
+                  <BattleStateStrip
+                    turn={Math.min(battle.turnsUsed + 1, battle.turnLimit)}
+                    turnLimit={battle.turnLimit}
+                    combo={battle.correctStreak}
+                    burstReady={burstReady}
+                    isBossBattle={battle.enemy.isBoss}
+                    muted={battle.status === "burst"}
+                  />
+                ) : null}
+
+                <div className="flex min-h-0 w-full flex-1 flex-col gap-2.5 sm:gap-3">
+                  <BattleStage
+                    backgroundLabel={label}
+                    enemy={
+                      battle?.enemy ?? {
+                        name: "Awaiting Battle",
+                        hp: 0,
+                        maxHp: 1,
+                        attack: 0,
+                        defense: 0,
+                        imagePath: initialEnemy?.imagePath,
+                      }
+                    }
+                    playerHit={playerHitFlash}
+                    enemyHit={enemyHitFlash}
+                    enemyAttacking={enemyAttackFlash}
+                    playerAttacking={playerAttackFlash}
+                    burstActive={false}
+                    floatingTexts={floatingTexts}
+                    shakeTone={stageShakeTone}
+                    hitStopActive={hitStopActive}
+                    impactFlashTone={impactFlashTone}
+                    enemyHitTier={enemyHitTier}
+                    enemyDefeated={battle?.status === "won"}
+                    playerDefeated={battle?.status === "lost"}
+                    hudMuted={battle?.status === "burst"}
+                    defeatAnimationMs={DEFEAT_ANIMATION_MS}
+                    actionCue={actionCue}
+                  />
+                  {battle?.status === "burst" || burstOutroState.active ? (
+                    <BattleBurstOverlay
+                      comboCount={battle?.correctStreak ?? 0}
+                      remainingMs={battle?.burstRemainingMs ?? 0}
+                      durationMs={BURST_DURATION_MS}
+                      currentBurstClicks={battle?.currentBurstClicks ?? 0}
+                      timerStarted={battle?.burstTimerStarted ?? false}
+                      resolving={battle?.burstResolving ?? false}
+                      introActive={burstIntroActive}
+                      outroActive={burstOutroState.active}
+                      outroDamage={burstOutroState.damage}
+                      onBurstClick={handleBurstClick}
                     />
-                  ) : null
-                }
-              />
+                  ) : null}
+
+                  <div
+                    className={[
+                      "shrink-0 pt-[clamp(0.25rem,1.4vh,1rem)] transition duration-300",
+                      battle?.status === "burst"
+                        ? BURST_MUTED_CLASSES
+                        : burstOutroState.active
+                          ? "opacity-60 blur-[1px] saturate-[0.9]"
+                          : isTensionActive
+                            ? "saturate-[1.05]"
+                            : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    <BattleQuestionPanel
+                      answers={answerOptions}
+                      question={questionText}
+                      questionMeta={questionMeta}
+                      duration={(battle?.timeLimitMs ?? 12_000) / 1000}
+                      remainingTime={
+                        battle?.status === "burst"
+                          ? battle.burstRemainingMs / 1000
+                          : (battle?.timeRemainingMs ?? 12_000) / 1000
+                      }
+                      warningThreshold={3}
+                      isTensionActive={!!isTensionActive}
+                    />
+                    <div className="flex justify-start pt-2.5 sm:pt-3">
+                      <BattleBottomBar
+                        player={playerBattleStats}
+                        logEntries={logEntries}
+                        onToggleLogCollapsed={() =>
+                          setIsBattleLogCollapsed((current) => !current)
+                        }
+                        onToggleItems={() =>
+                          battle?.status === "question"
+                            ? setSupportMenuOpen(!battle.supportMenuOpen)
+                            : undefined
+                        }
+                        itemsDisabled={!battle || battle.status !== "question"}
+                        itemCount={availableItemCount}
+                        itemsOpen={battle?.supportMenuOpen ?? false}
+                        logCollapsed={isBattleLogCollapsed}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         </div>
-      </div>
+      {battle?.supportMenuOpen ? (
+        <BattleSupportOverlay
+          battle={battle}
+          scale={viewportScale}
+          onActivateTool={handleSupportTool}
+          onClose={() => setSupportMenuOpen(false)}
+        />
+      ) : null}
       {battle &&
       outcomeVisible &&
       (battle.status === "won" || battle.status === "lost") ? (
         <BattleOutcomeOverlay
           status={battle.status}
           reward={reward}
+          scale={viewportScale}
           summary={outcomeSummary}
           onFinish={handleFinish}
         />

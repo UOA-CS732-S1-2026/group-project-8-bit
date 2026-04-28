@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { BattlePage } from "@/components/game/Battle/BattlePage";
 import { createEnemy } from "@/game/core/battleCore";
-import type { Enemy } from "@/game/core/types";
+import type { BattleOutcome, Enemy } from "@/game/core/types";
 import {
   CATEGORYCODE,
   type CategoryCode,
@@ -50,6 +50,11 @@ const backgroundOptions = [
     path: "/backgrounds/source-background.png",
   },
 ] as const;
+
+const enemyArtOptions = {
+  normal: "/quests/ashFind/page-enemy.png",
+  boss: "/quests/theEnd/andrew-enemy.png",
+} as const;
 
 type BackgroundOptionId = (typeof backgroundOptions)[number]["id"];
 
@@ -272,14 +277,29 @@ export default function ArcadePage() {
       isBoss: fightBoss,
     });
 
-    setBattleEnemy(nextEnemy);
+    setBattleEnemy({
+      ...nextEnemy,
+      imagePath: fightBoss ? enemyArtOptions.boss : enemyArtOptions.normal,
+      artPreset: fightBoss ? "andrew" : "page",
+    });
     setBattleStarted(true);
   };
 
-  const handleBattleFinish = () => {
+  const handleBattleFinish = (outcome: BattleOutcome) => {
     setBattleStarted(false);
     setBattleEnemy(null);
-    getMCStore().getState().restoreHpToFull();
+    const store = getMCStore().getState();
+    if (battleEnemy) {
+      store.setLastBattleResult({
+        enemyId: battleEnemy.id,
+        enemyName: battleEnemy.name,
+        outcome,
+        isBoss: battleEnemy.isBoss,
+        finishedAt: new Date().toISOString(),
+      });
+    }
+    store.restoreHpToFull();
+    store.restockSupportTools(1);
   };
 
   if (battleStarted && battleEnemy) {
@@ -297,7 +317,7 @@ export default function ArcadePage() {
     <main className="relative h-full min-h-0 w-full overflow-hidden bg-black text-stone-100">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-70"
-        style={{ backgroundImage: "url('/backgrounds/city-hub.png')" }}
+        style={{ backgroundImage: "url('/backgrounds/game-cover.png')" }}
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,5,0.48)_0%,rgba(8,6,5,0.28)_35%,rgba(7,5,4,0.78)_100%)]" />
 
