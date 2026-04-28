@@ -14,6 +14,8 @@ import {
   type QuestionType,
   useGameStore,
 } from "@/store/game-store";
+import ModalPortal from "./ModalPortal";
+import { useModalCloseAnimation } from "./useModalCloseAnimation";
 
 type SettingPanelProps = {
   onClose: () => void;
@@ -100,7 +102,10 @@ function ScaledSettingsPanel({ children }: { children: ReactNode }) {
       resizeObserver.observe(contentRef.current);
     }
 
+    window.addEventListener("resize", updateScale);
+
     return () => {
+      window.removeEventListener("resize", updateScale);
       resizeObserver.disconnect();
     };
   }, []);
@@ -181,6 +186,7 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
     readGameSettings(),
   );
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const { isClosing, requestClose } = useModalCloseAnimation(onClose);
   const currentSettings: GameSettings = {
     category,
     difficulty,
@@ -202,13 +208,16 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
   };
 
   return (
+    <ModalPortal>
     <div
-      className="absolute inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
+      className="game-modal-backdrop fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 backdrop-blur-sm"
+      data-closing={isClosing}
+      onClick={requestClose}
     >
       <ScaledSettingsPanel>
         <section
-          className="relative w-full overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+          className="game-modal-panel relative w-full overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+          data-closing={isClosing}
           role="dialog"
           aria-modal="true"
           aria-label="Game settings"
@@ -302,7 +311,7 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
             <button
               type="button"
               className={panelButtonClass}
-              onClick={onClose}
+              onClick={requestClose}
             >
               Cancel
             </button>
@@ -310,5 +319,6 @@ export default function SettingPanel({ onClose }: SettingPanelProps) {
         </section>
       </ScaledSettingsPanel>
     </div>
+    </ModalPortal>
   );
 }
