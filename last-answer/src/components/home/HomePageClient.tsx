@@ -125,7 +125,7 @@ export function HomePageClient({ user }: HomePageClientProps) {
             </Link>
           ) : (
             <div className="flex items-center gap-[clamp(0.3rem,1.2cqw,0.75rem)] rounded-lg border border-stone-100/18 bg-black/45 px-[clamp(0.4rem,1.5cqw,0.75rem)] py-[clamp(0.25rem,1cqh,0.5rem)] shadow-[0_8px_18px_rgba(0,0,0,0.32)]">
-              <span className="max-w-[clamp(5rem,16cqw,16rem)] truncate text-[clamp(0.5rem,1.15cqw,0.875rem)] font-semibold leading-none text-stone-100">
+              <span className="max-w-[clamp(5rem,16cqw,16rem)] truncate font-[family-name:var(--font-cinzel)] text-[clamp(0.5rem,1.15cqw,0.875rem)] font-semibold leading-none text-stone-100">
                 {playerName}
               </span>
               <LogoutButton className={authButtonClass} showError={false} />

@@ -1,9 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { validatePassword, validateUsername } from "@/lib/auth-shared";
+import {
+  AuthError,
+  AuthFooterLink,
+  AuthFormHeader,
+  AuthPanel,
+  AuthSubmitButton,
+  AuthTextField,
+} from "./AuthUi";
 
 type AuthResponse = {
   error?: string;
@@ -124,83 +131,53 @@ export function RegisterForm({
   }
 
   return (
-    <div className="flex w-full flex-1 flex-col justify-center rounded-[2rem] border border-amber-100/10 bg-stone-950/55 p-6 shadow-2xl shadow-black/30 sm:p-8">
-      <div className="mb-6 space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.28em] text-amber-200">
-          Register
-        </p>
-        <h2 className="text-2xl font-semibold text-stone-50">
-          Create your adventurer
-        </h2>
-        <p className="text-sm leading-6 text-stone-300">
-          Your username becomes the initial player identity until character
-          setup is expanded.
-        </p>
-      </div>
+    <AuthPanel>
+      <AuthFormHeader
+        eyebrow="Register"
+        title="Create Your Adventurer"
+        description="Create a persistent account so your player identity and progress survive the session."
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="block space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-200">
-            Username
-          </span>
-          <input
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            autoComplete="username"
-            className="w-full rounded-2xl border border-stone-600/70 bg-black/35 px-4 py-3 text-base text-stone-50 outline-none transition focus:border-amber-300/60 focus:bg-black/50"
-            placeholder="LostScholar"
-          />
-        </label>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-[clamp(0.58rem,1.5cqh,0.9rem)]"
+      >
+        <AuthTextField
+          label="Username"
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+          autoComplete="username"
+          placeholder="Username"
+        />
 
-        <label className="block space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-200">
-            Password
-          </span>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="new-password"
-            className="w-full rounded-2xl border border-stone-600/70 bg-black/35 px-4 py-3 text-base text-stone-50 outline-none transition focus:border-amber-300/60 focus:bg-black/50"
-            placeholder="At least 8 characters"
-          />
-        </label>
+        <AuthTextField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="new-password"
+          placeholder="At least 8 characters"
+        />
 
-        <label className="block space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-200">
-            Confirm Password
-          </span>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            autoComplete="new-password"
-            className="w-full rounded-2xl border border-stone-600/70 bg-black/35 px-4 py-3 text-base text-stone-50 outline-none transition focus:border-amber-300/60 focus:bg-black/50"
-            placeholder="Re-enter password"
-          />
-        </label>
+        <AuthTextField
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          autoComplete="new-password"
+          placeholder="Re-enter password"
+        />
 
-        {error ? (
-          <div className="rounded-2xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {error}
-          </div>
-        ) : null}
+        {error ? <AuthError>{error}</AuthError> : null}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full rounded-2xl border border-amber-300/35 bg-amber-400/15 px-4 py-3 text-sm font-semibold uppercase tracking-[0.28em] text-amber-100 transition hover:border-amber-200/60 hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <AuthSubmitButton disabled={isSubmitting}>
           {isSubmitting ? "Forging..." : "Create Account"}
-        </button>
+        </AuthSubmitButton>
       </form>
 
-      <p className="mt-6 text-sm text-stone-300">
-        Already registered?{" "}
-        <Link href={loginHref} className="font-semibold text-amber-200">
-          Log in here
-        </Link>
-      </p>
-    </div>
+      <AuthFooterLink prompt="Already registered?" href={loginHref}>
+        Log in here
+      </AuthFooterLink>
+    </AuthPanel>
   );
 }
