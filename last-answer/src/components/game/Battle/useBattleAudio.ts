@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type ToneSpec = {
   from: number;
@@ -93,6 +93,20 @@ function scheduleNoise(
 export function useBattleAudio() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const armedRef = useRef(false);
+  const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
+  const bgmTrackRef = useRef<string | null>(null);
+
+  const resetBattleMusic = useCallback(() => {
+    if (!bgmAudioRef.current) {
+      bgmTrackRef.current = null;
+      return;
+    }
+
+    bgmAudioRef.current.pause();
+    bgmAudioRef.current.currentTime = 0;
+    bgmAudioRef.current = null;
+    bgmTrackRef.current = null;
+  }, []);
 
   const ensureContext = useCallback(() => {
     if (typeof window === "undefined") {
@@ -129,7 +143,51 @@ export function useBattleAudio() {
     if (ctx.state === "suspended") {
       void ctx.resume();
     }
+
+    const bgm = bgmAudioRef.current;
+    if (bgm) {
+      void bgm.play().catch(() => {
+        // Ignore autoplay rejections until the next user gesture.
+      });
+    }
   }, [ensureContext]);
+
+  const setBattleMusic = useCallback((track: "normal" | "boss" | null) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const nextSrc =
+      track === "boss"
+        ? "/music/boss-battle-music.mp3"
+        : track === "normal"
+          ? "/music/normal-battle-music.mp3"
+          : null;
+
+    if (!nextSrc) {
+      resetBattleMusic();
+      return;
+    }
+
+    if (bgmTrackRef.current === nextSrc && bgmAudioRef.current) {
+      return;
+    }
+
+    resetBattleMusic();
+
+    const audio = new Audio(nextSrc);
+    audio.preload = "auto";
+    audio.loop = true;
+    audio.volume = track === "boss" ? 0.09 : 0.17;
+    bgmAudioRef.current = audio;
+    bgmTrackRef.current = nextSrc;
+
+    void audio.play().catch(() => {
+      // Ignore autoplay rejections until the next user gesture.
+    });
+  }, [resetBattleMusic]);
+
+  const stopBattleMusic = resetBattleMusic;
 
   const playPattern = useCallback(
     (tones: ToneSpec[], spacing = 0.05) => {
@@ -369,6 +427,12 @@ export function useBattleAudio() {
 
   useEffect(() => {
     return () => {
+      if (bgmAudioRef.current) {
+        bgmAudioRef.current.pause();
+        bgmAudioRef.current.currentTime = 0;
+        bgmAudioRef.current = null;
+      }
+
       const ctx = audioContextRef.current;
       if (!ctx) {
         return;
@@ -379,17 +443,36 @@ export function useBattleAudio() {
     };
   }, []);
 
-  return {
-    arm,
-    playCorrect,
-    playWrong,
-    playEnemyHit,
-    playPlayerHit,
-    playBurstIntro,
-    playBurstFinish,
-    playSupport,
-    playBurstTap,
-    playOutcomeWin,
-    playOutcomeLose,
-  };
+  return useMemo(
+    () => ({
+      arm,
+      playCorrect,
+      playWrong,
+      playEnemyHit,
+      playPlayerHit,
+      playBurstIntro,
+      playBurstFinish,
+      playSupport,
+      playBurstTap,
+      playOutcomeWin,
+      playOutcomeLose,
+      setBattleMusic,
+      stopBattleMusic,
+    }),
+    [
+      arm,
+      playCorrect,
+      playWrong,
+      playEnemyHit,
+      playPlayerHit,
+      playBurstIntro,
+      playBurstFinish,
+      playSupport,
+      playBurstTap,
+      playOutcomeWin,
+      playOutcomeLose,
+      setBattleMusic,
+      stopBattleMusic,
+    ],
+  );
 }

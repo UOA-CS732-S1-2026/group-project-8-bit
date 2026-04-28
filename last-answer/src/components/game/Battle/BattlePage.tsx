@@ -133,6 +133,7 @@ export function BattlePage({
   const actionCueTimeoutRef = useRef<number | null>(null);
   const player = useMCStore((state) => state.player);
   const battleAudio = useBattleAudio();
+  const { setBattleMusic, stopBattleMusic } = battleAudio;
   const {
     battle,
     currentQuestion,
@@ -354,6 +355,15 @@ export function BattlePage({
 
     router.back();
   }, [battle, onFinish, router]);
+
+  useEffect(() => {
+    const track = initialEnemy?.isBoss ? "boss" : "normal";
+    setBattleMusic(track);
+
+    return () => {
+      stopBattleMusic();
+    };
+  }, [initialEnemy?.isBoss, setBattleMusic, stopBattleMusic]);
 
   useEffect(() => {
     if (hasAutoStartedRef.current || battle) {

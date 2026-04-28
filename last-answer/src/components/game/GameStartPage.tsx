@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  releaseMainInterfaceMusic,
+  retainMainInterfaceMusic,
+  stopMainInterfaceMusicNow,
+} from "@/lib/mainInterfaceMusic";
 import LoadPanel, { type LoadPanelTab } from "./saveLoad/LoadPanel";
 import NewGamePanel from "./NewGamePanel";
 import SettingPanel from "./SettingPanel";
@@ -85,6 +90,14 @@ export function GameStartPage({
   const [isStartOpen, setIsStartOpen] = useState(false);
 
   useEffect(() => {
+    retainMainInterfaceMusic();
+
+    return () => {
+      releaseMainInterfaceMusic();
+    };
+  }, []);
+
+  useEffect(() => {
     if (!shouldClearLoadPanelParams) return;
 
     const currentUrl = new URL(window.location.href);
@@ -158,7 +171,11 @@ export function GameStartPage({
       {isNewGameOpen && (
         <NewGamePanel
           onClose={() => setIsNewGameOpen(false)}
-          onCreated={() => { setIsNewGameOpen(false); setIsStartOpen(true); }}
+          onCreated={() => {
+            stopMainInterfaceMusicNow();
+            setIsNewGameOpen(false);
+            setIsStartOpen(true);
+          }}
         />
       )}
       {isSettingsOpen && (
