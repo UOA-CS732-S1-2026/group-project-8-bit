@@ -15,6 +15,7 @@ import { gameSlots } from "@/store/game-store";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
 import ModalPortal from "../ModalPortal";
+import { useModalCloseAnimation } from "../useModalCloseAnimation";
 import SaveLoadMenu from "./SaveLoadMenu";
 
 export type LoadPanelTab = "local" | "cloud";
@@ -184,6 +185,7 @@ export default function LoadPanel({
   const [isLoadingCloudSaves, setIsLoadingCloudSaves] = useState(false);
   const [cloudAuthRequired, setCloudAuthRequired] = useState(false);
   const [cloudError, setCloudError] = useState<string | null>(null);
+  const { isClosing, requestClose } = useModalCloseAnimation(onClose);
 
   const refreshLocalSaves = useCallback(() => {
     setLocalSaveList(
@@ -317,12 +319,14 @@ export default function LoadPanel({
   return (
     <ModalPortal>
     <div
-      className="fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
+      className="game-modal-backdrop fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 backdrop-blur-sm"
+      data-closing={isClosing}
+      onClick={requestClose}
     >
       <ScaledLoadPanel>
       <section
-        className="relative flex w-full flex-col overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="game-modal-panel relative flex w-full flex-col overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        data-closing={isClosing}
         role="dialog"
         aria-modal="true"
         aria-label="Load game panel"
@@ -421,7 +425,11 @@ export default function LoadPanel({
           >
             Load
           </button>
-          <button type="button" className={panelButtonClass} onClick={onClose}>
+          <button
+            type="button"
+            className={panelButtonClass}
+            onClick={requestClose}
+          >
             Cancel
           </button>
         </div>

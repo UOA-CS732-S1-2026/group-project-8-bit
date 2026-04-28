@@ -53,6 +53,76 @@ body {
   animation: ember-rise var(--ember-duration) ease-in var(--ember-delay) infinite;
 }
 
+@keyframes game-modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes game-modal-backdrop-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes game-modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes game-modal-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+}
+
+.game-modal-backdrop {
+  animation: game-modal-backdrop-in 160ms ease-out both;
+}
+
+.game-modal-backdrop[data-closing="true"] {
+  animation: game-modal-backdrop-out 140ms ease-in both;
+}
+
+.game-modal-panel {
+  animation: game-modal-panel-in 210ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+
+.game-modal-panel[data-closing="true"] {
+  animation: game-modal-panel-out 150ms ease-in both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-modal-backdrop,
+  .game-modal-backdrop[data-closing="true"],
+  .game-modal-panel,
+  .game-modal-panel[data-closing="true"] {
+    animation-duration: 1ms;
+  }
+}
+
 @keyframes candle-flame-flicker {
   0% {
     transform: translate(-50%, 0) scale(0.96, 1.02) rotate(-2deg);
