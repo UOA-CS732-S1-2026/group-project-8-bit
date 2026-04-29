@@ -23,6 +23,7 @@ export function MainHub() {
       image: "/backgrounds/foggy-forest.png",
       accent: "from-emerald-200/70 via-lime-100/20 to-transparent",
       action: "Travel To Forest",
+      actionTone: "text-emerald-800 group-hover:text-emerald-700",
     },
     {
       id: "tavern",
@@ -34,6 +35,7 @@ export function MainHub() {
       image: "/backgrounds/Tavern_Background3.png",
       accent: "from-amber-100/75 via-orange-200/20 to-transparent",
       action: "Enter Tavern",
+      actionTone: "text-orange-800 group-hover:text-orange-700",
     },
   ] as const;
 
@@ -71,7 +73,9 @@ export function MainHub() {
               <p className="mt-2 hidden min-h-10 overflow-hidden px-2 text-sm leading-5 text-amber-100/82 lg:line-clamp-2">
                 {destination.description}
               </p>
-              <div className="mt-[clamp(0.22rem,0.9cqw,0.5rem)] flex min-h-[clamp(1.55rem,5.6cqw,2.75rem)] items-center justify-center bg-[url('/buttons/parchment-btn.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-2 text-center font-[family-name:var(--font-cinzel)] text-[0.52rem] font-black uppercase tracking-[0.12em] text-zinc-900 sm:text-xs sm:tracking-[0.16em]">
+              <div
+                className={`mt-[clamp(0.22rem,0.9cqw,0.5rem)] flex min-h-[clamp(1.55rem,5.6cqw,2.75rem)] items-center justify-center bg-[url('/buttons/parchment-btn.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-2 text-center font-[family-name:var(--font-cinzel)] text-[0.52rem] font-black uppercase tracking-[0.12em] drop-shadow-[0_1px_0_rgba(255,244,190,0.72)] transition-colors sm:text-xs sm:tracking-[0.16em] ${destination.actionTone}`}
+              >
                 {destination.action}
               </div>
             </Link>
