@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { useMCStore } from "@/store/mcStore";
 
 export function MainHub() {
-  const player = useMCStore((state) => state.player);
   const setLocation = useMCStore((state) => state.setLocation);
 
   useEffect(() => {
@@ -22,8 +21,10 @@ export function MainHub() {
         "Follow the damp lantern trail into drifting mist, hidden questions, and the first edge of danger.",
       href: "/game/foggyForest",
       image: "/backgrounds/foggy-forest.png",
+      imageTone: "brightness-[0.76] saturate-[0.9] contrast-[0.98]",
       accent: "from-emerald-200/70 via-lime-100/20 to-transparent",
       action: "Travel To Forest",
+      actionTone: "text-emerald-700 group-hover:text-emerald-600",
     },
     {
       id: "tavern",
@@ -33,72 +34,52 @@ export function MainHub() {
         "Rest beside the hearth, gather rumors from wandering scholars, and prepare for your next push outward.",
       href: "/game/tavern",
       image: "/backgrounds/Tavern_Background3.png",
+      imageTone: "brightness-[0.78] saturate-[0.88] contrast-[0.96]",
       accent: "from-amber-100/75 via-orange-200/20 to-transparent",
       action: "Enter Tavern",
-    },
-    {
-      id: "monolith",
-      eyebrow: "High Risk",
-      title: "The Monolith",
-      description:
-        "Approach the fractured pillar where forgotten knowledge hums through the stone and trials answer back.",
-      href: "/game/monolith",
-      image: "/backgrounds/monolith.png",
-      accent: "from-cyan-100/70 via-sky-200/20 to-transparent",
-      action: "Approach Monolith",
+      actionTone: "text-amber-700 group-hover:text-orange-600",
     },
   ] as const;
 
-  const playerHighlights = [
-    { label: "Level", value: player.level, note: "Current mastery" },
-    { label: "HP", value: `${player.hp} / ${player.maxHp}`, note: "Vitality" },
-    { label: "Experience", value: player.exp, note: "Stored knowledge" },
-    { label: "Coins", value: player.coins, note: "Travel provisions" },
-  ];
-
   return (
-    <main className="flex min-h-full w-full flex-col overflow-hidden text-stone-100">
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 pb-8 pt-24 sm:px-6 lg:px-8 lg:pb-10">
-        <section className="grid gap-5 lg:grid-cols-3">
+    <main className="w-full overflow-hidden px-[clamp(0.45rem,2cqw,1.25rem)] pb-[clamp(0.25rem,1.2cqw,0.75rem)] text-stone-100 [container-type:inline-size]">
+      <div className="mx-auto w-full max-w-5xl">
+        <section className="grid grid-cols-2 gap-[clamp(0.45rem,2cqw,1.25rem)]">
           {destinations.map((destination) => (
             <Link
               key={destination.id}
               href={destination.href}
-              className="group relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-stone-100/10 bg-stone-950/50 shadow-[0_20px_80px_rgba(0,0,0,0.35)]"
+              className="group relative min-w-0 overflow-hidden rounded-lg bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat p-[clamp(0.3rem,1.3cqw,0.85rem)] shadow-[0_14px_38px_rgba(0,0,0,0.58)] brightness-[0.88] saturate-[0.9] transition duration-200 hover:-translate-y-0.5 hover:brightness-[0.96] active:translate-y-0 active:scale-[0.98]"
             >
-              <div className="pointer-events-none absolute inset-0">
+              <div className="pointer-events-none absolute inset-0 rounded-lg bg-stone-950/16" />
+              <div className="relative h-[clamp(3.75rem,18cqw,13rem)] overflow-hidden rounded-md border border-amber-950/45 bg-stone-950/80">
                 <Image
                   src={destination.image}
                   alt={destination.title}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 33vw"
-                  className="object-cover object-center transition duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 50vw, 480px"
+                  className={`object-cover object-center transition duration-500 group-hover:scale-105 group-hover:brightness-[0.78] ${destination.imageTone}`}
                 />
-              </div>
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(6,6,6,0.08)_0%,rgba(10,9,9,0.35)_34%,rgba(9,8,7,0.92)_100%)]" />
-              <div
-                className={`pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b ${destination.accent}`}
-              />
-
-              <div className="relative flex h-full flex-col justify-between p-6">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.38em] text-stone-100/85">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,4,0.14)_0%,rgba(10,8,6,0.32)_44%,rgba(8,6,5,0.82)_100%)]" />
+                <div
+                  className={`pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b sm:h-24 ${destination.accent}`}
+                />
+                <div className="absolute inset-x-2 bottom-2 min-w-0 sm:inset-x-4 sm:bottom-4">
+                  <p className="truncate text-[0.52rem] font-semibold uppercase tracking-[0.16em] text-amber-100/90 sm:text-xs sm:tracking-[0.22em]">
                     {destination.eyebrow}
                   </p>
-                  <h2 className="mt-4 text-3xl font-semibold text-stone-50">
+                  <h2 className="mt-0.5 truncate font-[family-name:var(--font-cinzel)] text-xs font-black text-stone-50 sm:mt-1 sm:text-2xl">
                     {destination.title}
                   </h2>
-                  <p className="mt-3 max-w-sm text-sm leading-6 text-stone-200/80">
-                    {destination.description}
-                  </p>
                 </div>
-
-                <div className="space-y-3">
-                  <div className="h-px w-full bg-stone-100/15" />
-                  <div className="block w-full rounded-[1.1rem] border border-stone-100/15 bg-stone-950/45 px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.22em] text-stone-50 transition hover:border-amber-100/45 hover:bg-stone-900/80">
-                    {destination.action}
-                  </div>
-                </div>
+              </div>
+              <p className="relative mt-2 hidden min-h-10 overflow-hidden px-2 text-sm leading-5 text-amber-100/70 lg:line-clamp-2">
+                {destination.description}
+              </p>
+              <div
+                className={`relative mt-[clamp(0.22rem,0.9cqw,0.5rem)] flex min-h-[clamp(1.55rem,5.6cqw,2.75rem)] items-center justify-center bg-[url('/buttons/parchment-btn.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-2 text-center font-[family-name:var(--font-cinzel)] text-[0.52rem] font-black uppercase tracking-[0.12em] brightness-[0.84] saturate-[0.88] drop-shadow-[0_1px_0_rgba(40,24,10,0.32)] transition sm:text-xs sm:tracking-[0.16em] group-hover:brightness-[0.94] ${destination.actionTone}`}
+              >
+                {destination.action}
               </div>
             </Link>
           ))}
