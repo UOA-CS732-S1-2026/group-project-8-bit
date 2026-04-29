@@ -151,17 +151,13 @@ export function canTriggerBurst(args: {
   enemy: Enemy;
   burstUsesThisBattle: number;
 }): boolean {
-  const { streak, enemy, burstUsesThisBattle } = args;
+  const { streak } = args;
 
   if (streak < 5) {
     return false;
   }
 
-  if (enemy.isBoss) {
-    return streak % 5 === 0;
-  }
-
-  return burstUsesThisBattle === 0;
+  return streak % 5 === 0;
 }
 
 // Enemy generation is stat construction only, not battle-session orchestration.

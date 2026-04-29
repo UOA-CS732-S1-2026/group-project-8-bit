@@ -13,6 +13,8 @@ const BackMainHub =
 
 const backgroundImage = "url('/assets/button/button-pannel.png')";
 
+import { stopMainInterfaceMusicNow } from "@/lib/mainInterfaceMusic";
+import { releaseTavernMusic, retainTavernMusic } from "@/lib/tavernMusic";
 
 export default function TavernContent() {
   const setLocation = useMCStore((state) => state.setLocation);
@@ -21,6 +23,15 @@ const router = useRouter();
   useEffect(() => {
     setLocation("tavern");
   }, [setLocation]);
+
+  useEffect(() => {
+    stopMainInterfaceMusicNow();
+    retainTavernMusic();
+
+    return () => {
+      releaseTavernMusic();
+    };
+  }, []);
 
   return (
     <main className="h-full w-full text-amber-100">

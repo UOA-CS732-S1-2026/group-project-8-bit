@@ -129,6 +129,7 @@ export function activateSupportTool(
   if (
     !currentQuestion ||
     remainingUses <= 0 ||
+    (toolId === "analyze" && currentQuestion.type === "boolean") ||
     battle.toolUsedThisTurn ||
     battle.supportMenuOpen === false
   ) {
@@ -154,12 +155,11 @@ export function activateSupportTool(
         (index) =>
           index !== correctAnswerIndex &&
           !battle.eliminatedOptionIndices.includes(index),
-      )
-      .slice(0, 2);
+      );
 
     eliminatedOptionIndices = [
       ...battle.eliminatedOptionIndices,
-      ...wrongOptions,
+      ...wrongOptions.slice(0, 2),
     ];
   }
 

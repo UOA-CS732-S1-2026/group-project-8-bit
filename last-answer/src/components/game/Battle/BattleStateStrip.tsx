@@ -12,21 +12,15 @@ function getBurstState(args: {
   burstReady: boolean;
   isBossBattle: boolean;
 }) {
-  const { combo, burstReady, isBossBattle } = args;
+  const { combo, burstReady } = args;
 
   if (burstReady) {
     return { label: "Ready", activeRunes: 5 };
   }
 
-  const nextTarget = isBossBattle
-    ? Math.max(5, Math.ceil((combo + 1) / 5) * 5)
-    : 5;
+  const cycleProgress = combo > 0 ? combo % 5 : 0;
+  const nextTarget = Math.max(5, combo - cycleProgress + 5);
   const remaining = Math.max(0, nextTarget - combo);
-  const cycleProgress = isBossBattle
-    ? combo > 0
-      ? combo % 5
-      : 0
-    : Math.min(combo, 5);
 
   return {
     label: `${remaining} Left`,
@@ -64,7 +58,7 @@ export function BattleStateStrip({
       >
       <section
         className="relative overflow-hidden rounded-[0.85rem] bg-[linear-gradient(180deg,rgba(30,22,17,0.76)_0%,rgba(11,10,9,0.84)_100%)] shadow-[0_12px_28px_rgba(0,0,0,0.28)]"
-        style={{ width: "min(17rem, calc(100vw - 1.5rem))" }}
+        style={{ width: "min(17rem, calc(100% - 1.5rem))" }}
       >
         <div className="absolute inset-0 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat opacity-[0.72]" />
         <div className="relative flex flex-col gap-1.5 px-4 py-2">
@@ -76,7 +70,7 @@ export function BattleStateStrip({
               {turn}/{turnLimit}
             </div>
           </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <div className="rounded-[0.65rem] border border-white/6 bg-black/8 px-3 py-1.5 text-center">
               <div className="text-[0.54rem] font-semibold uppercase tracking-[0.28em] text-[#c6a172]">
                 Combo
@@ -87,7 +81,7 @@ export function BattleStateStrip({
             </div>
             <div
               className={[
-                "min-w-[6.25rem] rounded-[0.65rem] border px-2.5 py-1.5 text-center transition",
+                "flex min-w-0 flex-col items-center rounded-[0.65rem] border px-2.5 py-1.5 text-center transition",
                 burstReady
                   ? "border-[#f1d596]/35 bg-[linear-gradient(180deg,rgba(118,78,24,0.28)_0%,rgba(56,33,15,0.22)_100%)] shadow-[0_0_14px_rgba(238,186,92,0.12)]"
                   : "border-white/6 bg-black/8",
@@ -96,7 +90,7 @@ export function BattleStateStrip({
               <div className="text-[0.5rem] font-semibold uppercase tracking-[0.24em] text-[#c6a172]">
                 Burst
               </div>
-              <div className="mt-0.5 flex justify-center">
+              <div className="mt-0.5 flex w-full justify-center">
                 <div className="relative h-8 w-[4.3rem]">
                   {runeAngles.map((angle, index) => {
                     const isActive = index < burstState.activeRunes;
@@ -125,7 +119,7 @@ export function BattleStateStrip({
               </div>
               <div
                 className={[
-                  "mt-1 text-[0.52rem] font-bold uppercase leading-tight tracking-[0.16em]",
+                  "mt-1 w-full text-center text-[0.52rem] font-bold uppercase leading-tight tracking-[0.16em]",
                   burstReady ? "text-[#ffeab8]" : "text-[#d9c19a]",
                 ].join(" ")}
               >

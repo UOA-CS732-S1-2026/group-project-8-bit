@@ -30,16 +30,16 @@ export function BattleQuestionPanel({
   return (
     <div
       className={[
-        "relative z-[20] -mt-8 w-full space-y-0 sm:-mt-12 lg:-mt-16 xl:-mt-20",
+        "relative z-[20] -mt-4 w-full space-y-0 sm:-mt-5 lg:-mt-7 xl:-mt-9",
         isTensionActive ? "animate-[battle-tension-breathe_1.2s_ease-in-out_infinite]" : "",
       ]
         .filter(Boolean)
         .join(" ")}
     >
       <div
-        className="mb-[-1.5rem]"
+        className="mb-[-0.85rem] sm:mb-[-1rem]"
         style={{
-          width: "min(26rem, calc(100vw - 1rem))",
+          width: "min(22rem, calc(100vw - 1rem))",
           marginLeft: "auto",
         }}
       >
@@ -54,7 +54,7 @@ export function BattleQuestionPanel({
       <div className="-mt-px">
         <BattleQuestionHeader question={question} eyebrow={questionMeta} />
       </div>
-      <div className="mt-3 sm:mt-4">
+      <div className="mt-2 sm:mt-2.5">
         <BattleAnswerGrid answers={answers} />
       </div>
       <style jsx>{`

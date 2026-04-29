@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { AuthUser } from "@/lib/auth-shared";
@@ -12,7 +11,139 @@ type PublicShellProps = {
 };
 
 const navLinkClass =
-  "rounded-full border border-amber-200/25 bg-stone-950/50 px-4 py-2 text-sm font-semibold tracking-[0.18em] text-stone-100 transition hover:border-amber-200/60 hover:bg-amber-300/10";
+  "inline-flex min-h-[clamp(1.55rem,4.4cqh,2.35rem)] items-center justify-center rounded-md border border-amber-300/35 bg-black/48 px-[clamp(0.55rem,1.45cqw,0.95rem)] py-[clamp(0.22rem,0.8cqh,0.45rem)] font-[family-name:var(--font-cinzel)] text-[clamp(0.55rem,0.92cqw,0.74rem)] font-black uppercase tracking-[0.18em] text-amber-50 shadow-[0_8px_18px_rgba(0,0,0,0.35)] transition duration-200 hover:-translate-y-0.5 hover:border-amber-100/70 hover:bg-amber-300/14 active:translate-y-0 active:scale-95";
+
+type EmberConfig = {
+  left: string;
+  bottom: string;
+  delay: string;
+  duration: string;
+  drift: string;
+  size: number;
+};
+
+const EMBERS: EmberConfig[] = [
+  {
+    left: "8%",
+    bottom: "2%",
+    delay: "0s",
+    duration: "7s",
+    drift: "25px",
+    size: 3,
+  },
+  {
+    left: "14%",
+    bottom: "5%",
+    delay: "1.5s",
+    duration: "5.5s",
+    drift: "-20px",
+    size: 2.5,
+  },
+  {
+    left: "22%",
+    bottom: "1%",
+    delay: "0.8s",
+    duration: "8s",
+    drift: "30px",
+    size: 4,
+  },
+  {
+    left: "31%",
+    bottom: "3%",
+    delay: "2.3s",
+    duration: "6s",
+    drift: "-15px",
+    size: 2,
+  },
+  {
+    left: "38%",
+    bottom: "2%",
+    delay: "0.3s",
+    duration: "9s",
+    drift: "20px",
+    size: 3,
+  },
+  {
+    left: "45%",
+    bottom: "4%",
+    delay: "1.8s",
+    duration: "6.5s",
+    drift: "-25px",
+    size: 2.5,
+  },
+  {
+    left: "52%",
+    bottom: "1%",
+    delay: "3.1s",
+    duration: "7.5s",
+    drift: "15px",
+    size: 3,
+  },
+  {
+    left: "60%",
+    bottom: "3%",
+    delay: "0.6s",
+    duration: "5s",
+    drift: "-30px",
+    size: 2,
+  },
+  {
+    left: "67%",
+    bottom: "2%",
+    delay: "2s",
+    duration: "8.5s",
+    drift: "25px",
+    size: 4,
+  },
+  {
+    left: "75%",
+    bottom: "5%",
+    delay: "1.2s",
+    duration: "6s",
+    drift: "-20px",
+    size: 2.5,
+  },
+  {
+    left: "82%",
+    bottom: "1%",
+    delay: "3.5s",
+    duration: "7s",
+    drift: "30px",
+    size: 3,
+  },
+  {
+    left: "88%",
+    bottom: "3%",
+    delay: "0.9s",
+    duration: "5.5s",
+    drift: "-15px",
+    size: 2,
+  },
+  {
+    left: "93%",
+    bottom: "2%",
+    delay: "4.2s",
+    duration: "8s",
+    drift: "20px",
+    size: 3,
+  },
+  {
+    left: "18%",
+    bottom: "1%",
+    delay: "4.5s",
+    duration: "5.5s",
+    drift: "-25px",
+    size: 2.5,
+  },
+  {
+    left: "35%",
+    bottom: "3%",
+    delay: "2.1s",
+    duration: "8s",
+    drift: "15px",
+    size: 3,
+  },
+];
 
 export function PublicShell({
   title,
@@ -21,21 +152,50 @@ export function PublicShell({
   children,
 }: PublicShellProps) {
   return (
-    <main className="h-full w-full overflow-hidden bg-[radial-gradient(circle_at_top,#204735_0%,#101718_42%,#090b0f_100%)] text-stone-100">
-      <div className="mx-auto flex h-full w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <nav className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-amber-200/20 bg-stone-950/45 px-4 py-3 shadow-2xl shadow-black/30">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">
-                Oracle
-              </span>
-            </div>
-            <span className="text-sm text-stone-300">
+    <main className="relative h-full w-full overflow-hidden bg-black text-stone-100 [container-type:size]">
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/backgrounds/auth-tavern-entrance.png')",
+        }}
+      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_58%,rgba(245,158,11,0.15),transparent_27%),linear-gradient(90deg,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.42)_44%,rgba(0,0,0,0.76)_100%),linear-gradient(180deg,rgba(0,0,0,0.38)_0%,rgba(0,0,0,0.1)_44%,rgba(0,0,0,0.72)_100%)]" />
+
+      {EMBERS.map((ember, index) => (
+        <span
+          key={index}
+          className="animate-ember pointer-events-none absolute rounded-full"
+          style={
+            {
+              left: ember.left,
+              bottom: ember.bottom,
+              width: `${ember.size}px`,
+              height: `${ember.size}px`,
+              backgroundColor: "#fb923c",
+              boxShadow: `0 0 ${ember.size * 2}px #f97316, 0 0 ${ember.size * 4}px #f59e0b`,
+              "--ember-duration": ember.duration,
+              "--ember-delay": ember.delay,
+              "--ember-drift": ember.drift,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+
+      <div className="relative z-10 flex h-full w-full flex-col px-[clamp(0.55rem,2.4cqw,1.35rem)] py-[clamp(0.45rem,2.2cqh,1.15rem)]">
+        <nav className="flex items-start justify-between gap-3">
+          <Link
+            href="/"
+            className="group flex max-w-[46cqw] items-center gap-[clamp(0.45rem,1.2cqw,0.75rem)]"
+          >
+            <span className="rounded-md border border-amber-300/35 bg-black/50 px-[clamp(0.5rem,1.3cqw,0.85rem)] py-[clamp(0.24rem,0.8cqh,0.45rem)] font-[family-name:var(--font-cinzel)] text-[clamp(0.55rem,0.95cqw,0.78rem)] font-black uppercase tracking-[0.28em] text-amber-200 transition group-hover:border-amber-100/70">
+              Oracle
+            </span>
+            <span className="truncate text-[clamp(0.58rem,1.05cqw,0.82rem)] font-semibold text-stone-300">
               The Oracle of Lost Knowledge
             </span>
           </Link>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-[clamp(0.3rem,0.8cqw,0.55rem)]">
             <Link href="/" className={navLinkClass}>
               Home
             </Link>
@@ -53,76 +213,41 @@ export function PublicShell({
                 <Link href="/game/mainHub" className={navLinkClass}>
                   Continue
                 </Link>
-                <LogoutButton
-                  showError={false}
-                  className={navLinkClass}
-                />
+                <LogoutButton showError={false} className={navLinkClass} />
               </>
             )}
           </div>
         </nav>
 
-        <div className="grid flex-1 gap-6 py-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.85fr)]">
-          <section className="relative overflow-hidden rounded-[2rem] border border-amber-100/10 bg-stone-950/45 p-6 shadow-2xl shadow-black/25 sm:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.14),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.18),transparent_30%)]" />
-            <div className="relative flex h-full flex-col justify-between gap-8">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-200/90">
-                    Quiz RPG MVP
-                  </p>
-                  <div className="relative overflow-hidden rounded-[1.5rem] border border-amber-100/10 bg-black/30 p-4">
-                    <Image
-                      src="/banners/game-title-banner.png"
-                      alt="The Oracle of Lost Knowledge"
-                      width={1200}
-                      height={300}
-                      className="h-auto w-full"
-                      priority
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h1 className="max-w-3xl text-3xl font-semibold text-stone-50 sm:text-4xl lg:text-5xl">
-                    {title}
-                  </h1>
-                  <p className="max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-                    {description}
-                  </p>
-                </div>
-
-                <div className="grid gap-3 text-sm text-stone-300 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-emerald-300/15 bg-emerald-400/8 p-4">
-                    Persistent identity backed by PostgreSQL
-                  </div>
-                  <div className="rounded-2xl border border-amber-300/15 bg-amber-400/8 p-4">
-                    Session-based login across refreshes
-                  </div>
-                  <div className="rounded-2xl border border-sky-300/15 bg-sky-400/8 p-4">
-                    Player progress synced into the game store
-                  </div>
-                </div>
+        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,0.9fr)_minmax(23rem,0.68fr)] items-center gap-[clamp(0.75rem,2.4cqw,2rem)] pb-[clamp(0.35rem,1.8cqh,1rem)] pt-[clamp(0.25rem,1.4cqh,0.8rem)] max-[760px]:grid-cols-1">
+          <section className="min-w-0 self-end pb-[clamp(0.4rem,7cqh,4rem)] max-[760px]:hidden">
+            <div className="max-w-[min(40rem,47cqw)] space-y-[clamp(0.65rem,1.8cqh,1.15rem)]">
+              <div className="max-w-[min(34rem,42cqw)] border-y border-amber-200/25 bg-black/35 px-[clamp(0.75rem,1.6cqw,1.1rem)] py-[clamp(0.45rem,1.35cqh,0.9rem)] shadow-[0_12px_28px_rgba(0,0,0,0.5)]">
+                <p className="font-[family-name:var(--font-cinzel)] text-[clamp(0.86rem,2.15cqw,1.85rem)] font-black uppercase leading-tight tracking-[0.18em] text-amber-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                  The Oracle of Lost Knowledge
+                </p>
               </div>
-
-              <div className="flex flex-wrap items-center gap-3 text-sm text-stone-300">
-                {user ? (
-                  <span className="rounded-full border border-emerald-200/20 bg-emerald-400/10 px-4 py-2">
-                    Logged in as {user.username}
-                  </span>
-                ) : (
-                  <span className="rounded-full border border-stone-200/15 bg-stone-100/5 px-4 py-2">
-                    Create an account to preserve your character and progress.
-                  </span>
-                )}
+              <div className="max-w-[min(34rem,42cqw)] space-y-[clamp(0.35rem,1.15cqh,0.7rem)]">
+                <h1 className="font-[family-name:var(--font-cinzel)] text-[clamp(1.25rem,3.1cqw,3rem)] font-black leading-tight text-stone-50 drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)]">
+                  {title}
+                </h1>
+                <p className="max-w-[31rem] text-[clamp(0.74rem,1.25cqw,1rem)] leading-[1.55] text-stone-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+                  {description}
+                </p>
+              </div>
+              <div className="inline-flex max-w-full rounded-md border border-amber-200/20 bg-black/45 px-[clamp(0.7rem,1.4cqw,1rem)] py-[clamp(0.45rem,1.1cqh,0.7rem)] text-[clamp(0.62rem,1cqw,0.8rem)] text-stone-300 shadow-[0_10px_26px_rgba(0,0,0,0.45)]">
+                {user
+                  ? `Logged in as ${user.username}`
+                  : "Create an account to preserve your character and progress."}
               </div>
             </div>
           </section>
 
-          <aside className="flex min-h-0">{children}</aside>
+          <aside className="flex min-h-0 items-center justify-center max-[760px]:h-full">
+            {children}
+          </aside>
         </div>
       </div>
     </main>
   );
 }
-

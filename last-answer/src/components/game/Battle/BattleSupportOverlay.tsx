@@ -8,6 +8,7 @@ type BattleSupportOverlayProps = {
   battle: BattleSession;
   onActivateTool: (toolId: SupportToolId) => void;
   onClose: () => void;
+  scale?: number;
 };
 
 type SupportEntry = {
@@ -172,7 +173,9 @@ export function BattleSupportOverlay({
   battle,
   onActivateTool,
   onClose,
+  scale = 1,
 }: BattleSupportOverlayProps) {
+  const contentScale = Math.min(Math.max(scale * 0.94, 0.42), 1);
   const inventory = useMCStore((state) => state.player.inventory);
   const supportEntries = useMemo(
     () =>
@@ -182,8 +185,14 @@ export function BattleSupportOverlay({
         const remainingUses = battle.supportTools[toolId];
         const inventoryAmount =
           inventory.find((property) => property.id === toolId)?.leftNumber ?? 0;
+        const blockedByQuestionType =
+          toolId === "analyze" &&
+          battle.questions[battle.currentQuestionIndex]?.type === "boolean";
         const disabled =
-          remainingUses <= 0 || battle.toolUsedThisTurn || battle.status !== "question";
+          remainingUses <= 0 ||
+          blockedByQuestionType ||
+          battle.toolUsedThisTurn ||
+          battle.status !== "question";
 
         return {
           toolId,
@@ -194,12 +203,21 @@ export function BattleSupportOverlay({
           stateLabel:
             remainingUses <= 0
               ? "Sealed"
+              : blockedByQuestionType
+                ? "Locked"
               : battle.toolUsedThisTurn
                 ? "Invoked"
                 : `${remainingUses} Left`,
         };
       }),
-    [battle.status, battle.supportTools, battle.toolUsedThisTurn, inventory],
+    [
+      battle.currentQuestionIndex,
+      battle.questions,
+      battle.status,
+      battle.supportTools,
+      battle.toolUsedThisTurn,
+      inventory,
+    ],
   );
   const [selectedToolId, setSelectedToolId] = useState<SupportToolId>(
     supportEntries[0]?.toolId ?? "analyze",
@@ -228,6 +246,9 @@ export function BattleSupportOverlay({
   const detailLines =
     selectedEntry.remainingUses <= 0
       ? "No charges remain for this battle."
+      : selectedEntry.toolId === "analyze" &&
+          battle.questions[battle.currentQuestionIndex]?.type === "boolean"
+        ? "Truth-or-lie questions cannot be simplified by Unmasking."
       : battle.toolUsedThisTurn
         ? "You have already invoked one support on this question."
         : "Ready to invoke on this question.";
@@ -249,93 +270,100 @@ export function BattleSupportOverlay({
 
   return (
     <>
-      <div className="absolute inset-0 z-[35] overflow-y-auto overflow-x-hidden bg-[rgba(0,0,0,0.68)] px-3 pb-5 pt-24 backdrop-blur-[6px] sm:px-4 sm:pt-32 lg:pt-36">
-      <button
-        type="button"
-        aria-label="Close item menu"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 z-[35] overflow-hidden bg-[rgba(0,0,0,0.68)] backdrop-blur-[6px]">
+        <button
+          type="button"
+          aria-label="Close item menu"
+          className="absolute inset-0 cursor-default"
+          onClick={onClose}
+        />
 
-      <aside className="relative z-10 mx-auto flex w-full max-w-[min(66rem,98vw)] flex-col items-center">
-        <div className="relative mt-4 w-full max-w-[min(36rem,82vw,58vh)] sm:mt-7 sm:max-w-[min(39.5rem,72vw,58vh)]">
-          <div className="relative aspect-[1388/1299] w-full">
-            <Image
-              src="/battle/item_panel_2_refined.png"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 640px) 92vw, (max-width: 1024px) 72vw, 55rem"
-              className="pointer-events-none object-contain drop-shadow-[0_22px_44px_rgba(0,0,0,0.58)]"
-            />
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute left-[83.8%] top-[6.6%] z-30 rounded-full border border-[#bf9b62]/45 bg-[rgba(27,17,10,0.88)] px-2.5 py-1 text-[0.54rem] font-bold uppercase tracking-[0.2em] text-[#f7e3b8] transition hover:border-[#e5c084]/75 hover:text-[#fff1d1] sm:left-[84.2%] sm:top-[8.1%] sm:ml-2 sm:px-3 sm:text-[0.68rem]"
-            >
-              Close
-            </button>
-            <div className="absolute left-[25.9%] top-[27.1%] grid w-[48.2%] grid-cols-2 gap-x-[11.5%] gap-y-[17%] sm:left-[26.4%] sm:top-[27.5%] sm:w-[46.8%] sm:gap-x-[12.5%] sm:gap-y-[19%]">
-              <SupportBookSlot {...slotPropsById.analyze} />
-              <HourglassSlot {...slotPropsById.hourglass} />
-              <AegisShieldSlot {...slotPropsById.barrier} />
-              <OathboundChainSlot {...slotPropsById.chainGuard} />
-            </div>
-          </div>
-        </div>
-
-        <div className="relative mt-2 w-full max-w-[min(41rem,96vw)] rounded-[1rem] border border-[#9c7749]/55 bg-[linear-gradient(180deg,rgba(32,22,15,0.94)_0%,rgba(15,11,9,0.98)_100%)] px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.45)] sm:mt-3 sm:px-6 sm:py-3.5">
-          <div className="pointer-events-none absolute inset-0 rounded-[1rem] bg-[radial-gradient(circle_at_top,rgba(241,189,98,0.08)_0%,rgba(0,0,0,0)_52%)]" />
-          <div className="relative flex flex-col gap-2.5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="text-[0.58rem] uppercase tracking-[0.24em] text-[#ba9d73] sm:text-[0.62rem] sm:tracking-[0.28em]">
-                  Forbidden Support
-                </div>
-                <div className="mt-1 font-serif text-[0.92rem] font-semibold text-[#f4dfb8] sm:text-[1.02rem] lg:text-[1.06rem]">
-                  {selectedEntry.tool.name}
+        <aside className="relative z-10 flex h-full w-full items-center justify-center px-6 py-8">
+          <div
+            className="flex w-full max-w-[48rem] origin-center flex-col items-center"
+            style={{
+              transform: `scale(${contentScale})`,
+            }}
+          >
+            <div className="relative w-full max-w-[36rem]">
+              <div className="relative aspect-[1388/1299] w-full">
+                <Image
+                  src="/battle/item_panel_2_refined.png"
+                  alt=""
+                  fill
+                  priority
+                  sizes="36rem"
+                  className="pointer-events-none object-contain drop-shadow-[0_22px_44px_rgba(0,0,0,0.58)]"
+                />
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="absolute left-[84.2%] top-[8.1%] z-30 rounded-full border border-[#bf9b62]/45 bg-[rgba(27,17,10,0.88)] px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#f7e3b8] transition hover:border-[#e5c084]/75 hover:text-[#fff1d1]"
+                >
+                  Close
+                </button>
+                <div className="absolute left-[26.4%] top-[27.5%] grid w-[46.8%] grid-cols-2 gap-x-[12.5%] gap-y-[19%]">
+                  <SupportBookSlot {...slotPropsById.analyze} />
+                  <HourglassSlot {...slotPropsById.hourglass} />
+                  <AegisShieldSlot {...slotPropsById.barrier} />
+                  <OathboundChainSlot {...slotPropsById.chainGuard} />
                 </div>
               </div>
-              <div className="rounded-full border border-[#a88458]/35 bg-[rgba(64,44,24,0.54)] px-2.5 py-1 text-[0.58rem] uppercase tracking-[0.16em] text-[#d4bc92] sm:px-3 sm:text-[0.62rem] sm:tracking-[0.18em]">
-                {selectedEntry.stateLabel}
-              </div>
             </div>
 
-            <p className="text-[0.72rem] leading-5 text-[#dbc7a3] sm:text-[0.76rem]">
-              {selectedEntry.tool.description}
-            </p>
+            <div className="relative mt-3 w-full max-w-[41rem] rounded-[1rem] border border-[#9c7749]/55 bg-[linear-gradient(180deg,rgba(32,22,15,0.94)_0%,rgba(15,11,9,0.98)_100%)] px-6 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
+              <div className="pointer-events-none absolute inset-0 rounded-[1rem] bg-[radial-gradient(circle_at_top,rgba(241,189,98,0.08)_0%,rgba(0,0,0,0)_52%)]" />
+              <div className="relative flex flex-col gap-2.5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[0.62rem] uppercase tracking-[0.28em] text-[#ba9d73]">
+                      Forbidden Support
+                    </div>
+                    <div className="mt-1 font-serif text-[1.02rem] font-semibold text-[#f4dfb8] lg:text-[1.06rem]">
+                      {selectedEntry.tool.name}
+                    </div>
+                  </div>
+                  <div className="rounded-full border border-[#a88458]/35 bg-[rgba(64,44,24,0.54)] px-3 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-[#d4bc92]">
+                    {selectedEntry.stateLabel}
+                  </div>
+                </div>
 
-            <div className="flex flex-wrap gap-2 text-[0.56rem] font-semibold uppercase tracking-[0.14em] text-[#e8d1a5] sm:text-[0.6rem] sm:tracking-[0.16em]">
-              <span className="rounded-full border border-[#856242]/50 bg-[rgba(57,39,24,0.55)] px-3 py-1">
-                Inventory {selectedEntry.inventoryAmount}
-              </span>
-              <span className="rounded-full border border-[#856242]/50 bg-[rgba(57,39,24,0.55)] px-3 py-1">
-                Battle Uses {selectedEntry.remainingUses}
-              </span>
-              <span className="rounded-full border border-[#856242]/50 bg-[rgba(57,39,24,0.55)] px-3 py-1">
-                {selectedEntry.tool.strongAssist ? "Strong Assist" : "Standard Assist"}
-              </span>
-            </div>
+                <p className="text-[0.76rem] leading-5 text-[#dbc7a3]">
+                  {selectedEntry.tool.description}
+                </p>
 
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-[0.58rem] uppercase tracking-[0.15em] text-[#bb9b73] sm:text-[0.62rem] sm:tracking-[0.17em]">
-                {detailLines}
+                <div className="flex flex-wrap gap-2 text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#e8d1a5]">
+                  <span className="rounded-full border border-[#856242]/50 bg-[rgba(57,39,24,0.55)] px-3 py-1">
+                    Inventory {selectedEntry.inventoryAmount}
+                  </span>
+                  <span className="rounded-full border border-[#856242]/50 bg-[rgba(57,39,24,0.55)] px-3 py-1">
+                    Battle Uses {selectedEntry.remainingUses}
+                  </span>
+                  <span className="rounded-full border border-[#856242]/50 bg-[rgba(57,39,24,0.55)] px-3 py-1">
+                    {selectedEntry.tool.strongAssist ? "Strong Assist" : "Standard Assist"}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-[0.62rem] uppercase tracking-[0.17em] text-[#bb9b73]">
+                    {detailLines}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      !selectedEntry.disabled && onActivateTool(selectedEntry.toolId)
+                    }
+                    disabled={selectedEntry.disabled}
+                    className="w-full rounded-[0.8rem] border border-[#d4b07a]/65 bg-[linear-gradient(180deg,rgba(117,78,34,0.88)_0%,rgba(61,35,16,0.92)_100%)] px-4 py-3 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-[#fff0cc] shadow-[0_10px_24px_rgba(0,0,0,0.28)] transition hover:border-[#f0d29b]/85 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto"
+                  >
+                    Invoke Support
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  !selectedEntry.disabled && onActivateTool(selectedEntry.toolId)
-                }
-                disabled={selectedEntry.disabled}
-                className="w-full rounded-[0.8rem] border border-[#d4b07a]/65 bg-[linear-gradient(180deg,rgba(117,78,34,0.88)_0%,rgba(61,35,16,0.92)_100%)] px-4 py-3 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#fff0cc] shadow-[0_10px_24px_rgba(0,0,0,0.28)] transition hover:border-[#f0d29b]/85 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto sm:text-[0.72rem] sm:tracking-[0.22em]"
-              >
-                Invoke Support
-              </button>
             </div>
           </div>
-        </div>
-      </aside>
-    </div>
+        </aside>
+      </div>
 
       <style jsx global>{`
         @keyframes supportSlotPulse {

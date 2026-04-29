@@ -46,6 +46,8 @@ export type Enemy = {
   attack: number;
   defense: number;
   isBoss: boolean;
+  imagePath?: string;
+  artPreset?: "default" | "page" | "andrew";
 };
 
 export type BattleSupportState = Record<SupportToolId, number>;
@@ -111,6 +113,16 @@ export type BattleSession = {
 export type BattleCompletionResult = {
   outcome: Extract<BattleStatus, "won" | "lost">;
   reward: BattleReward | null;
+};
+
+export type BattleOutcome = Extract<BattleStatus, "won" | "lost">;
+
+export type LastBattleResult = {
+  enemyId: string;
+  enemyName: string;
+  outcome: BattleOutcome;
+  isBoss: boolean;
+  finishedAt: string;
 };
 
 export type BattleTransitionResult = {
