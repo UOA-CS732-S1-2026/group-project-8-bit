@@ -52,7 +52,7 @@ type PendingLoad = {
 const emptySlots = () => gameSlots.slice(0, 10).map(() => null);
 
 const LOAD_PANEL_DESIGN_WIDTH = 760;
-const LOAD_PANEL_DESIGN_HEIGHT = 720;
+const LOAD_PANEL_DESIGN_HEIGHT = 680;
 const LOAD_PANEL_GAP_X = 20;
 const LOAD_PANEL_GAP_Y = 20;
 
@@ -459,7 +459,7 @@ export default function LoadPanel({
       >
         <ScaledLoadPanel>
           <section
-            className="game-modal-panel relative flex h-full w-full flex-col overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            className="game-modal-panel relative flex h-full w-full flex-col overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[8%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
             data-closing={isClosing}
             role="dialog"
             aria-modal="true"
