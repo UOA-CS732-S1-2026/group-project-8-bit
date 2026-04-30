@@ -37,9 +37,6 @@ export default function StartScene({ onClose }: { onClose: () => void }) {
         <p className="text-sm leading-6 text-stone-100 sm:text-base sm:leading-7">
           {scene.text}
         </p>
-        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200/80">
-          Click to continue
-        </p>
       </div>
     </button>
   );

@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={`${cinzel.variable} min-h-full flex flex-col`}>
         <section className="flex min-h-screen items-center justify-center bg-black p-4">
           <div
-            className="aspect-video w-full overflow-hidden bg-black shadow-2xl"
+            className="relative aspect-video w-full overflow-hidden bg-black shadow-2xl"
             style={{
               maxWidth:
                 "min(calc(100vw - 2rem), calc((100vh - 2rem) * 16 / 9))",

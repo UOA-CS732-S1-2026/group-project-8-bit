@@ -38,12 +38,12 @@ const backgroundOptions = [
   {
     id: "mainHub",
     label: "Main Hub",
-    path: "/backgrounds/city-hub.png",
+    path: "/backgrounds/main-hub.png",
   },
   {
     id: "tavern",
     label: "Tavern",
-    path: "/backgrounds/Tavern_Background3.png",
+    path: "/backgrounds/tavern-background.png",
   },
   {
     id: "cave",
@@ -160,8 +160,7 @@ function ScaledArcadePanel({ children }: { children: ReactNode }) {
       setPanelMetrics((currentMetrics) => {
         const heightChanged =
           Math.abs(currentMetrics.height - contentHeight) > 0.5;
-        const scaleChanged =
-          Math.abs(currentMetrics.scale - nextScale) > 0.001;
+        const scaleChanged = Math.abs(currentMetrics.scale - nextScale) > 0.001;
 
         if (!heightChanged && !scaleChanged) {
           return currentMetrics;
@@ -310,15 +309,6 @@ export default function ArcadePage() {
     setBattleStarted(false);
     setBattleEnemy(null);
     const store = getMCStore().getState();
-    if (battleEnemy) {
-      store.setLastBattleResult({
-        enemyId: battleEnemy.id,
-        enemyName: battleEnemy.name,
-        outcome,
-        isBoss: battleEnemy.isBoss,
-        finishedAt: new Date().toISOString(),
-      });
-    }
     store.restoreHpToFull();
     store.restockSupportTools(1);
   };

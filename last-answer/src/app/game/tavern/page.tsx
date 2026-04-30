@@ -1,7 +1,7 @@
 import GameMainFooter from "@/components/game/GameMainFooter";
 import TavernContent from "@/components/Tarven/TavernContent";
 export default function TavernPage() {
-  const backgroundImage = "url('/backgrounds/Tavern_Background3.png')";
+  const backgroundImage = "url('/backgrounds/tavern-background.png')";
   return (
     <main
       className="h-full w-full bg-cover bg-center bg-no-repeat flex flex-col"

@@ -1,20 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import DialogueScene, { DialogueSingle } from "../game/DialogueScene";
+import { PageTarget } from "../game/quest/PageTarget";
+import { chatAndrewDialogues } from "@/game/dialogues/chatAndrew";
+import { beforeStart } from "@/game/dialogues/questPage";
 import Image from "next/image";
 import { supportToolConfigs } from "@/game/core/battleCore";
 import type { Player, SupportToolId } from "@/game/core/types";
 import { useMCStore } from "@/store/mcStore";
-import { useState } from "react";
-
-type SubMenuKey = "purchase" | "books" | "competition";
 
 type BarkeeperMenuProps = {
   onClose: () => void;
-};
-
-type SubMenuConfig = {
-  title: string;
-  items: string[];
 };
 
 type ShopItem = {
@@ -28,20 +26,13 @@ type ShopItem = {
 };
 
 const backgroundImage = "url('/panels/tarven-panel.png')";
+const chatDialogueBackground = "url('/backgrounds/chat-barkeeper.png')";
+const pageDialogueBackground = "url('/backgrounds/barkeeper-interact.png')";
 
-const subMenus: Record<SubMenuKey, SubMenuConfig> = {
-  purchase: {
-    title: "Purchase",
-    items: ["Health Tonic", "Iron Charm", "Traveler's Bread"],
-  },
-  books: {
-    title: "Borrow Books",
-    items: ["Bestiary Notes", "Old Tavern Ledger", "Map of Rumors"],
-  },
-  competition: {
-    title: "Competition",
-    items: ["Arm Wrestling", "Riddle Table", "Dart Challenge"],
-  },
+const pageQuest = {
+  id: "PageFight",
+  title: "Find Page",
+  description: "After lv10, talk with barkeeper to find Page.",
 };
 
 const menuItemClass =
@@ -86,7 +77,9 @@ function BarkeeperPurchasePanel({
   const shopItems: ShopItem[] = (
     Object.keys(supportToolConfigs) as SupportToolId[]
   ).map((toolId) => {
-    const inventoryEntry = player.inventory.find((property) => property.id === toolId);
+    const inventoryEntry = player.inventory.find(
+      (property) => property.id === toolId,
+    );
     const tool = supportToolConfigs[toolId];
     const visual = shopVisuals[toolId];
 
@@ -201,7 +194,11 @@ function BarkeeperPurchasePanel({
                     </p>
 
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.62rem] uppercase tracking-[0.16em] text-amber-100/54">
-                      <span>{tool.strongAssist ? "Strong Assist" : "Standard Assist"}</span>
+                      <span>
+                        {tool.strongAssist
+                          ? "Strong Assist"
+                          : "Standard Assist"}
+                      </span>
                       <span>Owned {item.stock}</span>
                     </div>
                   </div>
@@ -215,57 +212,130 @@ function BarkeeperPurchasePanel({
   );
 }
 
-function BarkeeperSubMenu({
-  subMenu,
-  onClose,
-}: {
-  subMenu: SubMenuConfig;
-  onClose: () => void;
-}) {
-  return (
-    <section
-      className="relative w-full max-w-sm bg-[length:100%_100%] bg-no-repeat bg-center px-10 py-10 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
-      style={{ backgroundImage }}
-      role="dialog"
-      aria-label={`${subMenu.title} submenu`}
-    >
-      <button type="button" onClick={onClose} className={closeButtonClass}>
-        Close
-      </button>
-
-      <h3 className="text-center text-2xl font-semibold text-stone-100">
-        {subMenu.title}
-      </h3>
-
-      <div className="mt-6 space-y-3">
-        {subMenu.items.map((item) => (
-          <button key={item} type="button" className={menuItemClass}>
-            {item}
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
-  const [activeSubMenu, setActiveSubMenu] = useState<SubMenuKey | null>(null);
-  const { player } = useMCStore((state) => state);
+  const router = useRouter();
+  const [openPurchasePanel, setOpenPurchasePanel] = useState(false);
+  const [chatDialogues, setChatDialogues] = useState<DialogueSingle[] | null>(
+    null,
+  );
+  const [showPageDialogue, setShowPageDialogue] = useState(false);
+  const [showPageTarget, setShowPageTarget] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const player = useMCStore((state) => state.player);
+  const startQuest = useMCStore((state) => state.startQuest);
+  const completeQuest = useMCStore((state) => state.completeQuest);
+  const pageQuestCompleted =
+    player.completedQuests?.some((quest) => quest.id === pageQuest.id) ?? false;
 
-  const openSubMenu = (subMenu: SubMenuKey) => {
-    setActiveSubMenu(subMenu);
-  };
+  useEffect(() => {
+    if (!toastMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setToastMessage(null);
+    }, 2000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [toastMessage]);
 
   const closeMenu = () => {
-    setActiveSubMenu(null);
+    setOpenPurchasePanel(false);
+    setChatDialogues(null);
     onClose();
+  };
+
+  const handleChatClick = () => {
+    const randomIndex = Math.floor(Math.random() * chatAndrewDialogues.length);
+
+    setOpenPurchasePanel(false);
+    setChatDialogues(chatAndrewDialogues[randomIndex]);
+  };
+
+  const handlePageDialogueFinish = () => {
+    setShowPageDialogue(false);
+
+    window.setTimeout(() => {
+      const readyToStart = window.confirm(
+        "Above lv10 to start this quest, are you ready to start the challenge? You'd better save the game first.",
+      );
+
+      if (!readyToStart) {
+        return;
+      }
+
+      if (player.level < 10) {
+        setToastMessage("Reach level 10 before starting this challenge.");
+        return;
+      }
+
+      startQuest(pageQuest);
+      console.log("start quest", pageQuest);
+      setShowPageTarget(true);
+    }, 0);
+  };
+
+  const handlePageTargetFinish = () => {
+    completeQuest(pageQuest);
+    setShowPageTarget(false);
+    closeMenu();
+  };
+
+  const handleLastAnswerClick = () => {
+    const readyToStart = window.confirm(
+      "Start the last challenge? You'd better save the game first.",
+    );
+
+    if (!readyToStart) {
+      return;
+    }
+
+    closeMenu();
+    router.push("/theQuest/theEnd");
   };
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 backdrop-blur-sm"
+      className="absolute inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 backdrop-blur-sm"
       onClick={closeMenu}
     >
+      {chatDialogues && (
+        <div
+          className="absolute inset-0 z-[70]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <DialogueScene
+            dialogues={chatDialogues}
+            backgroundImage={chatDialogueBackground}
+            onFinish={() => setChatDialogues(null)}
+          />
+        </div>
+      )}
+      {showPageDialogue && (
+        <div
+          className="absolute inset-0 z-[70]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <DialogueScene
+            dialogues={beforeStart()}
+            backgroundImage={pageDialogueBackground}
+            onFinish={handlePageDialogueFinish}
+          />
+        </div>
+      )}
+      {showPageTarget && (
+        <div
+          className="absolute inset-0 z-[75]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <PageTarget onFinish={handlePageTargetFinish} />
+        </div>
+      )}
+      {toastMessage && (
+        <div className="pointer-events-none fixed left-1/2 top-6 z-[80] -translate-x-1/2 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-8 py-4 text-center text-lg font-semibold text-amber-100 shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
+          {toastMessage}
+        </div>
+      )}
       <div
         className="flex w-full max-w-4xl flex-col items-center justify-center gap-4 md:flex-row md:items-stretch"
         onClick={(event) => event.stopPropagation()}
@@ -297,48 +367,45 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
             <button
               type="button"
               className={menuItemClass}
-              onClick={() => setActiveSubMenu(null)}
+              onClick={handleChatClick}
             >
               Chat
             </button>
             <button
               type="button"
               className={menuItemClass}
-              onClick={() => openSubMenu("purchase")}
+              onClick={() => setOpenPurchasePanel(true)}
             >
               Purchase
             </button>
-            <button
-              type="button"
-              className={menuItemClass}
-              onClick={() => openSubMenu("books")}
-            >
-              Borrow books
-            </button>
-            <button
-              type="button"
-              className={menuItemClass}
-              onClick={() => openSubMenu("competition")}
-            >
-              Competition
-            </button>
+            {player.level >= 5 && !pageQuestCompleted && (
+              <button
+                type="button"
+                className={menuItemClass}
+                onClick={() => setShowPageDialogue(true)}
+              >
+                Talk about Page
+              </button>
+            )}
+            {player.level >= 20 && pageQuestCompleted && (
+              <button
+                type="button"
+                className={menuItemClass}
+                onClick={handleLastAnswerClick}
+              >
+                the last answer(&gt;=lv20)
+              </button>
+            )}
             <button type="button" className={menuItemClass} onClick={closeMenu}>
               End
             </button>
           </div>
         </section>
 
-        {activeSubMenu === "purchase" ? (
+        {openPurchasePanel ? (
           <BarkeeperPurchasePanel
-            onClose={() => setActiveSubMenu(null)}
+            onClose={() => setOpenPurchasePanel(false)}
             player={player}
-          />
-        ) : null}
-
-        {activeSubMenu && activeSubMenu !== "purchase" ? (
-          <BarkeeperSubMenu
-            subMenu={subMenus[activeSubMenu]}
-            onClose={() => setActiveSubMenu(null)}
           />
         ) : null}
       </div>

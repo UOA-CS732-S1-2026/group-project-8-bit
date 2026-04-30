@@ -33,7 +33,7 @@ export function MainHub() {
       description:
         "Rest beside the hearth, gather rumors from wandering scholars, and prepare for your next push outward.",
       href: "/game/tavern",
-      image: "/backgrounds/Tavern_Background3.png",
+      image: "/backgrounds/tavern-background.png",
       imageTone: "brightness-[0.78] saturate-[0.88] contrast-[0.96]",
       accent: "from-amber-100/75 via-orange-200/20 to-transparent",
       action: "Enter Tavern",

@@ -49,6 +49,11 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
     onCloseMenu();
   };
 
+  const goHome = () => {
+    onCloseMenu();
+    router.push("/");
+  };
+
   return (
     <>
       {isOpen ? (
@@ -81,6 +86,14 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
               role="menuitem"
             >
               Settings
+            </button>
+            <button
+              type="button"
+              className={menuItemClass}
+              onClick={goHome}
+              role="menuitem"
+            >
+              back home
             </button>
           </div>
         </nav>
