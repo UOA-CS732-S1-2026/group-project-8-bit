@@ -103,13 +103,11 @@ export const buildInitialPlayer = (name?: string) =>
     name: name ?? defaultPlayer.name,
   });
 
-export const createPlayerStorageKey = (
-  userId?: string | null,
-  slotId?: string | null,
-) =>
-  userId
-    ? `${DEFAULT_STORAGE_KEY_PREFIX}:${userId}-${slotId}`
-    : DEFAULT_STORAGE_KEY_PREFIX;
+export const createPlayerStorageKey = (slotId?: string | null) =>
+  slotId ? `${DEFAULT_STORAGE_KEY_PREFIX}:${slotId}` : DEFAULT_STORAGE_KEY_PREFIX;
+
+export const createLegacyPlayerStorageKey = (slotId: string) =>
+  `${DEFAULT_STORAGE_KEY_PREFIX}:${slotId}-undefined`;
 
 export const normalizePlayer = (player?: Partial<Player> | null): Player => {
   const safeExp = clampStat(player?.exp ?? defaultPlayer.exp);

@@ -2,18 +2,19 @@
 import { useEffect, useState } from "react";
 import { createEnemy } from "@/game/core/battleCore";
 import type { Enemy } from "@/game/core/types";
+import { chatHunterDialogues } from "@/game/dialogues/chatHunter";
+import { chatOfficerDialogues } from "@/game/dialogues/chatOfficer";
+import { chatPageDialogues } from "@/game/dialogues/chatPage";
+import { chatSeekerDialogues } from "@/game/dialogues/chatSeeker";
 import { useMCStore } from "@/store/mcStore";
 import InteractBtn from "./InteractBtn";
 import DialogueScene, { type DialogueSingle } from "./DialogueScene";
 import { BattlePage } from "./Battle/BattlePage";
 
-const defaultDialogues: DialogueSingle[] = [
-  { character: "Officer", dialogue: "Stay alert, the forest is dangerous." },
-  {
-    character: "Hunter",
-    dialogue: "I've seen some strange creatures lately.",
-  },
-];
+const officerChatBackground = "url('/backgrounds/chatOfficer.png')";
+const pageChatBackground = "url('/backgrounds/chatPage.png')";
+const seekerHunterChatBackground =
+  "url('/backgrounds/chatSeekerHunter.png')";
 
 export default function FoggyForestContent() {
   const setLocation = useMCStore((state) => state.setLocation);
@@ -21,8 +22,7 @@ export default function FoggyForestContent() {
   const [showExplorePanel, setShowExplorePanel] = useState(false);
   const [battleEnemy, setBattleEnemy] = useState<Enemy | null>(null);
   const [showDialogue, setShowDialogue] = useState(false);
-  const [dialogues, setDialogues] =
-    useState<DialogueSingle[]>(defaultDialogues);
+  const [dialogues, setDialogues] = useState<DialogueSingle[]>([]);
   const [dialogBackgroundImage, setDialogBackgroundImage] = useState(
     "url('/backgrounds/the-opening.png')",
   );
@@ -67,17 +67,36 @@ export default function FoggyForestContent() {
     setShowDialogue(false);
   };
 
-  const handleClick1 = () => {
-    setDialogues([
-      { character: "Explorer", dialogue: "I will brave the unknown!" },
-    ]);
-    setDialogBackgroundImage("url('/backgrounds/city-hub.png')");
+  const openRandomDialogue = (
+    dialogueGroups: DialogueSingle[][],
+    backgroundImage: string,
+  ) => {
+    const randomIndex = Math.floor(Math.random() * dialogueGroups.length);
+
+    setBattleEnemy(null);
+    setShowExplorePanel(false);
+    setDialogues(dialogueGroups[randomIndex]);
+    setDialogBackgroundImage(backgroundImage);
     setShowDialogue(true);
   };
 
   const talkOfficer = () => {
-    setShowDialogue(true);
+    if (player.level >= 5) {
+      openRandomDialogue(chatOfficerDialogues, officerChatBackground);
+      return;
+    }
+
+    openRandomDialogue(chatPageDialogues, pageChatBackground);
   };
+
+  const talkSeekers = () => {
+    openRandomDialogue(chatSeekerDialogues, seekerHunterChatBackground);
+  };
+
+  const talkHunters = () => {
+    openRandomDialogue(chatHunterDialogues, seekerHunterChatBackground);
+  };
+
   const btnClass = "w-full max-w-[25%] min-h-[3rem] max-h-[6rem]";
   return (
     <main>
@@ -87,7 +106,8 @@ export default function FoggyForestContent() {
             enemy={battleEnemy}
             backgroundImage="/backgrounds/foggy-forest.png"
             label="forest"
-            onFinish={() => {
+            onFinish={(didWin) => {
+              void didWin;
               setBattleEnemy(null);
             }}
           />
@@ -149,13 +169,13 @@ export default function FoggyForestContent() {
         />
         <InteractBtn
           className={btnClass}
-          onPress={handleClick1}
+          onPress={talkSeekers}
           title="Talk to Seekers"
           content="The people work for the Empire to hunt monsters."
         />
         <InteractBtn
           className={btnClass}
-          onPress={handleClick1}
+          onPress={talkHunters}
           title="Talk to Hunters"
           content="The people hunt monsters for money."
         />

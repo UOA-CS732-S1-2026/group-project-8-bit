@@ -1,4 +1,3 @@
-import type { ComponentType } from "react";
 import type { EnemyTier } from "./level";
 import type { categoryKey, Difficulty, QuestionType } from "@/store/game-store";
 
@@ -117,14 +116,6 @@ export type BattleCompletionResult = {
 
 export type BattleOutcome = Extract<BattleStatus, "won" | "lost">;
 
-export type LastBattleResult = {
-  enemyId: string;
-  enemyName: string;
-  outcome: BattleOutcome;
-  isBoss: boolean;
-  finishedAt: string;
-};
-
 export type BattleTransitionResult = {
   battle: BattleSession;
   enemyDamage: number;
@@ -135,5 +126,4 @@ export type Quest = {
   id: string;
   title: string;
   description: string;
-  component: ComponentType;
 };
