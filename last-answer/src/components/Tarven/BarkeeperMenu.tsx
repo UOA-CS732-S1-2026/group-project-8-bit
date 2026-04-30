@@ -25,6 +25,14 @@ type ShopItem = {
   shortLabel: string;
 };
 
+type MainMenuItem = {
+  key: string;
+  label: string;
+  subtitle: string;
+  iconSrc: string;
+  onClick: () => void;
+};
+
 const backgroundImage = "url('/panels/tarven-panel.png')";
 const chatDialogueBackground = "url('/backgrounds/chat-barkeeper.png')";
 const pageDialogueBackground = "url('/backgrounds/barkeeper-interact.png')";
@@ -36,7 +44,7 @@ const pageQuest = {
 };
 
 const menuItemClass =
-  "w-full rounded-md border border-amber-200/20 bg-black/30 px-4 py-3 text-left text-base text-amber-100 transition duration-150 hover:border-amber-100/55 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
+  "w-full rounded-[1rem] border border-amber-100/16 bg-[linear-gradient(180deg,rgba(30,21,14,0.82)_0%,rgba(16,12,10,0.92)_100%)] px-4 py-3 text-left shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition duration-150 hover:-translate-y-0.5 hover:border-amber-100/34 hover:shadow-[0_14px_32px_rgba(0,0,0,0.28)] active:translate-y-[1px] active:scale-[0.98]";
 
 const closeButtonClass =
   "absolute right-6 top-6 rounded-md border border-amber-100/30 bg-black/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition hover:border-amber-100/65 hover:bg-amber-100/15 active:scale-95";
@@ -294,6 +302,50 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
     router.push("/theQuest/theEnd");
   };
 
+  const mainMenuItems: MainMenuItem[] = [
+    {
+      key: "chat",
+      label: "Chat",
+      subtitle: "Talk with Andrew",
+      iconSrc: "/icons/tavern-menu/chat.png?v=20260430b",
+      onClick: handleChatClick,
+    },
+    {
+      key: "purchase",
+      label: "Purchase",
+      subtitle: "Buy battle tools",
+      iconSrc: "/icons/tavern-menu/purchase.png?v=20260430b",
+      onClick: () => setOpenPurchasePanel(true),
+    },
+    {
+      key: "end",
+      label: "End",
+      subtitle: "Leave this menu",
+      iconSrc: "/icons/tavern-menu/end.png?v=20260430b",
+      onClick: closeMenu,
+    },
+  ];
+
+  if (player.level >= 5 && !pageQuestCompleted) {
+    mainMenuItems.splice(2, 0, {
+      key: "talk-page",
+      label: "Talk about Page",
+      subtitle: "Quest discussion",
+      iconSrc: "/icons/tavern-menu/chat.png?v=20260430b",
+      onClick: () => setShowPageDialogue(true),
+    });
+  }
+
+  if (player.level >= 20 && pageQuestCompleted) {
+    mainMenuItems.splice(mainMenuItems.length - 1, 0, {
+      key: "last-answer",
+      label: "The Last Answer",
+      subtitle: "Final challenge",
+      iconSrc: "/icons/tavern-menu/purchase.png?v=20260430b",
+      onClick: handleLastAnswerClick,
+    });
+  }
+
   return (
     <div
       className="absolute inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 backdrop-blur-sm"
@@ -364,41 +416,35 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
           </p>
 
           <div className="mt-6 space-y-3">
-            <button
-              type="button"
-              className={menuItemClass}
-              onClick={handleChatClick}
-            >
-              Chat
-            </button>
-            <button
-              type="button"
-              className={menuItemClass}
-              onClick={() => setOpenPurchasePanel(true)}
-            >
-              Purchase
-            </button>
-            {player.level >= 5 && !pageQuestCompleted && (
+            {mainMenuItems.map((item) => (
               <button
+                key={item.key}
                 type="button"
                 className={menuItemClass}
-                onClick={() => setShowPageDialogue(true)}
+                onClick={item.onClick}
               >
-                Talk about Page
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[0.85rem] border border-amber-100/14 bg-[radial-gradient(circle_at_30%_30%,rgba(255,218,157,0.18)_0%,rgba(70,45,18,0.14)_46%,rgba(0,0,0,0.12)_100%)]">
+                    <Image
+                      src={item.iconSrc}
+                      alt=""
+                      width={28}
+                      height={28}
+                      unoptimized
+                      className="h-7 w-7 object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[1.05rem] font-semibold leading-5 text-stone-100">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-amber-100/52">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                </div>
               </button>
-            )}
-            {player.level >= 20 && pageQuestCompleted && (
-              <button
-                type="button"
-                className={menuItemClass}
-                onClick={handleLastAnswerClick}
-              >
-                the last answer(&gt;=lv20)
-              </button>
-            )}
-            <button type="button" className={menuItemClass} onClick={closeMenu}>
-              End
-            </button>
+            ))}
           </div>
         </section>
 
