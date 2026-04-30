@@ -180,7 +180,7 @@ export default function LastTask() {
 
     return {
       ...enemy,
-      imagePath: "/quests/theEnd/darkside-monster.jpg",
+      imagePath: "/quests/theEnd/darkside-monster.png",
     };
   }, []);
 
@@ -195,7 +195,7 @@ export default function LastTask() {
 
     return {
       ...enemy,
-      imagePath: "/quests/theEnd/bossAndrew.jpg",
+      imagePath: "/quests/theEnd/bossAndrew.png",
       artPreset: "andrew" as const,
     };
   }, []);

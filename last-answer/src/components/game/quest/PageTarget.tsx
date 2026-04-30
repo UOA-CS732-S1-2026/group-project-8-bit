@@ -45,7 +45,7 @@ type PageTargetPhaseConfig = {
   nextPhase: PageTargetPhase | null;
 };
 
-const barkeeperTalkBackground = "url('/quests/ashFind/barkeeper-talk2.png')";
+const barkeeperTalkBackground = "url('/quests/ashFind/barkeeper-talk.png')";
 const searchForestBackground = "url('/quests/ashFind/search-forest.png')";
 const caveFindBackground = "url('/quests/ashFind/cave-find.png')";
 const pageAppearBackground = "url('/quests/ashFind/page-appear.png')";
@@ -54,7 +54,7 @@ const confrontPageBackground = "url('/quests/ashFind/confront-page.png')";
 const mercyPageBackground = "url('/quests/ashFind/mercy-page.png')";
 const betrayBackground = "url('/quests/ashFind/betray.png')";
 const savedMCBackground = "url('/quests/ashFind/saved-MC.png')";
-const theEndPreBackground = "url('/quests/theEnd/theEndPre.png')";
+const theEndPreBackground = "url('/quests/ashFind/the-end-pre.png')";
 
 const pageTargetPhaseConfigs: Record<
   PageTargetDialoguePhase,
