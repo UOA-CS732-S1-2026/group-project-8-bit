@@ -136,13 +136,23 @@ body {
   animation: game-modal-panel-out 150ms ease-in both;
 }
 
+@keyframes save-msg-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.save-msg-enter {
+  animation: save-msg-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .game-modal-backdrop,
   .game-modal-backdrop[data-closing="true"],
   .game-modal-panel,
   .game-modal-panel[data-closing="true"],
   .end-golden-order-enter,
-  .end-ashes-enter {
+  .end-ashes-enter,
+  .save-msg-enter {
     animation-duration: 1ms;
   }
 }

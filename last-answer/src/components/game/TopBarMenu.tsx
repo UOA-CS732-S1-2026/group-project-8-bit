@@ -13,7 +13,7 @@ type TopBarMenuProps = {
 type ActivePanel = LoadPanelTab | "settings" | null;
 
 const menuItemClass =
-  "w-full rounded-md border border-amber-200/20 bg-black/30 px-3 py-2 text-left text-xs font-semibold text-amber-100 transition duration-150 hover:border-amber-100/60 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98] sm:text-sm";
+  "w-full whitespace-nowrap rounded-md border border-amber-200/20 bg-black/30 px-2.5 py-2 text-left text-[clamp(0.7rem,1.7vw,0.875rem)] font-semibold leading-tight tracking-normal text-amber-100 transition duration-150 hover:border-amber-100/60 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
 
 export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
   const router = useRouter();
@@ -58,7 +58,7 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
     <>
       {isOpen ? (
         <nav
-          className="w-44 bg-[length:100%_100%] bg-center bg-no-repeat px-3 py-4 shadow-[0_18px_38px_rgba(0,0,0,0.48)]"
+          className="w-full bg-[length:100%_100%] bg-center bg-no-repeat px-3 py-4 shadow-[0_18px_38px_rgba(0,0,0,0.48)]"
           style={{ backgroundImage }}
           aria-label="Top bar menu"
         >
@@ -69,7 +69,7 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
               onClick={() => openPanel("local")}
               role="menuitem"
             >
-              Save&Load Local
+              Save / Load Local
             </button>
             <button
               type="button"
@@ -77,7 +77,7 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
               onClick={() => openPanel("cloud")}
               role="menuitem"
             >
-              Save&Load Cloud
+              Save / Load Cloud
             </button>
             <button
               type="button"
@@ -93,7 +93,7 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
               onClick={goHome}
               role="menuitem"
             >
-              back home
+              Back Home
             </button>
           </div>
         </nav>
@@ -102,6 +102,7 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
       {activePanel === "local" || activePanel === "cloud" ? (
         <LoadPanel
           initialTab={activePanel}
+          allowSave={true}
           onClose={() => setActivePanel(null)}
         />
       ) : null}

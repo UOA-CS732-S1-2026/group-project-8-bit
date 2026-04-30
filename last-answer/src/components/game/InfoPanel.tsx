@@ -6,6 +6,7 @@ import { maxLevel, xpIntoCurrentLevel, xpToNextLevel } from "@/game/core/level";
 import { supportToolConfigs } from "@/game/core/battleCore";
 import { useMCStore } from "@/store/mcStore";
 import ModalPortal from "./ModalPortal";
+import { useModalCloseAnimation } from "./useModalCloseAnimation";
 
 type InfoPanelProps = {
   onClose: () => void;
@@ -113,6 +114,7 @@ function ScaledInfoPanel({ children }: { children: ReactNode }) {
 }
 
 export default function InfoPanel({ onClose }: InfoPanelProps) {
+  const { isClosing, requestClose } = useModalCloseAnimation(onClose);
   const player = useMCStore((state) => state.readPlayer());
   const isMaxLevel = player.level >= maxLevel;
   const currentLevelXp = xpIntoCurrentLevel(player.exp, player.level);
@@ -121,12 +123,14 @@ export default function InfoPanel({ onClose }: InfoPanelProps) {
   return (
     <ModalPortal>
       <div
-        className="fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 px-4 backdrop-blur-sm"
-        onClick={onClose}
+        className="game-modal-backdrop fixed inset-0 z-[60] h-dvh w-dvw overflow-hidden bg-black/60 backdrop-blur-sm"
+        data-closing={isClosing}
+        onClick={requestClose}
       >
         <ScaledInfoPanel>
           <section
-            className="relative w-full bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            className="game-modal-panel relative w-full bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            data-closing={isClosing}
             role="dialog"
             aria-modal="true"
             aria-label="Player information"
@@ -134,7 +138,7 @@ export default function InfoPanel({ onClose }: InfoPanelProps) {
           >
             <button
               type="button"
-              onClick={onClose}
+              onClick={requestClose}
               className={`${panelButtonClass} absolute left-[10%] top-[11%] z-10`}
             >
               Close

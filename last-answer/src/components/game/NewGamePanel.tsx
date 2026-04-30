@@ -10,6 +10,8 @@ import {
 import { supportToolConfigs } from "@/game/core/battleCore";
 import { defaultPlayer } from "@/lib/player";
 import { useMCStore } from "@/store/mcStore";
+import ModalPortal from "./ModalPortal";
+import { useModalCloseAnimation } from "./useModalCloseAnimation";
 
 type NewGamePanelProps = {
   onClose: () => void;
@@ -134,6 +136,9 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
   const [error, setError] = useState<string | null>(null);
   const [pendingName, setPendingName] = useState<string | null>(null);
   const trimmedName = useMemo(() => characterName.trim(), [characterName]);
+  const { isClosing, requestClose } = useModalCloseAnimation(onClose);
+  const { isClosing: isConfirmClosing, requestClose: requestCloseConfirm } =
+    useModalCloseAnimation(() => setPendingName(null));
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -158,16 +163,19 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
   };
 
   return (
+    <ModalPortal>
     <div
-      className="absolute inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
+      className="game-modal-backdrop fixed inset-0 z-[60] overflow-hidden bg-black/60 backdrop-blur-sm"
+      data-closing={isClosing}
+      onClick={requestClose}
     >
       <ScaledPanelFrame
         designWidth={NEW_GAME_PANEL_DESIGN_WIDTH}
         fallbackHeight={NEW_GAME_PANEL_FALLBACK_HEIGHT}
       >
       <section
-        className="relative w-full overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        className="game-modal-panel relative w-full overflow-hidden bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+        data-closing={isClosing}
         role="dialog"
         aria-modal="true"
         aria-label="Create new character"
@@ -270,7 +278,7 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
             <button
               type="button"
               className={actionButtonClass}
-              onClick={onClose}
+              onClick={requestClose}
             >
               Cancel
             </button>
@@ -281,10 +289,11 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
 
       {pendingName ? (
         <div
-          className="absolute inset-0 z-[70] overflow-hidden bg-black/55 backdrop-blur-sm"
+          className="game-modal-backdrop absolute inset-0 z-[70] overflow-hidden bg-black/55 backdrop-blur-sm"
+          data-closing={isConfirmClosing}
           onClick={(event) => {
             event.stopPropagation();
-            setPendingName(null);
+            requestCloseConfirm();
           }}
         >
           <ScaledPanelFrame
@@ -292,7 +301,8 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
             fallbackHeight={CONFIRM_PANEL_FALLBACK_HEIGHT}
           >
           <section
-            className="relative w-full bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            className="game-modal-panel relative w-full bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-[8%] py-[9%] text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            data-closing={isConfirmClosing}
             role="alertdialog"
             aria-modal="true"
             aria-label="Confirm new character"
@@ -316,7 +326,7 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
               <button
                 type="button"
                 className={actionButtonClass}
-                onClick={() => setPendingName(null)}
+                onClick={requestCloseConfirm}
               >
                 No
               </button>
@@ -326,5 +336,6 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
         </div>
       ) : null}
     </div>
+    </ModalPortal>
   );
 }
