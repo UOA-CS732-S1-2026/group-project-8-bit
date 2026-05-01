@@ -6,9 +6,7 @@ const MODAL_CLOSE_ANIMATION_MS = 160;
 
 export function useModalCloseAnimation(onClose: () => void) {
   const [isClosing, setIsClosing] = useState(false);
-  const closeTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(
-    null,
-  );
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onCloseRef = useRef(onClose);
 
   useEffect(() => {
@@ -18,7 +16,7 @@ export function useModalCloseAnimation(onClose: () => void) {
   useEffect(() => {
     return () => {
       if (closeTimerRef.current) {
-        window.clearTimeout(closeTimerRef.current);
+        clearTimeout(closeTimerRef.current);
       }
     };
   }, []);
@@ -29,7 +27,7 @@ export function useModalCloseAnimation(onClose: () => void) {
     }
 
     setIsClosing(true);
-    closeTimerRef.current = window.setTimeout(() => {
+    closeTimerRef.current = setTimeout(() => {
       onCloseRef.current();
     }, MODAL_CLOSE_ANIMATION_MS);
   }, []);
