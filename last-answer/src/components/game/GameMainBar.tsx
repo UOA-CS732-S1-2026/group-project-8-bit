@@ -109,7 +109,8 @@ export function GameMainBar() {
         </div>
 
         <div
-          className={`shrink-0 bg-[url('/panels/buttons-panel2.png')] p-2 mt-3 sm:px-4 min-h-[50px] self-start ${panelFill}`}
+          className={`relative shrink-0 bg-[url('/panels/buttons-panel2.png')] p-2 mt-3 sm:px-4 min-h-[50px] self-start ${panelFill}`}
+          ref={menuRef}
         >
           <div className="flex items-center gap-1">
             <button
@@ -127,7 +128,7 @@ export function GameMainBar() {
               <span className="hidden sm:inline">Info</span>
             </button>
 
-            <div className="relative" ref={menuRef}>
+            <div>
               <button
                 type="button"
                 className={`${buttonClass} h-[clamp(1.5rem,5vh,2rem)] w-[clamp(3rem, 8vw, 4.2rem)] ${panelFill}`}
@@ -144,14 +145,13 @@ export function GameMainBar() {
                 />
                 <span className="hidden sm:inline">Menu</span>
               </button>
-
-              <div className="absolute right-0 top-full z-50 mt-2">
-                <TopBarMenu
-                  isOpen={showMenu}
-                  onCloseMenu={() => setShowMenu(false)}
-                />
-              </div>
             </div>
+          </div>
+          <div className="absolute left-0 right-0 top-full z-50 mt-1">
+            <TopBarMenu
+              isOpen={showMenu}
+              onCloseMenu={() => setShowMenu(false)}
+            />
           </div>
         </div>
       </header>

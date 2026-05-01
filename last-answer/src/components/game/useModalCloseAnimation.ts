@@ -28,6 +28,8 @@ export function useModalCloseAnimation(onClose: () => void) {
 
     setIsClosing(true);
     closeTimerRef.current = setTimeout(() => {
+      closeTimerRef.current = null;
+      setIsClosing(false);
       onCloseRef.current();
     }, MODAL_CLOSE_ANIMATION_MS);
   }, []);
