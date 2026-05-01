@@ -5,6 +5,7 @@
     "dev": "cd last-answer && npm run dev --",
     "build": "npm run check && cd last-answer && npm run build",
     "start": "cd last-answer && npm run start",
-    "lint": "cd last-answer && npm run lint"
+    "lint": "cd last-answer && npm run lint",
+    "test": "cd last-answer && npm run test"
   }
 }

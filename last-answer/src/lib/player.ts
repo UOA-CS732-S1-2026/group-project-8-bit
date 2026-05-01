@@ -80,7 +80,13 @@ const rebuildPlayerForTotalXp = (
   template?: Player,
 ): Player => {
   const safeXp = clampStat(totalXp);
-  const leveledPlayer = applyLevelProgression(getBasePlayer(template), safeXp);
+  const leveledPlayer = applyLevelProgression(
+    {
+      ...getBasePlayer(template),
+      exp: 0,
+    },
+    safeXp,
+  );
   const nextPlayer = leveledPlayer.player;
   const requestedLevel = levelForTotalXp(safeXp);
 
