@@ -8,7 +8,7 @@ type SaveLoadMenuProps = {
 };
 
 const slotButtonClass =
-  "min-h-20 overflow-hidden rounded-md border bg-black/35 px-3 py-2 text-left text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
+  "h-[7.75rem] overflow-hidden rounded-md border bg-black/35 px-3 py-2 text-left text-amber-100 transition duration-150 hover:border-amber-100/65 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
 
 export default function SaveLoadMenu({
   saveList,

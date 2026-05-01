@@ -10,7 +10,7 @@ import {
 import LoadPanel, { type LoadPanelTab } from "./saveLoad/LoadPanel";
 import NewGamePanel from "./NewGamePanel";
 import SettingPanel from "./SettingPanel";
-import StartScene from "./StartScene";
+import StartScene, { START_SCENE_IMAGES } from "./StartScene";
 
 type LoadPanelState = {
   isOpen: boolean;
@@ -162,6 +162,16 @@ export function GameStartPage({
         ))}
       </div>
 
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute size-px overflow-hidden opacity-0"
+      >
+        {START_SCENE_IMAGES.map((image) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={image} src={image} alt="" />
+        ))}
+      </div>
+
       {loadPanel.isOpen && (
         <LoadPanel
           initialTab={loadPanel.initialTab}
@@ -183,7 +193,9 @@ export function GameStartPage({
       )}
       {isStartOpen && (
         <StartScene
-          onClose={() => { setIsStartOpen(false); router.push("/game/tavern"); }}
+          onClose={() => {
+            router.push("/game/tavern");
+          }}
         />
       )}
     </main>
