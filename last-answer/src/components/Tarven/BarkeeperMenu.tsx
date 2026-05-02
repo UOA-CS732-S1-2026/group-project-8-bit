@@ -47,7 +47,7 @@ const menuItemClass =
   "w-full rounded-[1rem] border border-amber-100/16 bg-[linear-gradient(180deg,rgba(30,21,14,0.82)_0%,rgba(16,12,10,0.92)_100%)] px-4 py-3 text-left shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition duration-150 hover:-translate-y-0.5 hover:border-amber-100/34 hover:shadow-[0_14px_32px_rgba(0,0,0,0.28)] active:translate-y-[1px] active:scale-[0.98]";
 
 const closeButtonClass =
-  "absolute right-6 top-6 rounded-md border border-amber-100/30 bg-black/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition hover:border-amber-100/65 hover:bg-amber-100/15 active:scale-95";
+  "absolute right-8 top-6 rounded-md border border-amber-100/30 bg-black/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition hover:border-amber-100/65 hover:bg-amber-100/15 active:scale-95";
 
 const shopVisuals: Record<
   SupportToolId,
@@ -104,7 +104,7 @@ function BarkeeperPurchasePanel({
 
   return (
     <section
-      className="relative flex h-[min(78vh,56rem)] w-full max-w-xl flex-col overflow-hidden bg-[length:100%_100%] bg-no-repeat bg-center px-10 py-10 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
+      className="relative flex h-[min(78vh,56rem)] w-[min(46vw,39rem)] shrink-0 flex-col overflow-hidden bg-[length:100%_100%] bg-no-repeat bg-center px-10 py-10 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
       style={{ backgroundImage }}
       role="dialog"
       aria-label="Purchase submenu"
@@ -348,7 +348,7 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
 
   return (
     <div
-      className="absolute inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 backdrop-blur-sm"
       onClick={closeMenu}
     >
       {chatDialogues && (
@@ -389,11 +389,11 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
         </div>
       )}
       <div
-        className="flex w-full max-w-4xl flex-col items-center justify-center gap-4 md:flex-row md:items-stretch"
+        className="flex w-full max-w-5xl flex-row items-stretch justify-center gap-4"
         onClick={(event) => event.stopPropagation()}
       >
         <section
-          className="relative w-full max-w-md bg-[length:100%_100%] bg-no-repeat bg-center px-10 py-10 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
+          className="relative flex h-[min(78vh,56rem)] min-h-0 w-[min(46vw,39rem)] shrink-0 flex-col overflow-hidden bg-[length:100%_100%] bg-no-repeat bg-center px-10 py-10 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
           style={{ backgroundImage }}
           role="dialog"
           aria-modal="true"
@@ -415,7 +415,7 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
             competitions from me.
           </p>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [scrollbar-color:rgba(212,176,122,0.65)_rgba(0,0,0,0.12)] [scrollbar-width:thin]">
             {mainMenuItems.map((item) => (
               <button
                 key={item.key}

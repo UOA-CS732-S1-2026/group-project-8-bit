@@ -27,7 +27,8 @@ const categoryCodeValues = Object.values(CATEGORYCODE);
 
 const fieldClass = "space-y-2";
 const labelClass =
-  "block text-base font-black uppercase tracking-[0.22em] text-amber-950";
+  "block text-base font-black uppercase tracking-[0.22em] text-amber-950 relative  top-[7px]";
+
 const selectClass =
   "w-full rounded border border-stone-600/55 bg-stone-800/65 px-3 py-2.5 text-sm text-amber-100 outline-none transition focus:border-stone-500/70";
 const panelButtonClass =

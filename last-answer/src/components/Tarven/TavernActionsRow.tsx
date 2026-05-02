@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import BarkeeperMenu from "./BarkeeperMenu";
 import { useMCStore } from "@/store/mcStore";
 import DialogueScene, { DialogueSingle } from "../game/DialogueScene";
+import InteractBtn from "../game/InteractBtn";
 import { tavernCrowdDialogues } from "@/game/dialogues/tavernCrowd";
 
 export function TavernActionsRow() {
@@ -13,10 +14,7 @@ export function TavernActionsRow() {
   const [dialogues, setDialogues] = useState<DialogueSingle[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const restoreHpToFull = useMCStore((state) => state.restoreHpToFull);
-  const actionBtnClass =
-    "w-full min-h-[5.5rem] bg-[length:100%_100%] bg-no-repeat bg-center px-4 py-3 m-[0.1px] flex flex-col justify-center items-center text-center transform transition-transform duration-150 ease-out hover:scale-105 active:scale-95";
-
-  const panelImage = "url('/panels/interact-panel.png')";
+  const btnClass = "w-full max-w-[33.333%] min-h-[3rem] max-h-[6rem]";
   const tavernBackground = "url('/backgrounds/tavern-background.png')";
 
   useEffect(() => {
@@ -81,38 +79,25 @@ export function TavernActionsRow() {
           {toastMessage}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <button
-          className={actionBtnClass}
-          style={{ backgroundImage: panelImage }}
-          onClick={() => setOpenBarkeeperMenu(true)}
-        >
-          <div className="text-2xl ">Talk to the Barkeeper</div>
-          <div className="text-sm text-amber-200/80">
-            Trade at property shop
-          </div>
-        </button>
-        <button
-          className={actionBtnClass}
-          style={{ backgroundImage: panelImage }}
-          onClick={crowdClickHandler}
-        >
-          <div className="text-2xl">Listen to the Crowd</div>
-          <div className="text-sm text-amber-200/80">
-            Whispers hide in drunken words
-          </div>
-        </button>
-        <button
-          className={actionBtnClass}
-          // When you click the button, it will play someting interesting hahaha from Steven :D
-          style={{ backgroundImage: panelImage }}
-          onClick={handleDeepSleep}
-        >
-          <div className="text-2xl">Have a deep sleep</div>
-          <div className="text-sm text-amber-200/80">
-            For a moment, restore your physical strength
-          </div>
-        </button>
+      <div className="flex flex-row gap-2">
+        <InteractBtn
+          className={btnClass}
+          onPress={() => setOpenBarkeeperMenu(true)}
+          title="Talk to the Barkeeper"
+          content="Trade at property shop"
+        />
+        <InteractBtn
+          className={btnClass}
+          onPress={crowdClickHandler}
+          title="Listen to the Crowd"
+          content="Whispers hide in drunken words"
+        />
+        <InteractBtn
+          className={btnClass}
+          onPress={handleDeepSleep}
+          title="Have a Deep Sleep"
+          content="For a moment, restore your physical strength"
+        />
       </div>
     </main>
   );

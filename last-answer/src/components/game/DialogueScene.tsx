@@ -48,7 +48,7 @@ export default function DialogueScene({
 
   return (
     <div
-      className="absolute inset-0 z-50 flex bg-[length:100%_100%] bg-center bg-no-repeat"
+      className="absolute inset-0 z-50 flex bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage }}
     >
       <div className="absolute inset-0 bg-black/20" />
@@ -73,6 +73,10 @@ export default function DialogueScene({
           >
             {currentDialogue.dialogue}
           </p>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-6 right-10 h-0 w-0 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent border-t-amber-100/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)] animate-bounce sm:bottom-7 sm:right-18"
+          />
         </button>
       </div>
     </div>
