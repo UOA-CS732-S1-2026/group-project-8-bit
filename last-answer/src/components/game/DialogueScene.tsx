@@ -48,7 +48,7 @@ export default function DialogueScene({
 
   return (
     <div
-      className="absolute inset-0 z-50 flex bg-[length:100%_100%] bg-center bg-no-repeat"
+      className="absolute inset-0 z-50 flex bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage }}
     >
       <div className="absolute inset-0 bg-black/20" />
