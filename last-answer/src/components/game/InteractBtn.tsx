@@ -11,7 +11,7 @@ export default function InteractBtn({
   onPress,
 }: ButtonProps) {
   const actionBtnClass =
-    "w-full min-h-[5.5rem] bg-[length:100%_100%] bg-no-repeat bg-center px-4 py-3 m-[0.1px] flex flex-col justify-center items-center text-center transform transition-transform duration-150 ease-out hover:scale-105 active:scale-95";
+    "w-full min-h-[5.5rem] bg-[length:100%_100%] bg-no-repeat bg-center px-4 pt-5 pb-2 m-[0.1px] flex flex-col justify-start items-center text-center transform transition-transform duration-150 ease-out hover:scale-105 active:scale-95";
   const backgroundImage = "url('/panels/interact-panel.png')";
   return (
     <div className={`${className}`}>
