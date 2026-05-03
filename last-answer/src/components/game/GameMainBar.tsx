@@ -39,7 +39,8 @@ export function GameMainBar() {
     "/game/mainHub": "Main Hub",
   };
 
-  const pageTitle = routeTitleMap[pathname] ?? "The Oracle of Lost Knowledge";
+  const pageTitle =
+    routeTitleMap[pathname] ?? "The Last Answer: Ashes of The First Monolith";
 
   const panelFill = "bg-center bg-no-repeat bg-[length:100%_100%]";
   const buttonClass =
