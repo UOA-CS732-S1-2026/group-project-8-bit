@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel } from "next/font/google";
+import { MainInterfaceMusicController } from "@/components/MainInterfaceMusicController";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className={`${cinzel.variable} min-h-full flex flex-col`}>
+        <MainInterfaceMusicController />
         <section className="flex min-h-screen items-center justify-center bg-black p-4">
           <div
             className="relative aspect-video w-full overflow-hidden bg-black shadow-2xl"
