@@ -2,6 +2,7 @@
 
 let audioInstance: HTMLAudioElement | null = null;
 let retainCount = 0;
+let suspendCount = 0;
 let pendingStopTimeout: number | null = null;
 
 function clearPendingStop() {
@@ -27,6 +28,16 @@ function ensureAudio() {
   return audioInstance;
 }
 
+function playIfAllowed(audio: HTMLAudioElement) {
+  if (suspendCount > 0) {
+    return;
+  }
+
+  void audio.play().catch(() => {
+    // Ignore autoplay rejections; browsers may require prior interaction.
+  });
+}
+
 export function retainMainInterfaceMusic() {
   const audio = ensureAudio();
   if (!audio) {
@@ -35,10 +46,7 @@ export function retainMainInterfaceMusic() {
 
   clearPendingStop();
   retainCount += 1;
-
-  void audio.play().catch(() => {
-    // Ignore autoplay rejections; browsers may require prior interaction.
-  });
+  playIfAllowed(audio);
 }
 
 export function releaseMainInterfaceMusic() {
@@ -66,6 +74,7 @@ export function releaseMainInterfaceMusic() {
 export function stopMainInterfaceMusicNow() {
   clearPendingStop();
   retainCount = 0;
+  suspendCount = 0;
 
   if (!audioInstance) {
     return;
@@ -73,4 +82,29 @@ export function stopMainInterfaceMusicNow() {
 
   audioInstance.pause();
   audioInstance.currentTime = 0;
+}
+
+export function suspendMainInterfaceMusic() {
+  clearPendingStop();
+  suspendCount += 1;
+
+  if (!audioInstance) {
+    return;
+  }
+
+  audioInstance.pause();
+  audioInstance.currentTime = 0;
+}
+
+export function resumeMainInterfaceMusic() {
+  suspendCount = Math.max(0, suspendCount - 1);
+
+  if (suspendCount > 0 || retainCount === 0) {
+    return;
+  }
+
+  const audio = ensureAudio();
+  if (audio) {
+    playIfAllowed(audio);
+  }
 }

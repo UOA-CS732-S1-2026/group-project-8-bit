@@ -11,7 +11,7 @@ export const START_SCENE_IMAGES = [
 export default function StartScene({ onClose }: { onClose: () => void }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const name = getMCStore().getState().readPlayer().name || "Bruce";
-  const startText1 = `many years later, when ${name} faces the final choice that will decide the fate of the Aldren, he remembers the distant afternoon when people first discovered that Heaven had gone silent. Bells rang across the land. Mothers carried children into chapels. Old men fell to their knees in the streets. The preachers lifted their voices until they broke, begging for one sign that God had not abandoned His people. No answer came. And when fear had exhausted prayer, the first monsters emerged.`;
+  const startText1 = `Many years later, when ${name} faces the final choice that will decide the fate of the Aldren, he remembers the distant afternoon when people first discovered that Heaven had gone silent. Bells rang across the land. Mothers carried children into chapels. Old men fell to their knees in the streets. The preachers lifted their voices until they broke, begging for one sign that God had not abandoned His people. No answer came. And when fear had exhausted prayer, the first monsters emerged.`;
   const startText2 = `Three years later, ${name} wakes in a narrow bed above the tavern. Though the days have passed, the catastrophe still lingers like a wound from yesterday. Time flies, memories dim, and the old world slips further away. Now begins your new life as a hunter of knowledge fragments.`;
   const scenes = [
     { image: START_SCENE_IMAGES[0], text: startText1 },

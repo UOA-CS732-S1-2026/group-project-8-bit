@@ -2,11 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  releaseMainInterfaceMusic,
-  retainMainInterfaceMusic,
-  stopMainInterfaceMusicNow,
-} from "@/lib/mainInterfaceMusic";
+import { stopMainInterfaceMusicNow } from "@/lib/mainInterfaceMusic";
 import LoadPanel, { type LoadPanelTab } from "./saveLoad/LoadPanel";
 import NewGamePanel from "./NewGamePanel";
 import SettingPanel from "./SettingPanel";
@@ -88,14 +84,6 @@ export function GameStartPage({
   const [isNewGameOpen, setIsNewGameOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isStartOpen, setIsStartOpen] = useState(false);
-
-  useEffect(() => {
-    retainMainInterfaceMusic();
-
-    return () => {
-      releaseMainInterfaceMusic();
-    };
-  }, []);
 
   useEffect(() => {
     if (!shouldClearLoadPanelParams) return;

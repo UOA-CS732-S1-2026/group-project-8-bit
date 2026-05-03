@@ -23,6 +23,10 @@ import {
   getQuestionOptions,
   getQuestionPrompt,
 } from "@/game/core/battleUtil";
+import {
+  resumeMainInterfaceMusic,
+  suspendMainInterfaceMusic,
+} from "@/lib/mainInterfaceMusic";
 import { useBattleSession } from "@/game/useBattleSession";
 import { useMCStore } from "@/store/mcStore";
 import { BattleBottomBar } from "./BattleBottomBar";
@@ -174,6 +178,14 @@ export function BattlePage({
       )
     : 0;
   const debugSupportOpen = searchParams.get("debugSupport") === "1";
+
+  useEffect(() => {
+    suspendMainInterfaceMusic();
+
+    return () => {
+      resumeMainInterfaceMusic();
+    };
+  }, []);
 
   const pushFloatingText = useCallback(
     (entry: {
