@@ -220,6 +220,11 @@ function BarkeeperPurchasePanel({
   );
 }
 
+function getRandomAndrewDialogues(): DialogueSingle[] {
+  const randomIndex = Math.floor(Math.random() * chatAndrewDialogues.length);
+  return chatAndrewDialogues[randomIndex];
+}
+
 export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   const router = useRouter();
   const [openPurchasePanel, setOpenPurchasePanel] = useState(false);
@@ -254,10 +259,8 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   };
 
   const handleChatClick = () => {
-    const randomIndex = Math.floor(Math.random() * chatAndrewDialogues.length);
-
     setOpenPurchasePanel(false);
-    setChatDialogues(chatAndrewDialogues[randomIndex]);
+    setChatDialogues(getRandomAndrewDialogues());
   };
 
   const handlePageDialogueFinish = () => {
