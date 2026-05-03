@@ -10,7 +10,7 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  title: "The Oracle of Lost Knowledge",
+  title: "The Last Answer: Ashes of The First Monolith",
   description: "A web-based quiz RPG with persistent player progress.",
 };
 
