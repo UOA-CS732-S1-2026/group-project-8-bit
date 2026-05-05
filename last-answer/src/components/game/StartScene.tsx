@@ -11,7 +11,7 @@ export const START_SCENE_IMAGES = [
 export default function StartScene({ onClose }: { onClose: () => void }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const name = getMCStore().getState().readPlayer().name || "Bruce";
-  const startText1 = `many years later, when ${name} faces the final choice that will decide the fate of the Aldren, he remembers the distant afternoon when people first discovered that Heaven had gone silent. Bells rang across the land. Mothers carried children into chapels. Old men fell to their knees in the streets. The preachers lifted their voices until they broke, begging for one sign that God had not abandoned His people. No answer came. And when fear had exhausted prayer, the first monsters emerged.`;
+  const startText1 = `Many years later, when ${name} faces the final choice that will decide the fate of the Aldren, he remembers the distant afternoon when people first discovered that Heaven had gone silent. Bells rang across the land. Mothers carried children into chapels. Old men fell to their knees in the streets. The preachers lifted their voices until they broke, begging for one sign that God had not abandoned His people. No answer came. And when fear had exhausted prayer, the first monsters emerged.`;
   const startText2 = `Three years later, ${name} wakes in a narrow bed above the tavern. Though the days have passed, the catastrophe still lingers like a wound from yesterday. Time flies, memories dim, and the old world slips further away. Now begins your new life as a hunter of knowledge fragments.`;
   const scenes = [
     { image: START_SCENE_IMAGES[0], text: startText1 },
@@ -40,6 +40,10 @@ export default function StartScene({ onClose }: { onClose: () => void }) {
         <p className="text-sm leading-6 text-stone-100 sm:text-base sm:leading-7">
           {scene.text}
         </p>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 right-4 h-0 w-0 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent border-t-amber-100/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)] animate-bounce sm:bottom-4 sm:right-5"
+        />
       </div>
     </button>
   );

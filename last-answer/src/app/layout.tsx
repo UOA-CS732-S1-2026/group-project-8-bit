@@ -11,6 +11,13 @@ const cinzel = Cinzel({
 export const metadata: Metadata = {
   title: "The Oracle of Lost Knowledge",
   description: "A web-based quiz RPG with persistent player progress.",
+  icons: {
+    icon: [
+      { url: "/branding/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/branding/logo-option2-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/branding/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

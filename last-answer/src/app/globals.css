@@ -157,6 +157,29 @@ body {
   }
 }
 
+.guide-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(92, 79, 60, 0.72) transparent;
+}
+
+.guide-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.guide-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.guide-scroll::-webkit-scrollbar-thumb {
+  background: rgba(92, 79, 60, 0.72);
+  border-radius: 9999px;
+  border: 1px solid rgba(232, 218, 191, 0.35);
+}
+
+.guide-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 64, 48, 0.82);
+}
+
 @keyframes candle-flame-flicker {
   0% {
     transform: translate(-50%, 0) scale(0.96, 1.02) rotate(-2deg);
