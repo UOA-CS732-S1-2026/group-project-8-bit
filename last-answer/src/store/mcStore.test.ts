@@ -1,8 +1,7 @@
-import type { ComponentType } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { totalXpForLevel } from "@/game/core/level";
-import type { BattleReward, LastBattleResult, Quest } from "@/game/core/types";
+import type { BattleReward, Quest } from "@/game/core/types";
 import { buildInitialPlayer, createPlayerStorageKey } from "@/lib/player";
 import { createMCStore, defaultPlayer } from "./mcStore";
 
@@ -44,13 +43,10 @@ function createReward(overrides: Partial<BattleReward> = {}): BattleReward {
 }
 
 function createQuest(id: string): Quest {
-  const Component: ComponentType = () => null;
-
   return {
     id,
     title: `Quest ${id}`,
     description: `Description ${id}`,
-    component: Component,
   };
 }
 
@@ -66,10 +62,8 @@ describe("createMCStore", () => {
       player: defaultPlayer,
       storageKey: createPlayerStorageKey(),
       userId: null,
-      lastBattleResult: null,
     });
     expect(store.getState().readPlayer()).toEqual(defaultPlayer);
-    expect(store.getState().readLastBattleResult()).toBeNull();
   });
 
   it("saves and normalizes a player", () => {
@@ -100,28 +94,19 @@ describe("createMCStore", () => {
 
     expect(store.getState()).toMatchObject({
       userId: "user-1",
-      storageKey: createPlayerStorageKey("user-1"),
+      storageKey: createPlayerStorageKey(),
       player: expect.objectContaining({
         name: "Ada",
         coins: 40,
       }),
-      lastBattleResult: null,
     });
 
-    store.getState().setLastBattleResult({
-      enemyId: "enemy-1",
-      enemyName: "Enemy",
-      outcome: "won",
-      isBoss: false,
-      finishedAt: "2026-04-30T00:00:00.000Z",
-    });
     store.getState().clearPlayerContext();
 
     expect(store.getState()).toMatchObject({
       userId: null,
       storageKey: createPlayerStorageKey(),
       player: defaultPlayer,
-      lastBattleResult: null,
     });
   });
 
@@ -240,18 +225,10 @@ describe("createMCStore", () => {
       name: "Ada",
       coins: 50,
     });
-    store.getState().setLastBattleResult({
-      enemyId: "enemy-1",
-      enemyName: "Enemy",
-      outcome: "lost",
-      isBoss: false,
-      finishedAt: "2026-04-30T00:00:00.000Z",
-    });
 
     store.getState().resetPlayer("   ");
 
     expect(store.getState().player).toEqual(buildInitialPlayer("Ada"));
-    expect(store.getState().lastBattleResult).toBeNull();
 
     store.getState().resetPlayer("Grace");
     expect(store.getState().player).toEqual(buildInitialPlayer("Grace"));
@@ -292,18 +269,4 @@ describe("createMCStore", () => {
     expect(store.getState().readPersistPlayer("slot1")).toBeNull();
   });
 
-  it("stores and reads the latest battle result", () => {
-    const store = createMCStore();
-    const result: LastBattleResult = {
-      enemyId: "enemy-1",
-      enemyName: "Enemy",
-      outcome: "won",
-      isBoss: true,
-      finishedAt: "2026-04-30T00:00:00.000Z",
-    };
-
-    store.getState().setLastBattleResult(result);
-
-    expect(store.getState().readLastBattleResult()).toEqual(result);
-  });
 });

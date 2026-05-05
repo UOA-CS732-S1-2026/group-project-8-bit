@@ -188,10 +188,10 @@ export function PublicShell({
             className="group flex max-w-[46cqw] items-center gap-[clamp(0.45rem,1.2cqw,0.75rem)]"
           >
             <span className="rounded-md border border-amber-300/35 bg-black/50 px-[clamp(0.5rem,1.3cqw,0.85rem)] py-[clamp(0.24rem,0.8cqh,0.45rem)] font-[family-name:var(--font-cinzel)] text-[clamp(0.55rem,0.95cqw,0.78rem)] font-black uppercase tracking-[0.28em] text-amber-200 transition group-hover:border-amber-100/70">
-              Oracle
+              Home
             </span>
             <span className="truncate text-[clamp(0.58rem,1.05cqw,0.82rem)] font-semibold text-stone-300">
-              The Oracle of Lost Knowledge
+              The Last Answer: Ashes of The First Monolith
             </span>
           </Link>
 
@@ -224,7 +224,7 @@ export function PublicShell({
             <div className="max-w-[min(40rem,47cqw)] space-y-[clamp(0.65rem,1.8cqh,1.15rem)]">
               <div className="max-w-[min(34rem,42cqw)] border-y border-amber-200/25 bg-black/35 px-[clamp(0.75rem,1.6cqw,1.1rem)] py-[clamp(0.45rem,1.35cqh,0.9rem)] shadow-[0_12px_28px_rgba(0,0,0,0.5)]">
                 <p className="font-[family-name:var(--font-cinzel)] text-[clamp(0.86rem,2.15cqw,1.85rem)] font-black uppercase leading-tight tracking-[0.18em] text-amber-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                  The Oracle of Lost Knowledge
+                  The Last Answer: Ashes of The First Monolith
                 </p>
               </div>
               <div className="max-w-[min(34rem,42cqw)] space-y-[clamp(0.35rem,1.15cqh,0.7rem)]">

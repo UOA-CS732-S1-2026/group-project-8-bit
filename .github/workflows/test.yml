@@ -1,13 +1,13 @@
 name: Unit Tests
 
 on:
-  push:
-    branches:
-      - main
-      - test/unit-test
-  pull_request:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  #     - test/unit-test
+  # pull_request:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:

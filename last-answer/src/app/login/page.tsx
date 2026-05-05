@@ -7,7 +7,7 @@ type LoginPageProps = {
 };
 
 function getFirstSearchParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value ?? null;
+  return Array.isArray(value) ? value[0] : (value ?? null);
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <PublicShell
-      title="Return to the Oracle"
+      title="Return to the Game"
       description="Log in to pick up where you left off, with your stored player stats and progress restored into the game."
       user={session?.user ?? null}
     >

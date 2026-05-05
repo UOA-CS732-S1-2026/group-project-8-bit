@@ -2,7 +2,6 @@
 
 import {
   type ReactNode,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -19,11 +18,6 @@ import {
   type QuestionType,
   useGameStore,
 } from "@/store/game-store";
-import {
-  releaseMainInterfaceMusic,
-  retainMainInterfaceMusic,
-  stopMainInterfaceMusicNow,
-} from "@/lib/mainInterfaceMusic";
 import { defaultPlayer, getMCStore, useMCStore } from "@/store/mcStore";
 
 const difficultyOptions: Difficulty[] = ["easy", "medium", "hard"];
@@ -249,19 +243,6 @@ export default function ArcadePage() {
     [selectedBackgroundId],
   );
 
-  useEffect(() => {
-    if (battleStarted) {
-      releaseMainInterfaceMusic();
-      return;
-    }
-
-    retainMainInterfaceMusic();
-
-    return () => {
-      releaseMainInterfaceMusic();
-    };
-  }, [battleStarted]);
-
   const handleFight = () => {
     const confirmed = window.confirm(
       [
@@ -281,8 +262,6 @@ export default function ArcadePage() {
     if (!confirmed) {
       return;
     }
-
-    stopMainInterfaceMusicNow();
 
     if (resetBeforeFight) {
       resetPlayer();
@@ -306,6 +285,7 @@ export default function ArcadePage() {
   };
 
   const handleBattleFinish = (outcome: BattleOutcome) => {
+    void outcome;
     setBattleStarted(false);
     setBattleEnemy(null);
     const store = getMCStore().getState();

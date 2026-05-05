@@ -6,6 +6,7 @@ import {
   buildInitialPlayer,
   clampHp,
   clampStat,
+  createLegacyPlayerStorageKey,
   createPlayerStorageKey,
   defaultPlayer,
   normalizeInventory,
@@ -29,14 +30,18 @@ describe("player defaults", () => {
 describe("player storage keys", () => {
   it("uses the default key for anonymous local storage", () => {
     expect(createPlayerStorageKey()).toBe(DEFAULT_STORAGE_KEY_PREFIX);
-    expect(createPlayerStorageKey(null, "slot1")).toBe(
-      DEFAULT_STORAGE_KEY_PREFIX,
+    expect(createPlayerStorageKey(null)).toBe(DEFAULT_STORAGE_KEY_PREFIX);
+  });
+
+  it("scopes the storage key by slot", () => {
+    expect(createPlayerStorageKey("slot3")).toBe(
+      `${DEFAULT_STORAGE_KEY_PREFIX}:slot3`,
     );
   });
 
-  it("scopes the storage key by user and slot", () => {
-    expect(createPlayerStorageKey("user-1", "slot3")).toBe(
-      `${DEFAULT_STORAGE_KEY_PREFIX}:user-1-slot3`,
+  it("builds the legacy slot key used by persisted player fallbacks", () => {
+    expect(createLegacyPlayerStorageKey("slot3")).toBe(
+      `${DEFAULT_STORAGE_KEY_PREFIX}:slot3-undefined`,
     );
   });
 });

@@ -97,14 +97,6 @@ export function GameStartPage({
   );
 
   useEffect(() => {
-    retainMainInterfaceMusic();
-
-    return () => {
-      releaseMainInterfaceMusic();
-    };
-  }, []);
-
-  useEffect(() => {
     if (!shouldClearLoadPanelParams) return;
 
     const currentUrl = new URL(window.location.href);
