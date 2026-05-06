@@ -3,7 +3,7 @@ import Image from "next/image";
 type BattleStageEnemyArtProps = {
   imagePath?: string;
   enemyName?: string;
-  artPreset?: "default" | "page" | "andrew";
+  artPreset?: "default" | "page" | "andrew" | "darkside";
   isHit?: boolean;
   isAttacking?: boolean;
   isBursting?: boolean;
@@ -26,19 +26,26 @@ export function BattleStageEnemyArt({
   const artDirection =
     artPreset === "page"
       ? {
-          bottom: "20%",
-          right: "12%",
-          height: "clamp(37rem, 78vh, 52rem)",
-          imageClass: "scale-[1.28] object-[center_bottom]",
+          bottom: "17%",
+          right: "11%",
+          height: "clamp(39rem, 82vh, 54rem)",
+          imageClass: "scale-[1.34] object-[center_bottom]",
         }
       : artPreset === "andrew"
         ? {
-          bottom: "20%",
-          right: "8%",
-          height: "clamp(43rem, 88vh, 58rem)",
-          imageClass: "scale-[1.32] object-[center_bottom]",
-        }
-      : {
+            bottom: "2%",
+            right: "8%",
+            height: "clamp(29rem, 60vh, 39rem)",
+            imageClass: "scale-x-[1.20] scale-y-[1.08] object-[center_bottom]",
+          }
+        : artPreset === "darkside"
+          ? {
+              bottom: "-10%",
+              right: "19%",
+              height: "clamp(31rem, 68vh, 42rem)",
+              imageClass: "scale-[1.1] object-[center_bottom]",
+            }
+          : {
             bottom: "-20%",
             right: "20%",
             height: "clamp(30rem, 64vh, 41rem)",

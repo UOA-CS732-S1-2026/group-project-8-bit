@@ -4,6 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createEnemy } from "@/game/core/battleCore";
 import type { BattleOutcome } from "@/game/core/types";
+import {
+  pauseSceneryMusic,
+  resumeSceneryMusic,
+} from "@/lib/sceneryMusic";
 import { BattlePage } from "../Battle/BattlePage";
 import DialogueScene from "../DialogueScene";
 import type { DialogueSingle } from "../DialogueScene";
@@ -136,6 +140,7 @@ export function PageTarget({ onFinish }: PageTargetProps) {
 
     return {
       ...enemy,
+      portraitPath: "/portraits/page-portrait.png",
       imagePath: "/quests/ashFind/page-enemy.png",
       artPreset: "page" as const,
     };
@@ -200,6 +205,7 @@ export function PageTarget({ onFinish }: PageTargetProps) {
       return;
     }
 
+    pauseSceneryMusic();
     setPhase(phaseConfig.nextPhase);
   };
 
@@ -210,6 +216,7 @@ export function PageTarget({ onFinish }: PageTargetProps) {
       return;
     }
 
+    resumeSceneryMusic();
     showLoadingScreenBeforePhase("hiddenTruth");
   };
 

@@ -6,8 +6,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
 import { createEnemy } from "@/game/core/battleCore";
-import type { Enemy } from "@/game/core/types";
+import type { BattleOutcome, Enemy } from "@/game/core/types";
 import { chatHunterDialogues } from "@/game/dialogues/chatHunter";
 import { chatOfficerDialogues } from "@/game/dialogues/chatOfficer";
 import { chatPageDialogues } from "@/game/dialogues/chatPage";
@@ -134,10 +135,13 @@ function ScaledExplorePanel({ children }: { children: ReactNode }) {
 
 export default function FoggyForestContent() {
   const setLocation = useMCStore((state) => state.setLocation);
+  const restoreHpToFull = useMCStore((state) => state.restoreHpToFull);
   const player = useMCStore((state) => state.player);
+  const router = useRouter();
   const [showExplorePanel, setShowExplorePanel] = useState(false);
   const [battleEnemy, setBattleEnemy] = useState<Enemy | null>(null);
   const [showDialogue, setShowDialogue] = useState(false);
+  const [rescueOverlayVisible, setRescueOverlayVisible] = useState(false);
   const [dialogues, setDialogues] = useState<DialogueSingle[]>([]);
   const [dialogBackgroundImage, setDialogBackgroundImage] = useState(
     "url('/backgrounds/the-opening.png')",
@@ -213,6 +217,23 @@ export default function FoggyForestContent() {
     openRandomDialogue(chatHunterDialogues, seekerHunterChatBackground);
   };
 
+  const handleBattleFinish = (outcome: BattleOutcome) => {
+    setBattleEnemy(null);
+
+    if (outcome !== "lost") {
+      return;
+    }
+
+    setShowExplorePanel(false);
+    setShowDialogue(false);
+    setRescueOverlayVisible(true);
+  };
+
+  const handleRescueOverlayContinue = () => {
+    restoreHpToFull();
+    router.push("/game/tavern");
+  };
+
   const btnClass = "w-full max-w-[25%] min-h-[3rem] max-h-[6rem]";
   return (
     <main>
@@ -222,13 +243,33 @@ export default function FoggyForestContent() {
             enemy={battleEnemy}
             backgroundImage="/backgrounds/foggy-forest.png"
             label="forest"
-            onFinish={(didWin) => {
-              void didWin;
-              setBattleEnemy(null);
-            }}
+            onFinish={handleBattleFinish}
           />
         </div>
       )}
+      {rescueOverlayVisible ? (
+        <button
+          type="button"
+          onClick={handleRescueOverlayContinue}
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black px-6 text-center"
+        >
+          <div className="max-w-2xl">
+            <p className="text-[0.78rem] uppercase tracking-[0.36em] text-amber-200/70">
+              Defeat
+            </p>
+            <h2 className="mt-4 font-[family-name:var(--font-cinzel)] text-3xl font-semibold text-amber-50 sm:text-4xl">
+              Someone pulled you out of the forest.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-amber-100/78 sm:text-base">
+              The last thing you remember is the cold ground and a fading light.
+              When your eyes open again, you are being carried back toward the tavern.
+            </p>
+            <p className="mt-8 text-[0.72rem] uppercase tracking-[0.28em] text-amber-100/56">
+              Click to continue
+            </p>
+          </div>
+        </button>
+      ) : null}
       {showDialogue && (
         <DialogueScene
           dialogues={dialogues}

@@ -45,8 +45,9 @@ export type Enemy = {
   attack: number;
   defense: number;
   isBoss: boolean;
+  portraitPath?: string;
   imagePath?: string;
-  artPreset?: "default" | "page" | "andrew";
+  artPreset?: "default" | "page" | "andrew" | "darkside";
 };
 
 export type BattleSupportState = Record<SupportToolId, number>;

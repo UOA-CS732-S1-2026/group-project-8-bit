@@ -9,6 +9,7 @@ type BattleStageEnemyHudProps = {
     attack: number;
     defense: number;
     isBoss?: boolean;
+    portraitPath?: string;
   };
   muted?: boolean;
 };

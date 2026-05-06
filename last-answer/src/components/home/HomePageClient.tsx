@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AuthUser } from "@/lib/auth-shared";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { resumeMainInterfaceMusic } from "@/lib/mainInterfaceMusic";
 
 type HomePageClientProps = {
   user: AuthUser | null;
@@ -67,6 +68,8 @@ export function HomePageClient({ user }: HomePageClientProps) {
   const playerName = user?.username || user?.id || null;
 
   function handleModeClick(mode: "Story Mode" | "Arcade Mode") {
+    resumeMainInterfaceMusic();
+
     if (mode === "Story Mode") {
       router.push("/game");
       return;
@@ -126,7 +129,10 @@ export function HomePageClient({ user }: HomePageClientProps) {
               type="button"
               onClick={() => handleModeClick("Story Mode")}
               className={modeButtonClass}
-              style={{ animation: "btn-enter 1.1s cubic-bezier(0.16,1,0.3,1) 0.3s both, border-pulse 3s ease-in-out 1.4s infinite" }}
+              style={{
+                animation:
+                  "btn-enter 1.1s cubic-bezier(0.16,1,0.3,1) 0.1s both, border-pulse 3s ease-in-out 1.2s infinite",
+              }}
             >
               Story Mode
             </button>
@@ -135,7 +141,10 @@ export function HomePageClient({ user }: HomePageClientProps) {
               type="button"
               onClick={() => handleModeClick("Arcade Mode")}
               className={modeButtonClass}
-              style={{ animation: "btn-enter 1.1s cubic-bezier(0.16,1,0.3,1) 0.55s both, border-pulse 3s ease-in-out 1.65s infinite" }}
+              style={{
+                animation:
+                  "btn-enter 1.1s cubic-bezier(0.16,1,0.3,1) 0.3s both, border-pulse 3s ease-in-out 1.4s infinite",
+              }}
             >
               Arcade Mode
             </button>

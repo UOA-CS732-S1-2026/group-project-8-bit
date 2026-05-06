@@ -8,10 +8,13 @@ type BattleEnemyPanelProps = {
     attack: number;
     defense: number;
     isBoss?: boolean;
+    portraitPath?: string;
   };
 };
 
 export function BattleEnemyPanel({ enemy }: BattleEnemyPanelProps) {
+  const portraitPath = enemy.portraitPath ?? "/battle/monster1-portrait.png";
+
   return (
     <section
       className={[
@@ -34,7 +37,7 @@ export function BattleEnemyPanel({ enemy }: BattleEnemyPanelProps) {
             style={{
               width: "5.6rem",
               height: "5.6rem",
-              backgroundImage: "url('/battle/monster1-portrait.png')",
+              backgroundImage: `url('${portraitPath}')`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}

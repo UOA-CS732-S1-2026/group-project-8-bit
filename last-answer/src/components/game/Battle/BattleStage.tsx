@@ -21,7 +21,7 @@ type BattleStageProps = {
     defense: number;
     isBoss?: boolean;
     imagePath?: string;
-    artPreset?: "default" | "page" | "andrew";
+    artPreset?: "default" | "page" | "andrew" | "darkside";
   };
   playerHit?: boolean;
   enemyHit?: boolean;

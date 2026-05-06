@@ -9,6 +9,8 @@ import { beforeStart } from "@/game/dialogues/questPage";
 import Image from "next/image";
 import { supportToolConfigs } from "@/game/core/battleCore";
 import type { Player, SupportToolId } from "@/game/core/types";
+import { retainSceneryMusic, stopSceneryMusicNow } from "@/lib/sceneryMusic";
+import { retainTavernMusic, stopTavernMusicNow } from "@/lib/tavernMusic";
 import { useMCStore } from "@/store/mcStore";
 
 type BarkeeperMenuProps = {
@@ -78,9 +80,11 @@ const shopVisuals: Record<
 function BarkeeperPurchasePanel({
   onClose,
   player,
+  onPurchase,
 }: {
   onClose: () => void;
   player: Player;
+  onPurchase: (item: ShopItem) => void;
 }) {
   const shopItems: ShopItem[] = (
     Object.keys(supportToolConfigs) as SupportToolId[]
@@ -209,6 +213,22 @@ function BarkeeperPurchasePanel({
                       </span>
                       <span>Owned {item.stock}</span>
                     </div>
+
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => onPurchase(item)}
+                        disabled={!affordable}
+                        className={[
+                          "rounded-md border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] transition",
+                          affordable
+                            ? "border-amber-200/40 bg-amber-200/10 text-amber-50 hover:-translate-y-0.5 hover:border-amber-100/70 hover:bg-amber-200/18 active:translate-y-0 active:scale-95"
+                            : "cursor-not-allowed border-amber-100/12 bg-black/20 text-amber-100/32",
+                        ].join(" ")}
+                      >
+                        Buy 1
+                      </button>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -237,6 +257,7 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   const player = useMCStore((state) => state.player);
   const startQuest = useMCStore((state) => state.startQuest);
   const completeQuest = useMCStore((state) => state.completeQuest);
+  const buyProperty = useMCStore((state) => state.buyProperty);
   const pageQuestCompleted =
     player.completedQuests?.some((quest) => quest.id === pageQuest.id) ?? false;
 
@@ -266,28 +287,30 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   const handlePageDialogueFinish = () => {
     setShowPageDialogue(false);
 
-    window.setTimeout(() => {
-      const readyToStart = window.confirm(
-        "Above lv10 to start this quest, are you ready to start the challenge? You'd better save the game first.",
-      );
+    const readyToStart = window.confirm(
+      "Above lv10 to start this quest, are you ready to start the challenge? You'd better save the game first.",
+    );
 
-      if (!readyToStart) {
-        return;
-      }
+    if (!readyToStart) {
+      return;
+    }
 
-      if (player.level < 10) {
-        setToastMessage("Reach level 10 before starting this challenge.");
-        return;
-      }
+    if (player.level < 10) {
+      setToastMessage("Reach level 10 before starting this challenge.");
+      return;
+    }
 
-      startQuest(pageQuest);
-      console.log("start quest", pageQuest);
-      setShowPageTarget(true);
-    }, 0);
+    startQuest(pageQuest);
+    stopTavernMusicNow();
+    retainSceneryMusic();
+    console.log("start quest", pageQuest);
+    setShowPageTarget(true);
   };
 
   const handlePageTargetFinish = () => {
     completeQuest(pageQuest);
+    stopSceneryMusicNow();
+    retainTavernMusic();
     setShowPageTarget(false);
     closeMenu();
   };
@@ -301,8 +324,20 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
       return;
     }
 
+    stopTavernMusicNow();
     closeMenu();
     router.push("/theQuest/theEnd");
+  };
+
+  const handlePurchase = (item: ShopItem) => {
+    const purchased = buyProperty(item.id, 1);
+
+    if (!purchased) {
+      setToastMessage(`Not enough coin to buy ${item.name}.`);
+      return;
+    }
+
+    setToastMessage(`Purchased 1 ${item.name}.`);
   };
 
   const mainMenuItems: MainMenuItem[] = [
@@ -455,6 +490,7 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
           <BarkeeperPurchasePanel
             onClose={() => setOpenPurchasePanel(false)}
             player={player}
+            onPurchase={handlePurchase}
           />
         ) : null}
       </div>

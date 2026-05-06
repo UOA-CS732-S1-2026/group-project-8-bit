@@ -52,8 +52,8 @@ const backgroundOptions = [
 ] as const;
 
 const enemyArtOptions = {
-  normal: "/quests/ashFind/page-enemy.png",
-  boss: "/quests/theEnd/andrew-enemy.png",
+  normal: "/battle/monster1.png",
+  boss: "/battle/monster1.png",
 } as const;
 
 type BackgroundOptionId = (typeof backgroundOptions)[number]["id"];
@@ -279,7 +279,7 @@ export default function ArcadePage() {
     setBattleEnemy({
       ...nextEnemy,
       imagePath: fightBoss ? enemyArtOptions.boss : enemyArtOptions.normal,
-      artPreset: fightBoss ? "andrew" : "page",
+      artPreset: "default",
     });
     setBattleStarted(true);
   };
