@@ -34,9 +34,9 @@ export function BattleStageEnemyArt({
       : artPreset === "andrew"
         ? {
             bottom: "2%",
-            right: "8%",
-            height: "clamp(29rem, 60vh, 39rem)",
-            imageClass: "scale-x-[1.20] scale-y-[1.08] object-[center_bottom]",
+            right: "16%",
+            height: "clamp(27rem, 56vh, 36rem)",
+            imageClass: "scale-x-[1.12] scale-y-[1.02] object-[center_bottom]",
           }
         : artPreset === "darkside"
           ? {
