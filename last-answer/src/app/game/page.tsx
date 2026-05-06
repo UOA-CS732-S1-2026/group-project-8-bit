@@ -11,6 +11,7 @@ function getFirstSearchParam(value: string | string[] | undefined) {
 export default async function GamePage({ searchParams }: GamePageProps) {
   const params = (await searchParams) ?? {};
   const shouldOpenLoadPanel = getFirstSearchParam(params.panel) === "load";
+  const shouldOpenStoryGuide = getFirstSearchParam(params.panel) === "guide";
   const initialLoadPanelTab =
     getFirstSearchParam(params.tab) === "cloud" ? "cloud" : "local";
 
@@ -18,7 +19,8 @@ export default async function GamePage({ searchParams }: GamePageProps) {
     <GameStartPage
       initialLoadPanelOpen={shouldOpenLoadPanel}
       initialLoadPanelTab={initialLoadPanelTab}
-      shouldClearLoadPanelParams={shouldOpenLoadPanel}
+      shouldClearLoadPanelParams={shouldOpenLoadPanel || shouldOpenStoryGuide}
+      initialStoryGuideOpen={shouldOpenStoryGuide}
     />
   );
 }

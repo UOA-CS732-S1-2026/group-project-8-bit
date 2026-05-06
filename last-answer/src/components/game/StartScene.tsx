@@ -40,6 +40,10 @@ export default function StartScene({ onClose }: { onClose: () => void }) {
         <p className="text-sm leading-6 text-stone-100 sm:text-base sm:leading-7">
           {scene.text}
         </p>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 right-4 h-0 w-0 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent border-t-amber-100/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)] animate-bounce sm:bottom-4 sm:right-5"
+        />
       </div>
     </button>
   );

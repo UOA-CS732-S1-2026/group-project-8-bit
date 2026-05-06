@@ -2,7 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { stopMainInterfaceMusicNow } from "@/lib/mainInterfaceMusic";
+import {
+  releaseMainInterfaceMusic,
+  retainMainInterfaceMusic,
+  stopMainInterfaceMusicNow,
+} from "@/lib/mainInterfaceMusic";
+import GuidePanel from "./GuidePanel";
 import LoadPanel, { type LoadPanelTab } from "./saveLoad/LoadPanel";
 import NewGamePanel from "./NewGamePanel";
 import SettingPanel from "./SettingPanel";
@@ -17,6 +22,7 @@ type GameStartPageProps = {
   initialLoadPanelOpen?: boolean;
   initialLoadPanelTab?: LoadPanelTab;
   shouldClearLoadPanelParams?: boolean;
+  initialStoryGuideOpen?: boolean;
 };
 
 const menuButtonClass =
@@ -68,13 +74,15 @@ const MENU_BUTTONS = [
   { label: "Load Game",    delay: "0.3s"  },
   { label: "New Game",     delay: "0.45s" },
   { label: "Settings",     delay: "0.6s"  },
-  { label: "Back to Home", delay: "0.75s" },
+  { label: "Guide",        delay: "0.75s" },
+  { label: "Back to Home", delay: "0.9s"  },
 ];
 
 export function GameStartPage({
   initialLoadPanelOpen = false,
   initialLoadPanelTab = "local",
   shouldClearLoadPanelParams = false,
+  initialStoryGuideOpen = false,
 }: GameStartPageProps) {
   const router = useRouter();
   const [loadPanel, setLoadPanel] = useState<LoadPanelState>({
@@ -84,6 +92,9 @@ export function GameStartPage({
   const [isNewGameOpen, setIsNewGameOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isStartOpen, setIsStartOpen] = useState(false);
+  const [isStoryGuideOpen, setIsStoryGuideOpen] = useState(
+    initialStoryGuideOpen,
+  );
 
   useEffect(() => {
     if (!shouldClearLoadPanelParams) return;
@@ -101,6 +112,7 @@ export function GameStartPage({
     if (label === "Load Game")     setLoadPanel({ isOpen: true, initialTab: "local" });
     if (label === "New Game")      setIsNewGameOpen(true);
     if (label === "Settings")      setIsSettingsOpen(true);
+    if (label === "Guide")         setIsStoryGuideOpen(true);
     if (label === "Back to Home")  router.push("/");
   }
 
@@ -186,6 +198,10 @@ export function GameStartPage({
           }}
         />
       )}
+      <GuidePanel
+        isOpen={isStoryGuideOpen}
+        onClose={() => setIsStoryGuideOpen(false)}
+      />
     </main>
   );
 }
