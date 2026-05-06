@@ -42,6 +42,7 @@ type BattlePageProps = {
   enemy?: Enemy | null;
   backgroundImage?: string;
   label?: string;
+  suppressBattleMusic?: boolean;
   onFinish?: (outcome: BattleOutcome) => void;
 };
 
@@ -49,6 +50,7 @@ export function BattlePage({
   enemy: initialEnemy = null,
   backgroundImage = "/backgrounds/foggy-forest.png",
   label = "battle",
+  suppressBattleMusic = false,
   onFinish,
 }: BattlePageProps) {
   const BATTLE_CANVAS_WIDTH = 1660;
@@ -369,13 +371,18 @@ export function BattlePage({
   }, [battle, onFinish, router]);
 
   useEffect(() => {
+    if (suppressBattleMusic) {
+      stopBattleMusic();
+      return;
+    }
+
     const track = initialEnemy?.isBoss ? "boss" : "normal";
     setBattleMusic(track);
 
     return () => {
       stopBattleMusic();
     };
-  }, [initialEnemy?.isBoss, setBattleMusic, stopBattleMusic]);
+  }, [initialEnemy?.isBoss, setBattleMusic, stopBattleMusic, suppressBattleMusic]);
 
   useEffect(() => {
     if (hasAutoStartedRef.current || battle) {

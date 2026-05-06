@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createEnemy } from "@/game/core/battleCore";
 import type { BattleOutcome } from "@/game/core/types";
 import { BattlePage } from "@/components/game/Battle/BattlePage";
 import DialogueScene from "@/components/game/DialogueScene";
 import type { DialogueSingle } from "@/components/game/DialogueScene";
+import { stopSceneryMusicNow } from "@/lib/sceneryMusic";
+import { stopTavernMusicNow } from "@/lib/tavernMusic";
 import {
   agreeAndrew,
   ancientRuin,
@@ -169,6 +171,11 @@ export default function LastTask() {
   const transitionIdRef = useRef(0);
   const router = useRouter();
 
+  useEffect(() => {
+    stopTavernMusicNow();
+    stopSceneryMusicNow();
+  }, []);
+
   const darksideEnemy = useMemo(() => {
     const enemy = createEnemy({
       id: "darkside-of-knowledge",
@@ -180,7 +187,9 @@ export default function LastTask() {
 
     return {
       ...enemy,
+      portraitPath: "/portraits/boss-portrait.png",
       imagePath: "/quests/theEnd/darkside-monster.png",
+      artPreset: "darkside" as const,
     };
   }, []);
 
@@ -195,6 +204,7 @@ export default function LastTask() {
 
     return {
       ...enemy,
+      portraitPath: "/portraits/andwer-portrait.png",
       imagePath: "/quests/theEnd/bossAndrew.png",
       artPreset: "andrew" as const,
     };

@@ -206,6 +206,7 @@ export function createEnemy(args: {
     attack: 8 + level * 2 + attackBonusByTier[normalizedTier],
     defense: 6 + level + defenseBonusByTier[normalizedTier],
     isBoss,
+    portraitPath: "/battle/monster1-portrait.png",
   };
 }
 
