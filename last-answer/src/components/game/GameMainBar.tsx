@@ -92,8 +92,8 @@ export function GameMainBar() {
                 </div>
               </div>
 
-              <div className="mt-1 text-[12px] font-semibold tracking-normal text-stone-300">
-                {player.coins} coins
+              <div className="mt-1 text-[14px] font-semibold tracking-normal text-stone-300">
+                {player.coins} Coins
               </div>
             </div>
           </div>

@@ -139,7 +139,7 @@ export default function InfoPanel({ onClose }: InfoPanelProps) {
             <button
               type="button"
               onClick={requestClose}
-              className={`${panelButtonClass} absolute left-[10%] top-[11%] z-10`}
+              className={`${panelButtonClass} absolute right-[8%] top-[11%] z-10`}
             >
               Close
             </button>

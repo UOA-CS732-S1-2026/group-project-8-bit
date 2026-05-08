@@ -3,7 +3,7 @@ import type { Player } from "@/game/core/types";
 import { getCurrentSession } from "@/lib/auth";
 import { getConfigurationErrorMessage } from "@/lib/config";
 import { getPlayerSave, updatePlayerSave } from "@/lib/player-save";
-import { isPlayerSaveSlotId } from "@/lib/save-slots";
+import { isValidSaveId } from "@/lib/save-slots";
 
 export const runtime = "nodejs";
 
@@ -66,7 +66,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    if (!isPlayerSaveSlotId(body.saveId)) {
+    if (!isValidSaveId(body.saveId)) {
       return NextResponse.json(
         { error: "Invalid save slot." },
         { status: 400 },

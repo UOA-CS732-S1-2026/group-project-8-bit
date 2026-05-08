@@ -316,6 +316,12 @@ export default function LoadPanel({
   const selectedSave =
     selectedSlot === null ? null : saveList[selectedSlot] ?? null;
   const isCloudBusy = isCheckingSession || isLoadingCloudSaves;
+  const hasCurrentProgress =
+    player.level > 1 ||
+    player.exp > 0 ||
+    player.coins > 0 ||
+    player.activeQuest != null ||
+    (player.completedQuests?.length ?? 0) > 0;
 
   const handleTabClick = (tab: LoadPanelTab) => {
     if (tab === activeTab) {
@@ -359,7 +365,15 @@ export default function LoadPanel({
     const slotLabel = `Slot ${slot + 1}`;
 
     if (tab === "local") {
-      savePersistPlayer(player, slotId);
+      const ok = savePersistPlayer(player, slotId);
+      if (!ok) {
+        setSaveMessage({
+          type: "error",
+          text: `Unable to save to Local — ${slotLabel}. Storage may be full or unavailable.`,
+          id: Date.now(),
+        });
+        return;
+      }
       refreshLocalSaves();
       setSaveMessage({
         type: "success",
@@ -580,7 +594,7 @@ export default function LoadPanel({
               <button
                 type="button"
                 className={panelButtonClass}
-                disabled={!selectedSave || isCloudBusy}
+                disabled={!selectedSave || isCloudBusy || isSaving}
                 onClick={handleLoadRequest}
               >
                 Load
@@ -674,9 +688,15 @@ export default function LoadPanel({
                 Load {pendingLoad.tab === "local" ? "Local" : "Cloud"} Slot{" "}
                 {pendingLoad.slot + 1}?
               </p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-rose-700">
-                Current progress will be replaced.
-              </p>
+              {hasCurrentProgress ? (
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-rose-700">
+                  Current progress will be replaced.
+                </p>
+              ) : (
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-stone-600">
+                  No active game — safe to load.
+                </p>
+              )}
               <div className="mt-6 flex justify-center gap-3">
                 <button
                   type="button"
