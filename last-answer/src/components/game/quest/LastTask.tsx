@@ -267,6 +267,8 @@ export default function LastTask() {
     [showLoadingScreenBeforePhase],
   );
 
+  const [showAndrewChoice, setShowAndrewChoice] = useState(false);
+
   const handleDialogueFinish = () => {
     if (!isDialoguePhase(phase)) {
       return;
@@ -275,8 +277,7 @@ export default function LastTask() {
     const phaseConfig = lastTaskPhaseConfigs[phase];
 
     if (phaseConfig.nextPhase === "andrewChoice") {
-      const agreesWithAndrew = window.confirm("Do you agree with Andrew?");
-      moveToPhase(agreesWithAndrew ? "agreeAndrew" : "refuseAndrew");
+      setShowAndrewChoice(true);
       return;
     }
 
@@ -357,11 +358,56 @@ export default function LastTask() {
   const phaseConfig = lastTaskPhaseConfigs[phase];
 
   return (
-    <DialogueScene
-      key={phase}
-      dialogues={phaseConfig.dialogues()}
-      backgroundImage={phaseConfig.backgroundImage}
-      onFinish={handleDialogueFinish}
-    />
+    <>
+      <DialogueScene
+        key={phase}
+        dialogues={phaseConfig.dialogues()}
+        backgroundImage={phaseConfig.backgroundImage}
+        onFinish={handleDialogueFinish}
+      />
+      {showAndrewChoice && (
+        <div
+          className="game-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <section
+            className="game-modal-panel relative flex w-[min(88vw,26rem)] flex-col items-center bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-9 text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            role="alertdialog"
+            aria-modal="true"
+            aria-label="Andrew's choice"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif text-2xl font-bold tracking-wide text-amber-950">
+              Do You Agree with Andrew?
+            </h3>
+            <p className="mt-4 text-sm italic leading-relaxed text-amber-950">
+              Your answer will shape the path ahead.
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={() => {
+                  setShowAndrewChoice(false);
+                  moveToPhase("agreeAndrew");
+                }}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={() => {
+                  setShowAndrewChoice(false);
+                  moveToPhase("refuseAndrew");
+                }}
+              >
+                No
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </>
   );
 }

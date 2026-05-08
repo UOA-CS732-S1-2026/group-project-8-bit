@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useModalCloseAnimation } from "@/components/game/useModalCloseAnimation";
 import DialogueScene, { DialogueSingle } from "../game/DialogueScene";
 import { PageTarget } from "../game/quest/PageTarget";
 import { chatAndrewDialogues } from "@/game/dialogues/chatAndrew";
@@ -285,6 +286,14 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
     qty: number;
     refundCoins: number;
   } | null>(null);
+  const [pendingConfirm, setPendingConfirm] = useState<
+    "pageQuest" | "lastAnswer" | null
+  >(null);
+  const { isClosing: isConfirmClosing, requestClose: closeConfirm } =
+    useModalCloseAnimation(() => {
+      setPendingConfirm(null);
+      setShowPageDialogue(false);
+    });
   const undoTimerRef = useRef<number | null>(null);
   const player = useMCStore((state) => state.player);
   const startQuest = useMCStore((state) => state.startQuest);
@@ -324,26 +333,7 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   };
 
   const handlePageDialogueFinish = () => {
-    setShowPageDialogue(false);
-
-    const readyToStart = window.confirm(
-      "Above lv10 to start this quest, are you ready to start the challenge? You'd better save the game first.",
-    );
-
-    if (!readyToStart) {
-      return;
-    }
-
-    if (player.level < 10) {
-      setToastMessage("Reach level 10 before starting this challenge.");
-      return;
-    }
-
-    startQuest(pageQuest);
-    stopTavernMusicNow();
-    retainSceneryMusic();
-    console.log("start quest", pageQuest);
-    setShowPageTarget(true);
+    setPendingConfirm("pageQuest");
   };
 
   const handlePageTargetFinish = () => {
@@ -355,17 +345,27 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   };
 
   const handleLastAnswerClick = () => {
-    const readyToStart = window.confirm(
-      "Start the last challenge? You'd better save the game first.",
-    );
+    setPendingConfirm("lastAnswer");
+  };
 
-    if (!readyToStart) {
-      return;
+  const handleConfirmAction = () => {
+    if (pendingConfirm === "pageQuest") {
+      setPendingConfirm(null);
+      setShowPageDialogue(false);
+      if (player.level < 10) {
+        setToastMessage("Reach level 10 before starting this challenge.");
+        return;
+      }
+      startQuest(pageQuest);
+      stopTavernMusicNow();
+      retainSceneryMusic();
+      setShowPageTarget(true);
+    } else if (pendingConfirm === "lastAnswer") {
+      setPendingConfirm(null);
+      stopTavernMusicNow();
+      closeMenu();
+      router.push("/theQuest/theEnd");
     }
-
-    stopTavernMusicNow();
-    closeMenu();
-    router.push("/theQuest/theEnd");
   };
 
   const handlePurchase = (item: ShopItem, qty: number) => {
@@ -556,6 +556,54 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
           />
         ) : null}
       </div>
+
+      {pendingConfirm && (
+        <div
+          className="game-modal-backdrop absolute inset-0 z-[80] flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm"
+          data-closing={isConfirmClosing}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <section
+            className="game-modal-panel relative flex w-[min(88vw,26rem)] flex-col items-center bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-9 text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            data-closing={isConfirmClosing}
+            role="alertdialog"
+            aria-modal="true"
+            aria-label={
+              pendingConfirm === "pageQuest"
+                ? "Confirm start quest"
+                : "Confirm last challenge"
+            }
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif text-2xl font-bold tracking-wide text-amber-950">
+              {pendingConfirm === "pageQuest"
+                ? "Start the Quest?"
+                : "Start the Last Challenge?"}
+            </h3>
+            <p className="mt-4 text-sm italic leading-relaxed text-amber-950">
+              {pendingConfirm === "pageQuest"
+                ? "Requires level 10. Make sure to save your progress first."
+                : "This is the final challenge. Make sure to save your progress first."}
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={handleConfirmAction}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={closeConfirm}
+              >
+                No
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
