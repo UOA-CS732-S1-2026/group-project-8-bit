@@ -55,6 +55,7 @@ const LOAD_PANEL_DESIGN_WIDTH = 760;
 const LOAD_PANEL_DESIGN_HEIGHT = 680;
 const LOAD_PANEL_GAP_X = 20;
 const LOAD_PANEL_GAP_Y = 20;
+const SAVE_SUCCESS_AUTO_CLOSE_MS = 1000;
 
 const panelButtonClass =
   "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
@@ -311,6 +312,18 @@ export default function LoadPanel({
       controller.abort();
     };
   }, [activeTab, hydrateAuth, user]);
+
+  useEffect(() => {
+    if (saveMessage?.type !== "success") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      requestClose();
+    }, SAVE_SUCCESS_AUTO_CLOSE_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [saveMessage, requestClose]);
 
   const saveList = activeTab === "local" ? localSaveList : cloudSaveList;
   const selectedSave =
