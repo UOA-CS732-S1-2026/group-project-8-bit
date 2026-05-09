@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useModalCloseAnimation } from "@/components/game/useModalCloseAnimation";
 import DialogueScene, { DialogueSingle } from "../game/DialogueScene";
 import { PageTarget } from "../game/quest/PageTarget";
 import { chatAndrewDialogues } from "@/game/dialogues/chatAndrew";
@@ -84,8 +85,14 @@ function BarkeeperPurchasePanel({
 }: {
   onClose: () => void;
   player: Player;
-  onPurchase: (item: ShopItem) => void;
+  onPurchase: (item: ShopItem, qty: number) => void;
 }) {
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  const getQty = (id: string) => quantities[id] ?? 1;
+  const setQty = (id: string, val: number) =>
+    setQuantities((prev) => ({ ...prev, [id]: Math.max(1, val) }));
+
   const shopItems: ShopItem[] = (
     Object.keys(supportToolConfigs) as SupportToolId[]
   ).map((toolId) => {
@@ -117,24 +124,24 @@ function BarkeeperPurchasePanel({
         Close
       </button>
 
-      <div className="flex items-start justify-between gap-4 pr-20">
+      <div className="flex items-start justify-between gap-4 pr-32">
         <div>
           <h3 className="text-2xl font-semibold text-stone-100">Purchase</h3>
           <p className="mt-1 max-w-[18rem] text-sm leading-6 text-amber-100/72">
             Prepare for battle with the same four support tools used in combat.
           </p>
         </div>
-        <div className="rounded-xl border border-amber-100/20 bg-black/30 px-4 py-3 text-right shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
+        <div className="rounded-xl border border-amber-100/20 bg-black/30 px-4 py-2 text-right shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
           <div className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-100/60">
             Your Coin
           </div>
-          <div className="mt-1 flex items-center justify-end gap-2 text-lg font-semibold text-[#f5d58d]">
+          <div className="flex items-center justify-end gap-2 text-lg font-semibold text-[#f5d58d]">
             <Image
               src="/topbar/gold_coin_icon.png"
               alt=""
-              width={18}
-              height={18}
-              className="h-[18px] w-[18px]"
+              width={72}
+              height={72}
+              className="-my-3 h-[72px] w-[72px]"
             />
             <span>{player.coins}</span>
           </div>
@@ -151,7 +158,8 @@ function BarkeeperPurchasePanel({
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [scrollbar-color:rgba(212,176,122,0.65)_rgba(0,0,0,0.12)] [scrollbar-width:thin]">
           {shopItems.map((item) => {
-            const affordable = player.coins >= item.price;
+            const qty = getQty(item.id);
+            const affordable = player.coins >= item.price * qty;
             const tool = supportToolConfigs[item.id];
 
             return (
@@ -160,13 +168,13 @@ function BarkeeperPurchasePanel({
                 className="rounded-[1rem] border border-amber-100/16 bg-[linear-gradient(180deg,rgba(30,21,14,0.82)_0%,rgba(16,12,10,0.92)_100%)] p-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[0.95rem] border border-amber-100/14 bg-[radial-gradient(circle_at_30%_30%,rgba(255,218,157,0.18)_0%,rgba(70,45,18,0.14)_46%,rgba(0,0,0,0.12)_100%)]">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[0.95rem] border border-amber-100/14 bg-[radial-gradient(circle_at_30%_30%,rgba(255,218,157,0.18)_0%,rgba(70,45,18,0.14)_46%,rgba(0,0,0,0.12)_100%)]">
                     <Image
                       src={item.iconSrc}
                       alt={item.name}
-                      width={42}
-                      height={42}
-                      className="h-[42px] w-[42px] object-contain"
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -184,9 +192,9 @@ function BarkeeperPurchasePanel({
                           <Image
                             src="/topbar/gold_coin_icon.png"
                             alt=""
-                            width={13}
-                            height={13}
-                            className="h-[13px] w-[13px]"
+                            width={65}
+                            height={65}
+                            className="h-[65px] w-[65px]"
                           />
                           <span>{item.price}</span>
                         </div>
@@ -214,10 +222,29 @@ function BarkeeperPurchasePanel({
                       <span>Owned {item.stock}</span>
                     </div>
 
-                    <div className="mt-3 flex justify-end">
+                    <div className="mt-3 flex items-center justify-end gap-2">
+                      <div className="flex items-center rounded-md border border-amber-100/20 bg-black/30 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setQty(item.id, qty - 1)}
+                          className="px-2.5 py-1.5 text-sm font-bold text-amber-100/70 hover:bg-amber-200/10 hover:text-amber-50 transition active:scale-95"
+                        >
+                          −
+                        </button>
+                        <span className="min-w-[2rem] text-center text-[0.72rem] font-semibold text-amber-100">
+                          {qty}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setQty(item.id, qty + 1)}
+                          className="px-2.5 py-1.5 text-sm font-bold text-amber-100/70 hover:bg-amber-200/10 hover:text-amber-50 transition active:scale-95"
+                        >
+                          +
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => onPurchase(item)}
+                        onClick={() => onPurchase(item, qty)}
                         disabled={!affordable}
                         className={[
                           "rounded-md border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] transition",
@@ -226,7 +253,7 @@ function BarkeeperPurchasePanel({
                             : "cursor-not-allowed border-amber-100/12 bg-black/20 text-amber-100/32",
                         ].join(" ")}
                       >
-                        Buy 1
+                        Buy
                       </button>
                     </div>
                   </div>
@@ -254,10 +281,25 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   const [showPageDialogue, setShowPageDialogue] = useState(false);
   const [showPageTarget, setShowPageTarget] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [undoPurchase, setUndoPurchase] = useState<{
+    item: ShopItem;
+    qty: number;
+    refundCoins: number;
+  } | null>(null);
+  const [pendingConfirm, setPendingConfirm] = useState<
+    "pageQuest" | "lastAnswer" | null
+  >(null);
+  const { isClosing: isConfirmClosing, requestClose: closeConfirm } =
+    useModalCloseAnimation(() => {
+      setPendingConfirm(null);
+      setShowPageDialogue(false);
+    });
+  const undoTimerRef = useRef<number | null>(null);
   const player = useMCStore((state) => state.player);
   const startQuest = useMCStore((state) => state.startQuest);
   const completeQuest = useMCStore((state) => state.completeQuest);
   const buyProperty = useMCStore((state) => state.buyProperty);
+  const refundProperty = useMCStore((state) => state.refundProperty);
   const pageQuestCompleted =
     player.completedQuests?.some((quest) => quest.id === pageQuest.id) ?? false;
 
@@ -273,6 +315,12 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
     return () => window.clearTimeout(timeoutId);
   }, [toastMessage]);
 
+  useEffect(() => {
+    return () => {
+      if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current);
+    };
+  }, []);
+
   const closeMenu = () => {
     setOpenPurchasePanel(false);
     setChatDialogues(null);
@@ -285,26 +333,7 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   };
 
   const handlePageDialogueFinish = () => {
-    setShowPageDialogue(false);
-
-    const readyToStart = window.confirm(
-      "Above lv10 to start this quest, are you ready to start the challenge? You'd better save the game first.",
-    );
-
-    if (!readyToStart) {
-      return;
-    }
-
-    if (player.level < 10) {
-      setToastMessage("Reach level 10 before starting this challenge.");
-      return;
-    }
-
-    startQuest(pageQuest);
-    stopTavernMusicNow();
-    retainSceneryMusic();
-    console.log("start quest", pageQuest);
-    setShowPageTarget(true);
+    setPendingConfirm("pageQuest");
   };
 
   const handlePageTargetFinish = () => {
@@ -316,28 +345,47 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   };
 
   const handleLastAnswerClick = () => {
-    const readyToStart = window.confirm(
-      "Start the last challenge? You'd better save the game first.",
-    );
-
-    if (!readyToStart) {
-      return;
-    }
-
-    stopTavernMusicNow();
-    closeMenu();
-    router.push("/theQuest/theEnd");
+    setPendingConfirm("lastAnswer");
   };
 
-  const handlePurchase = (item: ShopItem) => {
-    const purchased = buyProperty(item.id, 1);
+  const handleConfirmAction = () => {
+    if (pendingConfirm === "pageQuest") {
+      setPendingConfirm(null);
+      setShowPageDialogue(false);
+      if (player.level < 10) {
+        setToastMessage("Reach level 10 before starting this challenge.");
+        return;
+      }
+      startQuest(pageQuest);
+      stopTavernMusicNow();
+      retainSceneryMusic();
+      setShowPageTarget(true);
+    } else if (pendingConfirm === "lastAnswer") {
+      setPendingConfirm(null);
+      stopTavernMusicNow();
+      closeMenu();
+      router.push("/theQuest/theEnd");
+    }
+  };
+
+  const handlePurchase = (item: ShopItem, qty: number) => {
+    const purchased = buyProperty(item.id, qty);
 
     if (!purchased) {
       setToastMessage(`Not enough coin to buy ${item.name}.`);
       return;
     }
 
-    setToastMessage(`Purchased 1 ${item.name}.`);
+    if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current);
+    setUndoPurchase({ item, qty, refundCoins: item.price * qty });
+    undoTimerRef.current = window.setTimeout(() => setUndoPurchase(null), 5000);
+  };
+
+  const handleUndo = () => {
+    if (!undoPurchase) return;
+    if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current);
+    refundProperty(undoPurchase.item.id, undoPurchase.qty, undoPurchase.refundCoins);
+    setUndoPurchase(null);
   };
 
   const mainMenuItems: MainMenuItem[] = [
@@ -421,7 +469,21 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
           <PageTarget onFinish={handlePageTargetFinish} />
         </div>
       )}
-      {toastMessage && (
+      {undoPurchase && (
+        <div className="fixed left-1/2 top-6 z-[80] -translate-x-1/2 flex items-center gap-3 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-8 py-4 text-amber-100 shadow-[0_18px_45px_rgba(0,0,0,0.55)]" onClick={(e) => e.stopPropagation()}>
+          <span className="text-base font-semibold">
+            Purchased {undoPurchase.qty}× {undoPurchase.item.name}
+          </span>
+          <button
+            type="button"
+            onClick={handleUndo}
+            className="rounded border border-amber-200/40 bg-amber-200/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-50 transition hover:border-amber-100/70 hover:bg-amber-200/20 active:scale-95"
+          >
+            Undo
+          </button>
+        </div>
+      )}
+      {toastMessage && !undoPurchase && (
         <div className="pointer-events-none fixed left-1/2 top-6 z-[80] -translate-x-1/2 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-8 py-4 text-center text-lg font-semibold text-amber-100 shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
           {toastMessage}
         </div>
@@ -462,14 +524,14 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
                 onClick={item.onClick}
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[0.85rem] border border-amber-100/14 bg-[radial-gradient(circle_at_30%_30%,rgba(255,218,157,0.18)_0%,rgba(70,45,18,0.14)_46%,rgba(0,0,0,0.12)_100%)]">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[0.85rem] border border-amber-100/14 bg-[radial-gradient(circle_at_30%_30%,rgba(255,218,157,0.18)_0%,rgba(70,45,18,0.14)_46%,rgba(0,0,0,0.12)_100%)]">
                     <Image
                       src={item.iconSrc}
                       alt=""
-                      width={28}
-                      height={28}
+                      width={48}
+                      height={48}
                       unoptimized
-                      className="h-7 w-7 object-contain"
+                      className="h-full w-full object-contain"
                     />
                   </div>
                   <div className="min-w-0">
@@ -494,6 +556,54 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
           />
         ) : null}
       </div>
+
+      {pendingConfirm && (
+        <div
+          className="game-modal-backdrop absolute inset-0 z-[80] flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm"
+          data-closing={isConfirmClosing}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <section
+            className="game-modal-panel relative flex w-[min(88vw,26rem)] flex-col items-center bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-9 text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            data-closing={isConfirmClosing}
+            role="alertdialog"
+            aria-modal="true"
+            aria-label={
+              pendingConfirm === "pageQuest"
+                ? "Confirm start quest"
+                : "Confirm last challenge"
+            }
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif text-2xl font-bold tracking-wide text-amber-950">
+              {pendingConfirm === "pageQuest"
+                ? "Start the Quest?"
+                : "Start the Last Challenge?"}
+            </h3>
+            <p className="mt-4 text-sm italic leading-relaxed text-amber-950">
+              {pendingConfirm === "pageQuest"
+                ? "Requires level 10. Make sure to save your progress first."
+                : "This is the final challenge. Make sure to save your progress first."}
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={handleConfirmAction}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={closeConfirm}
+              >
+                No
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

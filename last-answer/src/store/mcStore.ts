@@ -99,7 +99,7 @@ type MCStore = {
   readPlayer: () => Player;
   readPersistPlayer: (slotId: string) => Player | null;
   savePlayer: (player: Player) => void;
-  savePersistPlayer: (player: Player, slotId: string) => void;
+  savePersistPlayer: (player: Player, slotId: string) => boolean;
   hydratePlayer: (userId: string, player: Player) => void;
   clearPlayerContext: () => void;
   updatePlayer: (updates: Partial<Player>) => void;
@@ -113,6 +113,7 @@ type MCStore = {
   setCoins: (coins: number) => void;
   addCoins: (amount: number) => void;
   buyProperty: (propertyId: SupportToolId, amount?: number) => boolean;
+  refundProperty: (propertyId: SupportToolId, amount: number, refundCoins: number) => boolean;
   addProperty: (propertyId: SupportToolId, amount?: number) => boolean;
   reduceProperty: (propertyId: SupportToolId, amount?: number) => boolean;
   restockSupportTools: (minimumAmount?: number) => void;
@@ -179,7 +180,7 @@ const createMCStore = () =>
           }),
 
         savePersistPlayer: (player, slotId) => {
-          savePersistedPlayer(createPlayerStorageKey(slotId), player);
+          return savePersistedPlayer(createPlayerStorageKey(slotId), player);
         },
 
         hydratePlayer: (userId, player) => {
@@ -312,6 +313,38 @@ const createMCStore = () =>
             player: {
               ...player,
               coins: player.coins - totalCost,
+              inventory: nextInventory,
+            },
+          });
+
+          return true;
+        },
+
+        refundProperty: (propertyId, amount, refundCoins) => {
+          const player = get().player;
+          const property = getInventoryProperty(player.inventory, propertyId);
+
+          if (!property || property.leftNumber < amount) {
+            return false;
+          }
+
+          const nextInventory = updateInventoryProperty(
+            player.inventory,
+            propertyId,
+            (currentProperty) => ({
+              ...currentProperty,
+              leftNumber: currentProperty.leftNumber - amount,
+            }),
+          );
+
+          if (!nextInventory) {
+            return false;
+          }
+
+          set({
+            player: {
+              ...player,
+              coins: clampStat(player.coins + refundCoins),
               inventory: nextInventory,
             },
           });

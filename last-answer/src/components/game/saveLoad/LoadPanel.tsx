@@ -55,6 +55,7 @@ const LOAD_PANEL_DESIGN_WIDTH = 760;
 const LOAD_PANEL_DESIGN_HEIGHT = 680;
 const LOAD_PANEL_GAP_X = 20;
 const LOAD_PANEL_GAP_Y = 20;
+const SAVE_SUCCESS_AUTO_CLOSE_MS = 1000;
 
 const panelButtonClass =
   "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-600/55 disabled:hover:bg-stone-800/70 disabled:active:translate-y-0 disabled:active:scale-100";
@@ -312,10 +313,28 @@ export default function LoadPanel({
     };
   }, [activeTab, hydrateAuth, user]);
 
+  useEffect(() => {
+    if (saveMessage?.type !== "success") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      requestClose();
+    }, SAVE_SUCCESS_AUTO_CLOSE_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [saveMessage, requestClose]);
+
   const saveList = activeTab === "local" ? localSaveList : cloudSaveList;
   const selectedSave =
     selectedSlot === null ? null : saveList[selectedSlot] ?? null;
   const isCloudBusy = isCheckingSession || isLoadingCloudSaves;
+  const hasCurrentProgress =
+    player.level > 1 ||
+    player.exp > 0 ||
+    player.coins > 0 ||
+    player.activeQuest != null ||
+    (player.completedQuests?.length ?? 0) > 0;
 
   const handleTabClick = (tab: LoadPanelTab) => {
     if (tab === activeTab) {
@@ -359,7 +378,15 @@ export default function LoadPanel({
     const slotLabel = `Slot ${slot + 1}`;
 
     if (tab === "local") {
-      savePersistPlayer(player, slotId);
+      const ok = savePersistPlayer(player, slotId);
+      if (!ok) {
+        setSaveMessage({
+          type: "error",
+          text: `Unable to save to Local — ${slotLabel}. Storage may be full or unavailable.`,
+          id: Date.now(),
+        });
+        return;
+      }
       refreshLocalSaves();
       setSaveMessage({
         type: "success",
@@ -580,7 +607,7 @@ export default function LoadPanel({
               <button
                 type="button"
                 className={panelButtonClass}
-                disabled={!selectedSave || isCloudBusy}
+                disabled={!selectedSave || isCloudBusy || isSaving}
                 onClick={handleLoadRequest}
               >
                 Load
@@ -674,9 +701,15 @@ export default function LoadPanel({
                 Load {pendingLoad.tab === "local" ? "Local" : "Cloud"} Slot{" "}
                 {pendingLoad.slot + 1}?
               </p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-rose-700">
-                Current progress will be replaced.
-              </p>
+              {hasCurrentProgress ? (
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-rose-700">
+                  Current progress will be replaced.
+                </p>
+              ) : (
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-stone-600">
+                  No active game — safe to load.
+                </p>
+              )}
               <div className="mt-6 flex justify-center gap-3">
                 <button
                   type="button"

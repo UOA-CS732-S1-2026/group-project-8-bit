@@ -19,3 +19,11 @@ export function isPlayerSaveSlotId(value: unknown): value is PlayerSaveSlotId {
     PLAYER_SAVE_SLOT_IDS.includes(value as PlayerSaveSlotId)
   );
 }
+
+export const AUTO_SAVE_ID = "auto" as const;
+export type AutoSaveId = typeof AUTO_SAVE_ID;
+export type AnySaveId = PlayerSaveSlotId | AutoSaveId;
+
+export function isValidSaveId(value: unknown): value is AnySaveId {
+  return isPlayerSaveSlotId(value) || value === AUTO_SAVE_ID;
+}

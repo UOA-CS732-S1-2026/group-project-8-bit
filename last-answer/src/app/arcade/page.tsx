@@ -19,6 +19,7 @@ import {
   useGameStore,
 } from "@/store/game-store";
 import { defaultPlayer, getMCStore, useMCStore } from "@/store/mcStore";
+import { useModalCloseAnimation } from "@/components/game/useModalCloseAnimation";
 
 const difficultyOptions: Difficulty[] = ["easy", "medium", "hard"];
 const questionTypeOptions: QuestionType[] = ["multiple", "boolean"];
@@ -228,6 +229,9 @@ export default function ArcadePage() {
     useState<BackgroundOptionId>("mainHub");
   const [battleEnemy, setBattleEnemy] = useState<Enemy | null>(null);
   const [battleStarted, setBattleStarted] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { isClosing: isConfirmClosing, requestClose: closeConfirm } =
+    useModalCloseAnimation(() => setShowConfirm(false));
 
   const enemyLevel = resetBeforeFight ? defaultPlayer.level : player.level;
   const enemyName = fightBoss ? "Arcade Overlord" : "Arcade Challenger";
@@ -244,24 +248,11 @@ export default function ArcadePage() {
   );
 
   const handleFight = () => {
-    const confirmed = window.confirm(
-      [
-        "Start arcade battle with these settings?",
-        "",
-        `Category: ${selectedCategoryLabel}`,
-        `Difficulty: ${formatSetting(difficulty)}`,
-        `Type: ${formatSetting(type)}`,
-        `Boss fight: ${fightBoss ? "Yes" : "No"}`,
-        `Reset player: ${resetBeforeFight ? "Yes" : "No"}`,
-        `Background: ${selectedBackground.label}`,
-        `Enemy: ${enemyName}`,
-        `Enemy level: ${enemyLevel}`,
-      ].join("\n"),
-    );
+    setShowConfirm(true);
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  const handleConfirmFight = () => {
+    setShowConfirm(false);
 
     if (resetBeforeFight) {
       resetPlayer();
@@ -459,6 +450,56 @@ export default function ArcadePage() {
           </div>
         </ScaledArcadePanel>
       </section>
+
+      {showConfirm && (
+        <div
+          className="game-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm"
+          data-closing={isConfirmClosing}
+          onClick={(e) => {
+            e.stopPropagation();
+            closeConfirm();
+          }}
+        >
+          <section
+            className="game-modal-panel relative flex w-[min(88vw,26rem)] flex-col items-center bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-9 text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+            data-closing={isConfirmClosing}
+            role="alertdialog"
+            aria-modal="true"
+            aria-label="Confirm battle"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif text-2xl font-bold tracking-wide text-amber-950">
+              Start Arcade Battle?
+            </h3>
+            <ul className="mt-4 w-full space-y-1 text-center text-sm italic leading-relaxed text-amber-950">
+              <li>Category: {selectedCategoryLabel}</li>
+              <li>Difficulty: {formatSetting(difficulty)}</li>
+              <li>Type: {formatSetting(type)}</li>
+              <li>Boss fight: {fightBoss ? "Yes" : "No"}</li>
+              <li>Reset player: {resetBeforeFight ? "Yes" : "No"}</li>
+              <li>Background: {selectedBackground.label}</li>
+              <li>Enemy: {enemyName}</li>
+              <li>Enemy level: {enemyLevel}</li>
+            </ul>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={handleConfirmFight}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98]"
+                onClick={closeConfirm}
+              >
+                No
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
