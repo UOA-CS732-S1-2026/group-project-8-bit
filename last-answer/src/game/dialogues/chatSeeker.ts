@@ -6,6 +6,8 @@ const getPlayerName = () => {
   return player.name || defaultPlayer.name;
 };
 
+const playerCharacter = "__PLAYER__";
+
 const SeekerRespect: DialogueSingle[] = [
   {
     character: "Seeker",
@@ -16,7 +18,7 @@ const SeekerRespect: DialogueSingle[] = [
     dialogue: "You may not think much of it, but many of us still respect you.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Respect me?",
   },
   {
@@ -34,7 +36,7 @@ const SeekerRespect: DialogueSingle[] = [
       "Not many people would risk their position for people below them.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "I only did what should have been done.",
   },
   {
@@ -49,7 +51,7 @@ const SeekerRest: DialogueSingle[] = [
     dialogue: "Enjoy the quiet while it lasts.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You make it sound like peace is dangerous.",
   },
   {
@@ -62,7 +64,7 @@ const SeekerRest: DialogueSingle[] = [
       "Do not push yourself too hard. You have already carried more than most.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "I am fine.",
   },
   {
@@ -77,7 +79,7 @@ const SeekerCards: DialogueSingle[] = [
     dialogue: "We are going to play cards in the camp later. Want to join us?",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Cards?",
   },
   {
@@ -86,7 +88,7 @@ const SeekerCards: DialogueSingle[] = [
       "Yes. Nothing serious. Just a few rounds, some cheap drink, and arguments over rules no one remembers properly.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Sounds peaceful.",
   },
   {
@@ -101,7 +103,7 @@ const SeekerBoredom: DialogueSingle[] = [
     dialogue: "I hate days like this.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Quiet days?",
   },
   {
@@ -119,7 +121,7 @@ const SeekerBoredom: DialogueSingle[] = [
       "Now look at us. Sitting around the camp, waiting for orders that never come.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "At least no one is dying today.",
   },
   {
@@ -139,7 +141,7 @@ const SeekerMountainRumor: DialogueSingle[] = [
     dialogue: "Have you heard about the mountain in the forest?",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Only rumors.",
   },
   {
@@ -147,7 +149,7 @@ const SeekerMountainRumor: DialogueSingle[] = [
     dialogue: "Then listen carefully. People have been attacked there.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "By bandits?",
   },
   {
@@ -160,7 +162,7 @@ const SeekerMountainRumor: DialogueSingle[] = [
       "Knowledge fragments, and many of them. More than anyone should see in one place.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That is strange.",
   },
   {
@@ -173,7 +175,7 @@ const SeekerMountainRumor: DialogueSingle[] = [
       "Some say the mountain is forbidden now. Others say the government is hiding something there.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "And what do you think?",
   },
   {
@@ -183,10 +185,21 @@ const SeekerMountainRumor: DialogueSingle[] = [
   },
 ];
 
-export const chatSeekerDialogues: DialogueSingle[][] = [
+const chatSeekerDialogues: DialogueSingle[][] = [
   SeekerRespect,
   SeekerRest,
   SeekerCards,
   SeekerBoredom,
   SeekerMountainRumor,
 ];
+export const getChatSeekerDialogues = (): DialogueSingle[][] => {
+  const playerName = getPlayerName();
+
+  return chatSeekerDialogues.map((dialogueGroup) =>
+    dialogueGroup.map((dialogue) =>
+      dialogue.character === playerCharacter
+        ? { ...dialogue, character: playerName }
+        : dialogue,
+    ),
+  );
+};

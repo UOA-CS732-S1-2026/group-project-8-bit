@@ -9,10 +9,10 @@ import {
 import { useRouter } from "next/navigation";
 import { createEnemy } from "@/game/core/battleCore";
 import type { BattleOutcome, Enemy } from "@/game/core/types";
-import { chatHunterDialogues } from "@/game/dialogues/chatHunter";
-import { chatOfficerDialogues } from "@/game/dialogues/chatOfficer";
-import { chatPageDialogues } from "@/game/dialogues/chatPage";
-import { chatSeekerDialogues } from "@/game/dialogues/chatSeeker";
+import { getChatHunterDialogues } from "@/game/dialogues/chatHunter";
+import { getChatOfficerDialogues } from "@/game/dialogues/chatOfficer";
+import { getChatPageDialogues } from "@/game/dialogues/chatPage";
+import { getChatSeekerDialogues } from "@/game/dialogues/chatSeeker";
 import { useMCStore } from "@/store/mcStore";
 import InteractBtn from "./InteractBtn";
 import DialogueScene, { type DialogueSingle } from "./DialogueScene";
@@ -202,19 +202,19 @@ export default function FoggyForestContent() {
 
   const talkOfficer = () => {
     if (player.level >= 5) {
-      openRandomDialogue(chatOfficerDialogues, officerChatBackground);
+      openRandomDialogue(getChatOfficerDialogues(), officerChatBackground);
       return;
     }
 
-    openRandomDialogue(chatPageDialogues, pageChatBackground);
+    openRandomDialogue(getChatPageDialogues(), pageChatBackground);
   };
 
   const talkSeekers = () => {
-    openRandomDialogue(chatSeekerDialogues, seekerHunterChatBackground);
+    openRandomDialogue(getChatSeekerDialogues(), seekerHunterChatBackground);
   };
 
   const talkHunters = () => {
-    openRandomDialogue(chatHunterDialogues, seekerHunterChatBackground);
+    openRandomDialogue(getChatHunterDialogues(), seekerHunterChatBackground);
   };
 
   const handleBattleFinish = (outcome: BattleOutcome) => {

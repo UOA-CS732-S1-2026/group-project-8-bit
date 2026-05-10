@@ -17,7 +17,7 @@ export default function GameMainFooter() {
     }
 
     if (!pageQuestCompleted) {
-      return "Objective: talk with barkeeper about Page and reach level 20";
+      return "Objective: talk with barkeeper about Page and reach level 10";
     }
 
     if (player.level < 20) {

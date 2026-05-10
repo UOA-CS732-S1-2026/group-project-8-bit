@@ -6,13 +6,15 @@ const getPlayerName = () => {
   return player.name || defaultPlayer.name;
 };
 
+const playerCharacter = "__PLAYER__";
+
 const Greeting: DialogueSingle[] = [
   {
     character: "Page",
     dialogue: "Happy hunting, boy.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You sound cheerful today.",
   },
   {
@@ -32,7 +34,7 @@ const AboutMCHuntingSkill: DialogueSingle[] = [
     dialogue: "That was quite a lot.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "The fragments were clustered near the old road.",
   },
   {
@@ -45,7 +47,7 @@ const AboutMCHuntingSkill: DialogueSingle[] = [
       "You have a talent for hunting them. Careful hands, sharp eyes, and enough sense not to die for pride.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That almost sounds like praise.",
   },
   {
@@ -56,7 +58,7 @@ const AboutMCHuntingSkill: DialogueSingle[] = [
 
 const AboutAshesOfKnowledge: DialogueSingle[] = [
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "What happens to the ashes after we hand them over?",
   },
   {
@@ -65,7 +67,7 @@ const AboutAshesOfKnowledge: DialogueSingle[] = [
       "They are collected, recorded, sealed, and sent back to the First Monolith.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Back to the Monolith?",
   },
   {
@@ -74,7 +76,7 @@ const AboutAshesOfKnowledge: DialogueSingle[] = [
       "Yes. The ashes still carry remnants of knowledge. Broken, unstable, dangerous - but useful.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Useful for what?",
   },
   {
@@ -82,7 +84,7 @@ const AboutAshesOfKnowledge: DialogueSingle[] = [
     dialogue: "To slow the Monolith's decay.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "So the government uses monster remains to repair it.",
   },
   {
@@ -107,7 +109,7 @@ const PageHiddenAttitude: DialogueSingle[] = [
     dialogue: "But in truth, you are feeding the heart of the Empire.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That does not sound comforting.",
   },
   {
@@ -122,7 +124,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "You have been hunting well lately.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That sounds like a warning, not praise.",
   },
   {
@@ -130,7 +132,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "Perhaps both.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "What is it?",
   },
   {
@@ -138,7 +140,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "Stay away from the mountain beyond the forest.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "The mountain?",
   },
   {
@@ -147,7 +149,7 @@ const PageMountainWarning: DialogueSingle[] = [
       "Yes. Do not go near it. Do not follow rumors. Do not accept work that leads you there.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Why?",
   },
   {
@@ -155,7 +157,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "Because people who go there do not always return.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Knowledge fragments?",
   },
   {
@@ -163,7 +165,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "Too many of them. More than any hunter should face at once.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Fragments do not usually gather like that.",
   },
   {
@@ -171,7 +173,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "And that is exactly why you should avoid the place.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You sound certain.",
   },
   {
@@ -180,7 +182,7 @@ const PageMountainWarning: DialogueSingle[] = [
       "I read the reports. Seekers were attacked there. Hunters too. Some died. Some came back empty-eyed.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Then why has no one cleared it?",
   },
   {
@@ -188,7 +190,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "Because some wounds should not be touched with bare hands.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That does not answer the question.",
   },
   {
@@ -196,7 +198,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "It answers enough.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You are telling me not to investigate.",
   },
   {
@@ -205,7 +207,7 @@ const PageMountainWarning: DialogueSingle[] = [
       "I am telling you not to waste your life on a place already marked as forbidden.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Forbidden by the government?",
   },
   {
@@ -213,7 +215,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "By common sense.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Those are not always the same thing.",
   },
   {
@@ -221,7 +223,7 @@ const PageMountainWarning: DialogueSingle[] = [
     dialogue: "No. But in this case, listen to either one.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "And if I do not?",
   },
   {
@@ -235,10 +237,21 @@ const PageMountainWarning: DialogueSingle[] = [
   },
 ];
 
-export const chatPageDialogues: DialogueSingle[][] = [
+const chatPageDialogues: DialogueSingle[][] = [
   Greeting,
   AboutMCHuntingSkill,
   AboutAshesOfKnowledge,
   PageHiddenAttitude,
   PageMountainWarning,
 ];
+export const getChatPageDialogues = (): DialogueSingle[][] => {
+  const playerName = getPlayerName();
+
+  return chatPageDialogues.map((dialogueGroup) =>
+    dialogueGroup.map((dialogue) =>
+      dialogue.character === playerCharacter
+        ? { ...dialogue, character: playerName }
+        : dialogue,
+    ),
+  );
+};

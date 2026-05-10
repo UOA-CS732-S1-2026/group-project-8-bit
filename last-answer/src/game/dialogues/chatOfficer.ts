@@ -6,13 +6,15 @@ const getPlayerName = () => {
   return player.name || defaultPlayer.name;
 };
 
+const playerCharacter = "__PLAYER__";
+
 const BasicWorkDialogue: DialogueSingle[] = [
   {
     character: "Officer",
     dialogue: "You again. Good.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Do you have work?",
   },
   {
@@ -20,7 +22,7 @@ const BasicWorkDialogue: DialogueSingle[] = [
     dialogue: "Always. Bring me Ashes of Knowledge, and you will be paid.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Same rate as before?",
   },
   {
@@ -28,7 +30,7 @@ const BasicWorkDialogue: DialogueSingle[] = [
     dialogue: "Same rate. More if the ashes are stable and properly sealed.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "And if they are damaged?",
   },
   {
@@ -40,7 +42,7 @@ const BasicWorkDialogue: DialogueSingle[] = [
 
 const AboutPagesBetrayal: DialogueSingle[] = [
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "I heard Page disappeared.",
   },
   {
@@ -48,7 +50,7 @@ const AboutPagesBetrayal: DialogueSingle[] = [
     dialogue: "Disappeared? No. He betrayed the Empire.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "What did he do?",
   },
   {
@@ -57,7 +59,7 @@ const AboutPagesBetrayal: DialogueSingle[] = [
       "He stole a large stock of Ashes of Knowledge and fled before the transfer could be completed.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That explains the wanted notices.",
   },
   {
@@ -65,7 +67,7 @@ const AboutPagesBetrayal: DialogueSingle[] = [
     dialogue: "It explains only part of them.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "There is more?",
   },
   {
@@ -74,7 +76,7 @@ const AboutPagesBetrayal: DialogueSingle[] = [
       "That is not your concern. What matters is this: Page is wanted by the Empire. Whoever brings him back, dead or alive, will receive a large reward.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "How large?",
   },
   {
@@ -85,7 +87,7 @@ const AboutPagesBetrayal: DialogueSingle[] = [
 
 const AboutStolenAshes: DialogueSingle[] = [
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Why does the Empire care so much about the ashes?",
   },
   {
@@ -98,7 +100,7 @@ const AboutStolenAshes: DialogueSingle[] = [
       "They are collected, measured, sealed, and sent where they are needed.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "To the First Monolith?",
   },
   {
@@ -106,7 +108,7 @@ const AboutStolenAshes: DialogueSingle[] = [
     dialogue: "You ask too many questions.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That sounds like a yes.",
   },
   {
@@ -117,7 +119,7 @@ const AboutStolenAshes: DialogueSingle[] = [
 
 const AboutGovernmentSupport: DialogueSingle[] = [
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "If Page is so dangerous, will the Empire send soldiers?",
   },
   {
@@ -125,7 +127,7 @@ const AboutGovernmentSupport: DialogueSingle[] = [
     dialogue: "No.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "No?",
   },
   {
@@ -139,7 +141,7 @@ const AboutGovernmentSupport: DialogueSingle[] = [
       "We do not have spare men to chase one traitor through the forest.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "So hunters and seekers are expected to do it?",
   },
   {
@@ -147,7 +149,7 @@ const AboutGovernmentSupport: DialogueSingle[] = [
     dialogue: "Hunters, seekers, mercenaries, anyone willing to take the risk.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "And if we need help?",
   },
   {
@@ -156,9 +158,20 @@ const AboutGovernmentSupport: DialogueSingle[] = [
   },
 ];
 
-export const chatOfficerDialogues: DialogueSingle[][] = [
+const chatOfficerDialogues: DialogueSingle[][] = [
   BasicWorkDialogue,
   AboutPagesBetrayal,
   AboutStolenAshes,
   AboutGovernmentSupport,
 ];
+export const getChatOfficerDialogues = (): DialogueSingle[][] => {
+  const playerName = getPlayerName();
+
+  return chatOfficerDialogues.map((dialogueGroup) =>
+    dialogueGroup.map((dialogue) =>
+      dialogue.character === playerCharacter
+        ? { ...dialogue, character: playerName }
+        : dialogue,
+    ),
+  );
+};
