@@ -6,13 +6,15 @@ const getPlayerName = () => {
   return player.name || defaultPlayer.name;
 };
 
+const playerCharacter = "__PLAYER__";
+
 const HunterStartOfWork: DialogueSingle[] = [
   {
     character: "Hunter",
     dialogue: "Another day, another hunt.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You sound tired already.",
   },
   {
@@ -32,7 +34,7 @@ const HunterProtectingCity: DialogueSingle[] = [
     dialogue: "People complain about us, but they sleep because of us.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Because we keep the monsters away?",
   },
   {
@@ -45,7 +47,7 @@ const HunterProtectingCity: DialogueSingle[] = [
       "We protect this city from knowledge fragments, and the government pays us for every danger we drag back from the dark.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "So it is duty and business.",
   },
   {
@@ -60,7 +62,7 @@ const HunterRespectForMC: DialogueSingle[] = [
     dialogue: "You are good at this. Better than most.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "At hunting?",
   },
   {
@@ -73,7 +75,7 @@ const HunterRespectForMC: DialogueSingle[] = [
       "I saw how many Ashes of Knowledge you brought to the officer last time. That was not luck.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Luck helped.",
   },
   {
@@ -88,7 +90,7 @@ const HunterTeamLeader: DialogueSingle[] = [
     dialogue: "You know, you are a good team leader.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That sounds unlike you. Are you praising me?",
   },
   {
@@ -101,7 +103,7 @@ const HunterTeamLeader: DialogueSingle[] = [
       "But it is true. With you leading, we bring back more ashes and fewer people get hurt.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That matters more than the reward.",
   },
   {
@@ -116,7 +118,7 @@ const HunterMountainWarning: DialogueSingle[] = [
     dialogue: "Be careful if your work takes you near the mountain.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "The one beyond the forest?",
   },
   {
@@ -124,7 +126,7 @@ const HunterMountainWarning: DialogueSingle[] = [
     dialogue: "Yes. Stay away from it if you can.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You heard something?",
   },
   {
@@ -136,7 +138,7 @@ const HunterMountainWarning: DialogueSingle[] = [
     dialogue: "Knowledge fragments. Too many of them.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "A cluster?",
   },
   {
@@ -151,7 +153,7 @@ const HunterDrinksAfterWork: DialogueSingle[] = [
     dialogue: "After today's hunt, we should take a break.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "A break?",
   },
   {
@@ -159,7 +161,7 @@ const HunterDrinksAfterWork: DialogueSingle[] = [
     dialogue: "Drinks. My treat.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That generous?",
   },
   {
@@ -172,7 +174,7 @@ const HunterDrinksAfterWork: DialogueSingle[] = [
       "We will go to the tavern. It is a good place. Warm fire, decent drink, and the barkeeper knows how to keep people coming back.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Andrew?",
   },
   {
@@ -185,7 +187,7 @@ const HunterDrinksAfterWork: DialogueSingle[] = [
       "He plays music sometimes, too. Not loudly. Not like a drunk trying to impress a girl. Proper music.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "He knows how to manage a room.",
   },
   {
@@ -201,7 +203,7 @@ const HunterEndlessWork: DialogueSingle[] = [
     dialogue: "Sometimes I wonder if this work will ever end.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "The monsters?",
   },
   {
@@ -214,7 +216,7 @@ const HunterEndlessWork: DialogueSingle[] = [
       "We kill them, burn what remains, collect the ashes, report to the officer... and the next day there are more.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "It feels endless.",
   },
   {
@@ -227,7 +229,7 @@ const HunterEndlessWork: DialogueSingle[] = [
       "Or maybe it only feels that way because no one understands where they truly come from.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "You think there is a source?",
   },
   {
@@ -236,7 +238,7 @@ const HunterEndlessWork: DialogueSingle[] = [
   },
 ];
 
-export const chatHunterDialogues: DialogueSingle[][] = [
+const chatHunterDialogues: DialogueSingle[][] = [
   HunterStartOfWork,
   HunterProtectingCity,
   HunterRespectForMC,
@@ -245,3 +247,14 @@ export const chatHunterDialogues: DialogueSingle[][] = [
   HunterDrinksAfterWork,
   HunterEndlessWork,
 ];
+export const getChatHunterDialogues = (): DialogueSingle[][] => {
+  const playerName = getPlayerName();
+
+  return chatHunterDialogues.map((dialogueGroup) =>
+    dialogueGroup.map((dialogue) =>
+      dialogue.character === playerCharacter
+        ? { ...dialogue, character: playerName }
+        : dialogue,
+    ),
+  );
+};

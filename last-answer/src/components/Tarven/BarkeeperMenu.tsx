@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useModalCloseAnimation } from "@/components/game/useModalCloseAnimation";
 import DialogueScene, { DialogueSingle } from "../game/DialogueScene";
 import { PageTarget } from "../game/quest/PageTarget";
-import { chatAndrewDialogues } from "@/game/dialogues/chatAndrew";
+import { getChatAndrewDialogues } from "@/game/dialogues/chatAndrew";
 import { beforeStart } from "@/game/dialogues/questPage";
 import Image from "next/image";
 import { supportToolConfigs } from "@/game/core/battleCore";
@@ -268,6 +268,7 @@ function BarkeeperPurchasePanel({
 }
 
 function getRandomAndrewDialogues(): DialogueSingle[] {
+  const chatAndrewDialogues = getChatAndrewDialogues();
   const randomIndex = Math.floor(Math.random() * chatAndrewDialogues.length);
   return chatAndrewDialogues[randomIndex];
 }

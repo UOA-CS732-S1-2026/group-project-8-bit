@@ -6,6 +6,8 @@ const getPlayerName = () => {
   return player.name || defaultPlayer.name;
 };
 
+const playerCharacter = "__PLAYER__";
+
 const Greeting: DialogueSingle[] = [
   {
     character: "Andrew",
@@ -29,7 +31,7 @@ const AboutMonsters: DialogueSingle[] = [
     dialogue: "Be careful when you travel beyond the walls.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "The knowledge fragments?",
   },
   {
@@ -47,7 +49,7 @@ const AboutMonsters: DialogueSingle[] = [
       "Those who survive are sometimes worse than dead. Empty-eyed. Obedient. Innocent, in the most terrible way.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Then I will avoid them when I can.",
   },
   {
@@ -62,7 +64,7 @@ const AboutSecondKing: DialogueSingle[] = [
     dialogue: "Many people now say they miss the days of the Second King.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Because life was safer then?",
   },
   {
@@ -79,7 +81,7 @@ const AboutSecondKing: DialogueSingle[] = [
     dialogue: "Many were arrested. Some never returned.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "And now?",
   },
   {
@@ -100,7 +102,7 @@ const AboutSecondKing: DialogueSingle[] = [
 
 const AboutThirdKing: DialogueSingle[] = [
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "What do you think about the Third King?",
   },
   {
@@ -113,7 +115,7 @@ const AboutThirdKing: DialogueSingle[] = [
       "He allowed people to criticize the government. He cancelled many old privileges of the Precursors. He tried to make the law fairer.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "And that caused the civil war.",
   },
   {
@@ -126,7 +128,7 @@ const AboutThirdKing: DialogueSingle[] = [
     dialogue: "But the bitter part is this: many Aldrens oppose him too.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Because they only see the chaos.",
   },
   {
@@ -147,7 +149,7 @@ const AboutGreatSilence: DialogueSingle[] = [
     dialogue: "The Great Silence came without warning.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Nobody was prepared.",
   },
   {
@@ -160,7 +162,7 @@ const AboutGreatSilence: DialogueSingle[] = [
       "Many people could not bear it. They had lived their whole lives with its guidance. When that voice vanished, something inside them collapsed.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "They became mindless.",
   },
   {
@@ -168,7 +170,7 @@ const AboutGreatSilence: DialogueSingle[] = [
     dialogue: "Some did. Others fled and recovered.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Why them?",
   },
   {
@@ -203,7 +205,7 @@ const AboutMCLeavingGovernmentWork: DialogueSingle[] = [
       "Tell me honestly. Do you regret resigning from government service?",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "No.",
   },
   {
@@ -212,7 +214,7 @@ const AboutMCLeavingGovernmentWork: DialogueSingle[] = [
       "Even now? Seekers have less and less proper work. Most hunting is done by the hunters. Many seekers sit around all day, lazy and useless, but still receive their fixed salary every month.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "That is exactly why I left.",
   },
   {
@@ -220,16 +222,16 @@ const AboutMCLeavingGovernmentWork: DialogueSingle[] = [
     dialogue: "Because of the officers?",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Because of one officer in particular.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue:
       "He kept forcing fresh recruits into dangerous tasks. He knew nothing about the field, but acted as if every life under him was replaceable.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue:
       "I could not stand someone so irresponsible. He did not understand danger, and he did not respect the people who faced it.",
   },
@@ -238,11 +240,11 @@ const AboutMCLeavingGovernmentWork: DialogueSingle[] = [
     dialogue: "So you would make the same choice again?",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Yes.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue:
       "My life now is not easy, but it is mine. I earn more than before, and I work with people I can trust.",
   },
@@ -251,7 +253,7 @@ const AboutMCLeavingGovernmentWork: DialogueSingle[] = [
     dialogue: "Good.",
   },
   {
-    character: getPlayerName(),
+    character: playerCharacter,
     dialogue: "Good?",
   },
   {
@@ -265,7 +267,7 @@ const AboutMCLeavingGovernmentWork: DialogueSingle[] = [
   },
 ];
 
-export const chatAndrewDialogues: DialogueSingle[][] = [
+const chatAndrewDialogues: DialogueSingle[][] = [
   Greeting,
   AboutMonsters,
   AboutSecondKing,
@@ -273,3 +275,15 @@ export const chatAndrewDialogues: DialogueSingle[][] = [
   AboutGreatSilence,
   AboutMCLeavingGovernmentWork,
 ];
+
+export const getChatAndrewDialogues = (): DialogueSingle[][] => {
+  const playerName = getPlayerName();
+
+  return chatAndrewDialogues.map((dialogueGroup) =>
+    dialogueGroup.map((dialogue) =>
+      dialogue.character === playerCharacter
+        ? { ...dialogue, character: playerName }
+        : dialogue,
+    ),
+  );
+};
