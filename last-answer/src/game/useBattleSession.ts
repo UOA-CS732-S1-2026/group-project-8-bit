@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getBattleTurnLimit } from "@/game/core/battleCore";
+import { getBattleTurnLimit, supportToolConfigs } from "@/game/core/battleCore";
 import {
   activateSupportTool as handleSupportToolActivation,
   createBattle,
@@ -24,6 +24,7 @@ import type {
   SupportToolId,
 } from "@/game/core/types";
 import { useGameStore } from "@/store/game-store";
+import { useAchievementStore } from "@/store/achievementStore";
 import { getMCStore } from "@/store/mcStore";
 
 type BattleSessionControls = {
@@ -67,6 +68,9 @@ export function useBattleSession(): BattleSessionControls {
       }
 
       applyBattleCompletion(playerStore, transition.completion);
+      useAchievementStore
+        .getState()
+        .recordBattleCompletion(transition.completion, transition.battle.bestCombo);
 
       if (transition.completion) {
         setBattleReward(transition.completion.reward);
@@ -255,6 +259,10 @@ export function useBattleSession(): BattleSessionControls {
 
     if (toolWasConsumed) {
       getMCStore().getState().reduceProperty(toolId, 1);
+      const toolConfig = supportToolConfigs[toolId];
+      useAchievementStore
+        .getState()
+        .recordSupportToolUse(toolId, Boolean(toolConfig?.strongAssist));
     }
   }
 

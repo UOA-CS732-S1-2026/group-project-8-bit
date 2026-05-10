@@ -18,6 +18,7 @@ import {
 } from "@/game/core/fateCards";
 import type { Player, SupportToolId } from "@/game/core/types";
 import { defaultPlayer } from "@/lib/player";
+import { useAchievementStore } from "@/store/achievementStore";
 import { useMCStore } from "@/store/mcStore";
 import ModalPortal from "./ModalPortal";
 import { useModalCloseAnimation } from "./useModalCloseAnimation";
@@ -264,6 +265,8 @@ function getInventoryAmount(player: Player, toolId: SupportToolId) {
 
 export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) {
   const savePlayer = useMCStore((state) => state.savePlayer);
+  const resetAchievements = useAchievementStore((state) => state.resetAchievements);
+  const setActiveAchievementScope = useAchievementStore((state) => state.setActiveScope);
   const [characterName, setCharacterName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pendingName, setPendingName] = useState<string | null>(null);
@@ -367,6 +370,9 @@ export default function NewGamePanel({ onClose, onCreated }: NewGamePanelProps) 
       hp: newMaxHp,
     };
 
+    const newCharacterScopeId = `character:${pendingName.trim().toLowerCase()}:${Date.now()}`;
+    setActiveAchievementScope(newCharacterScopeId);
+    resetAchievements();
     savePlayer(finalPlayer);
     setPendingName(null);
     onCreated();
