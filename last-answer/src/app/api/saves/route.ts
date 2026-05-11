@@ -3,7 +3,7 @@ import type { Player } from "@/game/core/types";
 import { normalizeAchievementCloudData } from "@/lib/achievement-data";
 import { getCurrentSession } from "@/lib/auth";
 import { getConfigurationErrorMessage } from "@/lib/config";
-import { getPlayerSave, updatePlayerSave } from "@/lib/player-save";
+import { deletePlayerSave, getPlayerSave, updatePlayerSave } from "@/lib/player-save";
 import { isValidSaveId } from "@/lib/save-slots";
 
 export const runtime = "nodejs";
@@ -12,6 +12,10 @@ type SaveRequestBody = {
   saveId?: unknown;
   player?: unknown;
   achievements?: unknown;
+};
+
+type DeleteRequestBody = {
+  saveId?: unknown;
 };
 
 export async function GET() {
@@ -25,9 +29,9 @@ export async function GET() {
       );
     }
 
-    const saveList = await getPlayerSave(session.user.id);
+    const { saveList, savedAtList } = await getPlayerSave(session.user.id);
 
-    return NextResponse.json({ saveList });
+    return NextResponse.json({ saveList, savedAtList });
   } catch (error) {
     const configurationMessage = getConfigurationErrorMessage(error);
 
@@ -82,14 +86,14 @@ export async function PUT(request: Request) {
       );
     }
 
-    const save = await updatePlayerSave(
+    const { save, savedAt } = await updatePlayerSave(
       session.user.id,
       body.saveId,
       body.player as Player,
       normalizeAchievementCloudData(body.achievements),
     );
 
-    return NextResponse.json({ save });
+    return NextResponse.json({ save, savedAt });
   } catch (error) {
     const configurationMessage = getConfigurationErrorMessage(error);
 
@@ -103,6 +107,56 @@ export async function PUT(request: Request) {
     console.error("Save update failed", error);
     return NextResponse.json(
       { error: "Unable to save player progress right now." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await getCurrentSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 },
+      );
+    }
+
+    let body: DeleteRequestBody;
+
+    try {
+      body = (await request.json()) as DeleteRequestBody;
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request payload." },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidSaveId(body.saveId)) {
+      return NextResponse.json(
+        { error: "Invalid save slot." },
+        { status: 400 },
+      );
+    }
+
+    await deletePlayerSave(session.user.id, body.saveId);
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const configurationMessage = getConfigurationErrorMessage(error);
+
+    if (configurationMessage) {
+      return NextResponse.json(
+        { error: configurationMessage },
+        { status: 500 },
+      );
+    }
+
+    console.error("Save delete failed", error);
+    return NextResponse.json(
+      { error: "Unable to delete save right now." },
       { status: 500 },
     );
   }
