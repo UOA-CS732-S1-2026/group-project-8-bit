@@ -4,10 +4,13 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { Player } from "@/game/core/types";
 import type { AuthUser } from "@/lib/auth-shared";
+import { useAchievementStore } from "@/store/achievementStore";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
 import { GameMainBar } from "./GameMainBar";
 import GameMainFooter from "./GameMainFooter";
+import { AchievementProgressTracker } from "./AchievementProgressTracker";
+import { AchievementToastStack } from "./AchievementToastStack";
 import { PlayerSaveSync } from "./PlayerSaveSync";
 
 type AuthenticatedGameShellProps = {
@@ -26,11 +29,13 @@ export function AuthenticatedGameShell({
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const hydratePlayer = useMCStore((state) => state.hydratePlayer);
   const activeUserId = useMCStore((state) => state.userId);
+  const setActiveAchievementScope = useAchievementStore((state) => state.setActiveScope);
 
   useEffect(() => {
     hydrateAuth(user);
+    setActiveAchievementScope(`cloud:auto:${user.id}`);
     hydratePlayer(user.id, player);
-  }, [hydrateAuth, hydratePlayer, player, user]);
+  }, [hydrateAuth, hydratePlayer, player, setActiveAchievementScope, user]);
 
   const ready = isHydrated && activeUserId === user.id;
 
@@ -52,6 +57,7 @@ export function AuthenticatedGameShell({
   return (
     <div className="relative h-full w-full overflow-hidden" style={shellStyle}>
       <PlayerSaveSync />
+      <AchievementProgressTracker />
       <div className="grid h-full w-full grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden">
         {showSharedChrome ? (
           <div className="relative z-10 h-[var(--game-topbar-height)]">
@@ -64,6 +70,7 @@ export function AuthenticatedGameShell({
         ) : null}
       </div>
       {showSharedChrome ? <GameMainFooter /> : null}
+      <AchievementToastStack />
     </div>
   );
 }

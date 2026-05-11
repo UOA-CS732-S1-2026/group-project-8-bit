@@ -1,13 +1,19 @@
 import type { QueryResultRow } from "pg";
 import type { Player } from "@/game/core/types";
+import type { AchievementCloudData } from "@/lib/achievement-data";
+import {
+  createPlayerSaveRecord,
+  normalizePlayerSaveRecord,
+  type PlayerSaveRecord,
+} from "@/lib/player-save-data";
 import { PLAYER_SAVE_SLOT_IDS, type PlayerSaveSlotId } from "./save-slots";
 import { query, type Queryable } from "./db";
-import { buildInitialPlayer, normalizePlayer } from "./player";
+import { buildInitialPlayer } from "./player";
 
 type SaveRow = QueryResultRow & {
   user_id: string;
   save_id: PlayerSaveSlotId;
-  save_data: Player;
+  save_data: unknown;
   updated_at?: Date | string | null;
 };
 
@@ -16,7 +22,7 @@ type UpdatedAtRow = QueryResultRow & {
 };
 
 export type PlayerSaveListing = {
-  saveList: Array<Player | null>;
+  saveList: Array<PlayerSaveRecord | null>;
   savedAtList: Array<string | null>;
 };
 
@@ -31,7 +37,7 @@ function toIsoString(value: Date | string | null | undefined): string | null {
 
 function buildSaveListing(rows: SaveRow[]): PlayerSaveListing {
   const savesBySlot = new Map(
-    rows.map((save) => [save.save_id, normalizePlayer(save.save_data)]),
+    rows.map((save) => [save.save_id, normalizePlayerSaveRecord(save.save_data)]),
   );
   const savedAtBySlot = new Map(
     rows.map((save) => [save.save_id, toIsoString(save.updated_at)]),
@@ -53,6 +59,7 @@ export async function createInitialPlayerSave(
   db: Queryable = defaultQueryable,
 ) {
   const initialPlayer = buildInitialPlayer(username);
+  const initialSave = createPlayerSaveRecord(initialPlayer);
 
   await db.query(
     `INSERT INTO player_saves (user_id, save_id, save_data, updated_at)
@@ -61,10 +68,10 @@ export async function createInitialPlayerSave(
      DO UPDATE SET
        save_data = EXCLUDED.save_data,
        updated_at = NOW()`,
-    [userId, PLAYER_SAVE_SLOT_IDS[0], JSON.stringify(initialPlayer)],
+    [userId, PLAYER_SAVE_SLOT_IDS[0], JSON.stringify(initialSave)],
   );
 
-  return initialPlayer;
+  return initialSave;
 }
 
 export async function getPlayerSave(
@@ -112,9 +119,10 @@ export async function updatePlayerSave(
   userId: string,
   saveId: string,
   player: Player,
+  achievements: AchievementCloudData | null = null,
   db: Queryable = defaultQueryable,
-): Promise<{ player: Player; savedAt: string | null }> {
-  const normalizedPlayer = normalizePlayer(player);
+): Promise<{ save: PlayerSaveRecord; savedAt: string | null }> {
+  const normalizedSave = createPlayerSaveRecord(player, achievements);
 
   const result = await db.query<UpdatedAtRow>(
     `INSERT INTO player_saves (user_id, save_id, save_data, updated_at)
@@ -124,11 +132,11 @@ export async function updatePlayerSave(
        save_data = EXCLUDED.save_data,
        updated_at = NOW()
      RETURNING updated_at`,
-    [userId, saveId, JSON.stringify(normalizedPlayer)],
+    [userId, saveId, JSON.stringify(normalizedSave)],
   );
 
   return {
-    player: normalizedPlayer,
+    save: normalizedSave,
     savedAt: toIsoString(result.rows[0]?.updated_at),
   };
 }

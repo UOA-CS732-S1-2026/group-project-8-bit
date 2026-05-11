@@ -26,6 +26,7 @@ import {
   sealedPath,
   wayToRuin,
 } from "@/game/dialogues/theEnd";
+import { useAchievementStore } from "@/store/achievementStore";
 import EndAshes from "./EndAshes";
 import EndGoldenOrder from "./EndGoldenOrder";
 
@@ -169,6 +170,10 @@ export default function LastTask() {
   const [isLoadingDialogue, setIsLoadingDialogue] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const transitionIdRef = useRef(0);
+  const endingRecordedRef = useRef({
+    golden: false,
+    ashes: false,
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -266,6 +271,17 @@ export default function LastTask() {
     },
     [showLoadingScreenBeforePhase],
   );
+
+  useEffect(() => {
+    if (phase === "goldenEnding" && !endingRecordedRef.current.golden) {
+      endingRecordedRef.current.golden = true;
+      useAchievementStore.getState().recordEndingSeen("golden");
+    }
+    if (phase === "ashesEnding" && !endingRecordedRef.current.ashes) {
+      endingRecordedRef.current.ashes = true;
+      useAchievementStore.getState().recordEndingSeen("ashes");
+    }
+  }, [phase]);
 
   const [showAndrewChoice, setShowAndrewChoice] = useState(false);
 

@@ -11,7 +11,12 @@ import {
 } from "react";
 import type { Player } from "@/game/core/types";
 import type { AuthUser } from "@/lib/auth-shared";
+import {
+  createPlayerSaveRecord,
+  type PlayerSaveRecord,
+} from "@/lib/player-save-data";
 import { stopMainInterfaceMusicNow } from "@/lib/mainInterfaceMusic";
+import { useAchievementStore } from "@/store/achievementStore";
 import { gameSlots } from "@/store/game-store";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
@@ -33,7 +38,7 @@ type SessionResponse = {
 };
 
 type SavesResponse = {
-  saveList?: Array<Player | null>;
+  saveList?: Array<PlayerSaveRecord | null>;
   savedAtList?: Array<string | null>;
   error?: string;
 };
@@ -53,6 +58,7 @@ type PendingLoad = {
   tab: LoadPanelTab;
   slot: number;
   save: Player;
+  cloudAchievements: PlayerSaveRecord["achievements"];
 };
 type PendingDelete = {
   tab: LoadPanelTab;
@@ -197,6 +203,16 @@ export default function LoadPanel({
   const savePlayer = useMCStore((state) => state.savePlayer);
   const savePersistPlayer = useMCStore((state) => state.savePersistPlayer);
   const deletePersistPlayer = useMCStore((state) => state.deletePersistPlayer);
+  const setActiveAchievementScope = useAchievementStore((state) => state.setActiveScope);
+  const hydrateAchievementScopeFromCloudData = useAchievementStore(
+    (state) => state.hydrateScopeFromCloudData,
+  );
+  const copyActiveAchievementScopeTo = useAchievementStore(
+    (state) => state.copyActiveScopeTo,
+  );
+  const exportActiveAchievementCloudData = useAchievementStore(
+    (state) => state.exportActiveCloudData,
+  );
   const player = useMCStore((state) => state.player);
   const user = useAuthStore((state) => state.user);
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
@@ -209,7 +225,7 @@ export default function LoadPanel({
     () => gameSlots.slice(0, 10).map((slotId) => readPersistSavedAt(slotId)),
   );
   const [cloudSaveList, setCloudSaveList] =
-    useState<Array<Player | null>>(emptySlots);
+    useState<Array<PlayerSaveRecord | null>>(emptySlots);
   const [cloudSavedAtList, setCloudSavedAtList] =
     useState<Array<string | null>>(emptySlots);
   const [isCheckingSession, setIsCheckingSession] = useState(false);
@@ -357,9 +373,15 @@ export default function LoadPanel({
     return () => window.clearTimeout(timeoutId);
   }, [saveMessage, requestClose]);
 
-  const saveList = activeTab === "local" ? localSaveList : cloudSaveList;
+  const cloudPlayerList = cloudSaveList.map((entry) => entry?.player ?? null);
+  const selectedCloudSave =
+    selectedSlot === null ? null : cloudSaveList[selectedSlot] ?? null;
   const selectedSave =
-    selectedSlot === null ? null : saveList[selectedSlot] ?? null;
+    activeTab === "local"
+      ? selectedSlot === null
+        ? null
+        : localSaveList[selectedSlot] ?? null
+      : selectedCloudSave?.player ?? null;
   const isCloudBusy = isCheckingSession || isLoadingCloudSaves;
   const hasCurrentProgress =
     player.level > 1 ||
@@ -406,8 +428,9 @@ export default function LoadPanel({
 
   const saveToSlot = async (tab: LoadPanelTab, slot: number) => {
     const slotId = gameSlots[slot];
-
+    const achievementScopeId = `${tab}:slot:${slotId}`;
     const slotLabel = `Slot ${slot + 1}`;
+    const achievementCloudData = exportActiveAchievementCloudData();
 
     if (tab === "local") {
       const ok = savePersistPlayer(player, slotId);
@@ -420,6 +443,7 @@ export default function LoadPanel({
         });
         return;
       }
+      copyActiveAchievementScopeTo(achievementScopeId);
       refreshLocalSaves();
       setSaveMessage({
         type: "success",
@@ -435,11 +459,15 @@ export default function LoadPanel({
       const response = await fetch("/api/saves", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ saveId: slotId, player }),
+        body: JSON.stringify({
+          saveId: slotId,
+          player,
+          achievements: achievementCloudData,
+        }),
       });
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
-        player?: Player;
+        save?: PlayerSaveRecord;
         savedAt?: string | null;
       } | null;
 
@@ -449,7 +477,7 @@ export default function LoadPanel({
 
       setCloudSaveList((prev) => {
         const next = [...prev];
-        next[slot] = payload?.player ?? player;
+        next[slot] = payload?.save ?? createPlayerSaveRecord(player, achievementCloudData);
         return next;
       });
       setCloudSavedAtList((prev) => {
@@ -457,6 +485,7 @@ export default function LoadPanel({
         next[slot] = payload?.savedAt ?? new Date().toISOString();
         return next;
       });
+      copyActiveAchievementScopeTo(achievementScopeId);
       setSaveMessage({
         type: "success",
         text: `Saved to Cloud — ${slotLabel}`,
@@ -501,11 +530,22 @@ export default function LoadPanel({
       tab: activeTab,
       slot: selectedSlot,
       save: selectedSave,
+      cloudAchievements:
+        activeTab === "cloud" ? selectedCloudSave?.achievements ?? null : null,
     });
   };
 
-  const loadSave = (save: Player) => {
+  const loadSave = (
+    save: Player,
+    scopeId: string,
+    cloudAchievements: PlayerSaveRecord["achievements"],
+  ) => {
     stopMainInterfaceMusicNow();
+    if (cloudAchievements) {
+      hydrateAchievementScopeFromCloudData(scopeId, cloudAchievements);
+    } else {
+      setActiveAchievementScope(scopeId);
+    }
     savePlayer(save);
     onClose();
     router.push(resolvePlayerRoute(save.location));
@@ -516,7 +556,11 @@ export default function LoadPanel({
 
     const loadRequest = pendingLoad;
     setPendingLoad(null);
-    loadSave(loadRequest.save);
+    loadSave(
+      loadRequest.save,
+      `${loadRequest.tab}:slot:${gameSlots[loadRequest.slot]}`,
+      loadRequest.cloudAchievements,
+    );
   };
 
   const handleDeleteRequest = () => {
@@ -671,7 +715,7 @@ export default function LoadPanel({
                         </p>
                       ) : (
                         <SaveLoadMenu
-                          saveList={cloudSaveList}
+                          saveList={cloudPlayerList}
                           savedAtList={cloudSavedAtList}
                           selectedSlot={selectedSlot}
                           onSlotClick={setSelectedSlot}

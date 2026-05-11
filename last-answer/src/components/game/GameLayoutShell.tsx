@@ -2,6 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { AchievementProgressTracker } from "./AchievementProgressTracker";
+import { AchievementToastStack } from "./AchievementToastStack";
 import { GameMainBar } from "./GameMainBar";
 
 type GameLayoutShellProps = {
@@ -14,6 +16,7 @@ export function GameLayoutShell({ children }: GameLayoutShellProps) {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
+      <AchievementProgressTracker />
       {showGameChrome ? (
         <header>
           <div className="absolute left-0 right-0 top-0 z-10">
@@ -22,6 +25,7 @@ export function GameLayoutShell({ children }: GameLayoutShellProps) {
         </header>
       ) : null}
       {children}
+      <AchievementToastStack />
     </div>
   );
 }

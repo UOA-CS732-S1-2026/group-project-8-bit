@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import AchievementPanel from "./AchievementPanel";
 import GuidePanel from "./GuidePanel";
 import SettingPanel from "./SettingPanel";
 import LoadPanel, { type LoadPanelTab } from "./saveLoad/LoadPanel";
@@ -11,7 +12,7 @@ type TopBarMenuProps = {
   onCloseMenu: () => void;
 };
 
-type ActivePanel = LoadPanelTab | "settings" | "guide" | null;
+type ActivePanel = LoadPanelTab | "settings" | "guide" | "achievements" | null;
 
 const menuItemClass =
   "w-full whitespace-nowrap rounded-md border border-amber-200/20 bg-black/30 px-2.5 py-2 text-left text-[clamp(0.7rem,1.7vw,0.875rem)] font-semibold leading-tight tracking-normal text-amber-100 transition duration-150 hover:border-amber-100/60 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98]";
@@ -95,6 +96,14 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
             <button
               type="button"
               className={menuItemClass}
+              onClick={() => openPanel("achievements")}
+              role="menuitem"
+            >
+              Achievements
+            </button>
+            <button
+              type="button"
+              className={menuItemClass}
               onClick={openGuide}
               role="menuitem"
             >
@@ -124,6 +133,9 @@ export function TopBarMenu({ isOpen, onCloseMenu }: TopBarMenuProps) {
       ) : null}
       {activePanel === "guide" ? (
         <GuidePanel isOpen={true} onClose={() => setActivePanel(null)} />
+      ) : null}
+      {activePanel === "achievements" ? (
+        <AchievementPanel onClose={() => setActivePanel(null)} />
       ) : null}
     </>
   );
