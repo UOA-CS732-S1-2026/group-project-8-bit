@@ -808,11 +808,11 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                     <span className="text-[1.12rem] leading-none text-[#8a6a3e]">
                       {STORY_SECTION_ICON[section.id] ?? "✧"}
                     </span>
-                    <span className="text-sm font-semibold">
+                    <span className="text-[0.98rem] font-semibold">
                       {highlightText(section.title, storyGuideQuery)}
                     </span>
                   </div>
-                  <div className="mt-1 text-[0.68rem] uppercase tracking-[0.14em] text-[#644f39]/86">
+                  <div className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] leading-7 text-[#644f39]/82">
                     {highlightText(section.summary, storyGuideQuery)}
                   </div>
                 </button>
@@ -833,20 +833,20 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                 : "border-stone-700/38 bg-[rgba(245,238,220,0.48)]",
             ].join(" ")}
           >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+            <div className="grid grid-cols-[minmax(max-content,1fr)_auto] items-start gap-1.5">
               <h2
                 id={`guide-section-${activeGuideSection.id}`}
-                className="min-w-0 truncate whitespace-nowrap pr-2 text-[clamp(1.35rem,2.2vw,2.15rem)] font-extrabold leading-[1.02] text-[#2d2217]"
+                className="min-w-0 whitespace-nowrap pr-1 text-[clamp(1.56rem,2.45vw,2.4rem)] font-extrabold leading-[1.01] tracking-[-0.03em] text-[#2d2217]"
               >
                 {highlightText(activeGuideSection.title, storyGuideQuery)}
               </h2>
-              <div className="hidden shrink-0 items-center gap-2 md:flex md:justify-self-end">
+              <div className="hidden shrink-0 items-center gap-0.5 md:flex md:justify-self-end">
                 <button
                   type="button"
                   aria-pressed={highContrast}
                   aria-label="Toggle high contrast mode"
                   className={[
-                    "rounded border px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] transition",
+                    "rounded border px-1.25 py-1.5 text-[0.48rem] font-semibold uppercase tracking-[0.08em] transition",
                     highContrast
                       ? "border-[#7f5f3a]/75 bg-[rgba(79,57,33,0.95)] text-amber-100"
                       : "border-[#8f7655]/60 bg-[rgba(245,236,218,0.62)] text-[#564333] hover:bg-[rgba(245,236,218,0.82)]",
@@ -858,7 +858,7 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                 <button
                   type="button"
                   className={[
-                    "rounded border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition duration-150",
+                    "rounded border px-1.75 py-1.5 text-[0.58rem] font-semibold uppercase tracking-[0.08em] transition duration-150",
                     isGlossaryOpen
                       ? "border-[#8f6a3d]/75 bg-[rgba(245,236,218,0.86)] text-[#453524]"
                       : "border-[#8f7655]/60 bg-[rgba(245,236,218,0.62)] text-[#564333] hover:bg-[rgba(245,236,218,0.82)]",
@@ -871,7 +871,7 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                   type="button"
                   ref={closeButtonRef}
                   aria-label="Close guide panel"
-                  className="rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98]"
+                  className="rounded border border-stone-600/55 bg-stone-800/70 px-2 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-amber-100 transition duration-150 hover:bg-stone-700/75 hover:border-stone-500/65 active:translate-y-[1px] active:scale-[0.98]"
                   onClick={closeGuide}
                 >
                   ✕ Close
