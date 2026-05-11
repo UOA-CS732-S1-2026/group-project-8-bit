@@ -1,67 +1,44 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
 import { supportToolConfigs } from "@/game/core/battleCore";
 import type { SupportToolId } from "@/game/core/types";
 import { defaultPlayer } from "@/lib/player";
+import {
+  applyTrainingAnswerResult,
+  applyTrainingHeal,
+  applyTrainingTimerTick,
+  applyTrainingToolActivation,
+  getActiveGuideSectionIndex,
+  getAdjacentGuideSections,
+  getWrappedGuideSectionIndex,
+  renderTextWithGlossary,
+  resolveActiveGuideSection,
+  buildGlossaryEntries,
+  buildTrainingGuideSteps,
+  createTrainingInitialState,
+  filterAndSortGuideToolRows,
+  filterGlossaryEntries,
+  filterGuideSections,
+  highlightText,
+  readGuideA11ySettings,
+  resolveGlossaryDestinationSectionId,
+  TRAINING_INITIAL_TOOLS,
+  TRAINING_MAX_ENEMY_HP,
+  TRAINING_MAX_PLAYER_HP,
+  type GlossaryEntry,
+  type GuideToolRow,
+  type StoryGuideSection,
+  type ToolAssistType,
+  type ToolSortMode,
+  type TrainingQuestion,
+  type TrainingToolId,
+  type TrainingRoundState,
+  type TrainingToolState,
+  writeGuideA11ySettings,
+} from "./GuidePanel.utils";
 import ModalPortal from "./ModalPortal";
 import { useModalCloseAnimation } from "./useModalCloseAnimation";
-
-type StoryGuideSection = {
-  id: string;
-  title: string;
-  summary: string;
-  blocks: Array<{
-    heading: string;
-    content: string;
-  }>;
-  notes: string[];
-  growthTable?: Array<{
-    stat: string;
-    perLevel: string;
-  }>;
-};
-
-type ToolAssistType = "all" | "strong" | "standard";
-type ToolSortMode = "priceAsc" | "priceDesc" | "nameAsc" | "usesDesc";
-
-type GuideToolRow = {
-  id: SupportToolId;
-  name: string;
-  effect: string;
-  type: "strong" | "standard";
-  maxUses: number;
-  price: number;
-};
-
-type GlossaryEntry = {
-  term: string;
-  text: string;
-  sectionCount: number;
-  sectionIds: string[];
-};
-
-type TrainingQuestion = {
-  prompt: string;
-  options: string[];
-  correctIndex: number;
-};
-
-type TrainingLogType = "system" | "correct" | "wrong" | "tool" | "heal";
-
-type TrainingLog = {
-  id: number;
-  type: TrainingLogType;
-  text: string;
-};
-
-type TrainingToolState = {
-  analyze: number;
-  hourglass: number;
-  barrier: number;
-  chainGuard: number;
-};
 
 type TrainingToolUsage = {
   analyze: number;
@@ -70,73 +47,10 @@ type TrainingToolUsage = {
   chainGuard: number;
 };
 
-type TrainingRoundState = {
-  playerHp: number;
-  enemyHp: number;
-  combo: number;
-  bestCombo: number;
-  questionIndex: number;
-  turn: number;
-  timeBudget: number;
-  questionStartBudget: number;
-  timerStarted: boolean;
-  hasTakenDamage: boolean;
-  answeredCount: number;
-  correctCount: number;
-  totalResponseMs: number;
-  hiddenOptionIndexes: number[];
-  barrierArmed: boolean;
-  chainArmed: boolean;
-  finished: boolean;
-  logs: TrainingLog[];
-};
-
-type TrainingGuideStep = {
-  id: number;
-  title: string;
-  hint: string;
-  done: boolean;
-};
-
 type GuidePanelProps = {
   isOpen: boolean;
   onClose: () => void;
 };
-
-type GuideA11ySettings = {
-  highContrast: boolean;
-};
-
-const GUIDE_A11Y_STORAGE_KEY = "guide-a11y-settings-v1";
-
-function readGuideA11ySettings(): GuideA11ySettings {
-  if (typeof window === "undefined") {
-    return { highContrast: false };
-  }
-  try {
-    const raw = window.localStorage.getItem(GUIDE_A11Y_STORAGE_KEY);
-    if (!raw) {
-      return { highContrast: false };
-    }
-    const parsed = JSON.parse(raw) as Partial<GuideA11ySettings>;
-    return {
-      highContrast: Boolean(parsed.highContrast),
-    };
-  } catch {
-    return { highContrast: false };
-  }
-}
-
-function writeGuideA11ySettings(settings: GuideA11ySettings) {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.setItem(GUIDE_A11Y_STORAGE_KEY, JSON.stringify(settings));
-  } catch {
-    // Ignore storage write failures.
-  }
-}
 
 const STORY_GUIDE_SECTIONS: StoryGuideSection[] = [
   {
@@ -450,84 +364,6 @@ const TRAINING_QUESTIONS: TrainingQuestion[] = [
   },
 ];
 
-const TRAINING_MAX_PLAYER_HP = 100;
-const TRAINING_MAX_ENEMY_HP = 120;
-const TRAINING_BASE_DAMAGE = 16;
-const TRAINING_ENEMY_DAMAGE = 12;
-const TRAINING_BASE_TIME = 12;
-
-function escapeRegExp(text: string) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function highlightText(text: string, query: string): ReactNode {
-  const cleanQuery = query.trim();
-  if (!cleanQuery) {
-    return text;
-  }
-
-  const pattern = new RegExp(`(${escapeRegExp(cleanQuery)})`, "ig");
-  const parts = text.split(pattern);
-
-  return parts.map((part, index) =>
-    pattern.test(part) ? (
-      <mark
-        key={`${part}-${index}`}
-        className="rounded-sm bg-amber-300/55 px-[0.08rem] text-inherit"
-      >
-        {part}
-      </mark>
-    ) : (
-      <span key={`${part}-${index}`}>{part}</span>
-    ),
-  );
-}
-
-function renderTextWithGlossary(
-  text: string,
-  query: string,
-  onShowGlossary: (
-    event: React.MouseEvent<HTMLButtonElement> | React.FocusEvent<HTMLButtonElement>,
-    term: string,
-  ) => void,
-  onHideGlossary: () => void,
-): ReactNode {
-  if (!GLOSSARY_TERMS.length) {
-    return highlightText(text, query);
-  }
-
-  const termPattern = new RegExp(
-    `(${GLOSSARY_TERMS.map((term) => escapeRegExp(term)).join("|")})`,
-    "gi",
-  );
-  const parts = text.split(termPattern);
-
-  return parts.map((part, index) => {
-    const matchedTerm = GLOSSARY_TERMS.find(
-      (term) => term.toLowerCase() === part.toLowerCase(),
-    );
-    if (!matchedTerm) {
-      return <span key={`${part}-${index}`}>{highlightText(part, query)}</span>;
-    }
-
-    return (
-      <button
-        key={`${matchedTerm}-${index}`}
-        type="button"
-        tabIndex={0}
-        className="rounded-sm border-b border-dashed border-[#8f6b41]/70 px-[0.05rem] font-semibold text-[#4a3725] transition-colors hover:text-[#2e2116] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f6b41]/55"
-        aria-label={`${matchedTerm}: glossary term`}
-        onMouseEnter={(event) => onShowGlossary(event, matchedTerm)}
-        onMouseLeave={onHideGlossary}
-        onFocus={(event) => onShowGlossary(event, matchedTerm)}
-        onBlur={onHideGlossary}
-      >
-        {highlightText(part, query)}
-      </button>
-    );
-  });
-}
-
 export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
   const initialA11ySettings = readGuideA11ySettings();
   const [storyGuideQuery, setStoryGuideQuery] = useState("");
@@ -542,12 +378,9 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
   const [trainingState, setTrainingState] = useState<TrainingRoundState>(
     createTrainingInitialState(),
   );
-  const [trainingTools, setTrainingTools] = useState<TrainingToolState>({
-    analyze: 2,
-    hourglass: 1,
-    barrier: 1,
-    chainGuard: 1,
-  });
+  const [trainingTools, setTrainingTools] = useState<TrainingToolState>(
+    TRAINING_INITIAL_TOOLS,
+  );
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(
     initialA11ySettings.highContrast,
@@ -612,33 +445,18 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
   };
 
   const filteredGuideSections = useMemo(() => {
-    const query = storyGuideQuery.trim().toLowerCase();
-
-    if (!query) {
-      return STORY_GUIDE_SECTIONS;
-    }
-
-    return STORY_GUIDE_SECTIONS.filter((section) => {
-      const haystack = [
-        section.title,
-        section.summary,
-        ...section.blocks.map((block) => `${block.heading} ${block.content}`),
-        ...section.notes,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return haystack.includes(query);
-    });
+    return filterGuideSections(STORY_GUIDE_SECTIONS, storyGuideQuery);
   }, [storyGuideQuery]);
 
-  const activeGuideSection =
-    filteredGuideSections.find((section) => section.id === activeGuideSectionId) ??
-    filteredGuideSections[0] ??
-    STORY_GUIDE_SECTIONS[0];
-
-  const activeIndex = filteredGuideSections.findIndex(
-    (section) => section.id === activeGuideSection.id,
+  const activeGuideSection = resolveActiveGuideSection(
+    filteredGuideSections,
+    activeGuideSectionId,
+    STORY_GUIDE_SECTIONS,
+  );
+  const activeGuideSectionResolvedId = activeGuideSection.id;
+  const activeIndex = getActiveGuideSectionIndex(
+    filteredGuideSections,
+    activeGuideSectionResolvedId,
   );
 
   const toolPriceById = useMemo(() => {
@@ -659,70 +477,38 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
   }, [toolPriceById]);
 
   const visibleToolRows = useMemo(() => {
-    const filtered = baseToolRows.filter((tool) =>
-      toolTypeFilter === "all" ? true : tool.type === toolTypeFilter,
+    return filterAndSortGuideToolRows(
+      baseToolRows,
+      toolTypeFilter,
+      toolSortMode,
     );
-
-    const sorted = [...filtered];
-    sorted.sort((left, right) => {
-      if (toolSortMode === "priceAsc") return left.price - right.price;
-      if (toolSortMode === "priceDesc") return right.price - left.price;
-      if (toolSortMode === "usesDesc") return right.maxUses - left.maxUses;
-      return left.name.localeCompare(right.name);
-    });
-    return sorted;
   }, [baseToolRows, toolSortMode, toolTypeFilter]);
 
   const glossaryEntries = useMemo<GlossaryEntry[]>(() => {
-    return GLOSSARY_TERMS.map((term) => {
-      const termRegex = new RegExp(`\\b${escapeRegExp(term)}\\b`, "i");
-      const sectionIds = STORY_GUIDE_SECTIONS.filter((section) => {
-        const searchable = [
-          section.title,
-          section.summary,
-          ...section.blocks.map((block) => `${block.heading} ${block.content}`),
-          ...section.notes,
-        ].join(" ");
-        return termRegex.test(searchable);
-      }).map((section) => section.id);
-
-      return {
-        term,
-        text: GLOSSARY[term],
-        sectionCount: sectionIds.length,
-        sectionIds,
-      };
-    });
+    return buildGlossaryEntries(
+      GLOSSARY_TERMS,
+      GLOSSARY,
+      STORY_GUIDE_SECTIONS,
+    );
   }, []);
 
   const filteredGlossaryEntries = useMemo(() => {
-    const q = glossaryQuery.trim().toLowerCase();
-    if (!q) {
-      return glossaryEntries;
-    }
-    return glossaryEntries.filter((entry) => {
-      return (
-        entry.term.toLowerCase().includes(q) ||
-        entry.text.toLowerCase().includes(q)
-      );
-    });
+    return filterGlossaryEntries(glossaryEntries, glossaryQuery);
   }, [glossaryEntries, glossaryQuery]);
 
-  const jumpToGlossaryTerm = useCallback(
-    (entry: GlossaryEntry) => {
-      const destinationSectionId = entry.sectionIds.includes(activeGuideSection.id)
-        ? activeGuideSection.id
-        : entry.sectionIds[0];
+  const jumpToGlossaryTerm = (entry: GlossaryEntry) => {
+    const destinationSectionId = resolveGlossaryDestinationSectionId(
+      entry,
+      activeGuideSectionResolvedId,
+    );
 
-      if (destinationSectionId) {
-        selectSection(destinationSectionId);
-      }
-      setStoryGuideQuery(entry.term);
-      setIsGlossaryOpen(false);
-      contentScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    },
-    [activeGuideSection.id],
-  );
+    if (destinationSectionId) {
+      selectSection(destinationSectionId);
+    }
+    setStoryGuideQuery(entry.term);
+    setIsGlossaryOpen(false);
+    contentScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const currentTrainingQuestion =
     TRAINING_QUESTIONS[
@@ -761,120 +547,22 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
     (completedGuideSteps / trainingGuideSteps.length) * 100,
   );
 
-  const pushTrainingLog = (
-    currentLogs: TrainingLog[],
-    type: TrainingLogType,
-    text: string,
-  ) => {
-    const item: TrainingLog = { id: nextLogId(currentLogs), type, text };
-    return [...currentLogs, item].slice(-8);
-  };
-
   const resetTraining = () => {
     setTrainingState(createTrainingInitialState());
-    setTrainingTools({
-      analyze: 2,
-      hourglass: 1,
-      barrier: 1,
-      chainGuard: 1,
-    });
+    setTrainingTools(TRAINING_INITIAL_TOOLS);
   };
 
   const applyTrainingResult = (isCorrect: boolean, timedOut: boolean) => {
     setTrainingState((current) => {
-      if (current.finished) {
+      if (current.finished || !currentTrainingQuestion) {
         return current;
       }
-      let nextPlayerHp = current.playerHp;
-      let nextEnemyHp = current.enemyHp;
-      let nextCombo = current.combo;
-      let nextBarrier = current.barrierArmed;
-      let nextChain = current.chainArmed;
-      let nextLogs = current.logs;
-      const responseSeconds = timedOut
-        ? current.questionStartBudget
-        : Math.max(0, current.questionStartBudget - current.timeBudget);
-      const responseMs = Math.round(responseSeconds * 1000);
-      const nextAnsweredCount = current.answeredCount + 1;
-      const nextCorrectCount = current.correctCount + (isCorrect ? 1 : 0);
-      const nextTotalResponseMs = current.totalResponseMs + responseMs;
-
-      if (isCorrect) {
-        const damage = TRAINING_BASE_DAMAGE + Math.min(12, current.combo * 2);
-        nextEnemyHp = Math.max(0, current.enemyHp - damage);
-        nextCombo = current.combo + 1;
-        nextLogs = pushTrainingLog(
-          nextLogs,
-          "correct",
-          `Correct: dealt ${damage} damage. Combo increased to ${nextCombo}.`,
-        );
-      } else {
-        const blockedByBarrier = current.barrierArmed;
-        if (!blockedByBarrier) {
-          nextPlayerHp = Math.max(0, current.playerHp - TRAINING_ENEMY_DAMAGE);
-        }
-        if (current.chainArmed) {
-          nextChain = false;
-          nextLogs = pushTrainingLog(
-            nextLogs,
-            "tool",
-            "Oathbound Chain triggered: combo was preserved despite the mistake.",
-          );
-        } else {
-          nextCombo = 0;
-        }
-        nextBarrier = false;
-        nextLogs = pushTrainingLog(
-          nextLogs,
-          "wrong",
-          timedOut
-            ? blockedByBarrier
-              ? "Timeout: Veil of Aegis blocked enemy counterattack."
-              : `Timeout: enemy dealt ${TRAINING_ENEMY_DAMAGE} damage.`
-            : blockedByBarrier
-              ? "Wrong answer: Veil of Aegis blocked enemy counterattack."
-              : `Wrong answer: enemy dealt ${TRAINING_ENEMY_DAMAGE} damage.`,
-        );
-      }
-
-      const nextQuestionIndex = current.questionIndex + 1;
-      const exhaustedQuestions = nextQuestionIndex >= TRAINING_QUESTIONS.length;
-      const isVictory = nextEnemyHp <= 0;
-      const isDefeat = nextPlayerHp <= 0;
-      const finished = isVictory || isDefeat || exhaustedQuestions;
-      const resultText = isVictory
-        ? "Training success: enemy defeated."
-        : isDefeat
-          ? "Training failed: player HP dropped to 0."
-          : exhaustedQuestions
-            ? "Training finished: all demo questions used."
-            : "";
-
-      if (resultText) {
-        nextLogs = pushTrainingLog(nextLogs, "system", resultText);
-      }
-
-      return {
-        ...current,
-        playerHp: nextPlayerHp,
-        enemyHp: nextEnemyHp,
-        combo: nextCombo,
-        bestCombo: Math.max(current.bestCombo, nextCombo),
-        hasTakenDamage: current.hasTakenDamage || nextPlayerHp < current.playerHp,
-        answeredCount: nextAnsweredCount,
-        correctCount: nextCorrectCount,
-        totalResponseMs: nextTotalResponseMs,
-        barrierArmed: nextBarrier,
-        chainArmed: nextChain,
-        questionIndex: Math.min(nextQuestionIndex, TRAINING_QUESTIONS.length - 1),
-        turn: current.turn + 1,
-        hiddenOptionIndexes: [],
-        timeBudget: TRAINING_BASE_TIME,
-        questionStartBudget: TRAINING_BASE_TIME,
-        timerStarted: true,
-        finished,
-        logs: nextLogs,
-      };
+      return applyTrainingAnswerResult(
+        current,
+        isCorrect,
+        timedOut,
+        TRAINING_QUESTIONS.length,
+      );
     });
   };
 
@@ -909,82 +597,7 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
         if (!isTrainingOpen || current.finished || !current.timerStarted) {
           return current;
         }
-        if (current.timeBudget <= 1) {
-          let nextPlayerHp = current.playerHp;
-          let nextCombo = current.combo;
-          let nextBarrier = current.barrierArmed;
-          let nextChain = current.chainArmed;
-          let nextLogs = current.logs;
-          const responseMs = Math.round(current.questionStartBudget * 1000);
-          const blockedByBarrier = current.barrierArmed;
-
-          if (!blockedByBarrier) {
-            nextPlayerHp = Math.max(0, current.playerHp - TRAINING_ENEMY_DAMAGE);
-          }
-          if (current.chainArmed) {
-            nextChain = false;
-            nextLogs = pushTrainingLog(
-              nextLogs,
-              "tool",
-              "Oathbound Chain triggered: combo was preserved despite the mistake.",
-            );
-          } else {
-            nextCombo = 0;
-          }
-          nextBarrier = false;
-          nextLogs = pushTrainingLog(
-            nextLogs,
-            "wrong",
-            blockedByBarrier
-              ? "Timeout: Veil of Aegis blocked enemy counterattack."
-              : `Timeout: enemy dealt ${TRAINING_ENEMY_DAMAGE} damage.`,
-          );
-
-          const nextQuestionIndex = current.questionIndex + 1;
-          const exhaustedQuestions = nextQuestionIndex >= TRAINING_QUESTIONS.length;
-          const isDefeat = nextPlayerHp <= 0;
-          const finished = isDefeat || exhaustedQuestions;
-          if (isDefeat) {
-            nextLogs = pushTrainingLog(
-              nextLogs,
-              "system",
-              "Training failed: player HP dropped to 0.",
-            );
-          } else if (exhaustedQuestions) {
-            nextLogs = pushTrainingLog(
-              nextLogs,
-              "system",
-              "Training finished: all demo questions used.",
-            );
-          }
-
-          return {
-            ...current,
-            playerHp: nextPlayerHp,
-            combo: nextCombo,
-            bestCombo: Math.max(current.bestCombo, nextCombo),
-            hasTakenDamage: current.hasTakenDamage || nextPlayerHp < current.playerHp,
-            answeredCount: current.answeredCount + 1,
-            totalResponseMs: current.totalResponseMs + responseMs,
-            barrierArmed: nextBarrier,
-            chainArmed: nextChain,
-            questionIndex: Math.min(
-              nextQuestionIndex,
-              TRAINING_QUESTIONS.length - 1,
-            ),
-            turn: current.turn + 1,
-            hiddenOptionIndexes: [],
-            timeBudget: TRAINING_BASE_TIME,
-            questionStartBudget: TRAINING_BASE_TIME,
-            timerStarted: current.timerStarted,
-            finished,
-            logs: nextLogs,
-          };
-        }
-        return {
-          ...current,
-          timeBudget: current.timeBudget - 1,
-        };
+        return applyTrainingTimerTick(current, TRAINING_QUESTIONS.length);
       });
     }, 1000);
 
@@ -997,102 +610,35 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
   ]);
 
   const healInTraining = () => {
-    setTrainingState((current) => {
-      const restored = TRAINING_MAX_PLAYER_HP - current.playerHp;
-      if (restored <= 0) {
-        return {
-          ...current,
-          logs: pushTrainingLog(
-            current.logs,
-            "heal",
-            "Deep Sleep used: HP is already full.",
-          ),
-        };
-      }
-      return {
-        ...current,
-        playerHp: TRAINING_MAX_PLAYER_HP,
-        logs: pushTrainingLog(
-          current.logs,
-          "heal",
-          `Deep Sleep used: restored ${restored} HP to full.`,
-        ),
-      };
-    });
+    setTrainingState((current) => applyTrainingHeal(current));
   };
 
-  const activateTrainingTool = (toolId: keyof TrainingToolState) => {
-    if (trainingState.finished) {
+  const activateTrainingTool = (toolId: TrainingToolId) => {
+    if (trainingState.finished || !currentTrainingQuestion) {
       return;
     }
     setTrainingTools((currentTools) => {
-      if (currentTools[toolId] <= 0) {
-        setTrainingState((currentState) => ({
-          ...currentState,
-          logs: pushTrainingLog(
-            currentState.logs,
-            "tool",
-            "No remaining uses for this tool in training.",
-          ),
-        }));
-        return currentTools;
-      }
-      const nextTools = {
-        ...currentTools,
-        [toolId]: currentTools[toolId] - 1,
-      };
-
       setTrainingState((currentState) => {
-        const nextState = { ...currentState };
-        if (toolId === "analyze") {
-          const wrongIndexes = currentTrainingQuestion.options
-            .map((_, index) => index)
-            .filter((index) => index !== currentTrainingQuestion.correctIndex)
-            .slice(0, 2);
-          nextState.hiddenOptionIndexes = wrongIndexes;
-          nextState.logs = pushTrainingLog(
-            currentState.logs,
-            "tool",
-            "Scripture of Unmasking used: two wrong options are now hidden.",
-          );
-        }
-        if (toolId === "hourglass") {
-          nextState.timeBudget = currentState.timeBudget + 4;
-          nextState.questionStartBudget = currentState.questionStartBudget + 4;
-          nextState.logs = pushTrainingLog(
-            currentState.logs,
-            "tool",
-            "Suspended Sand used: +4s added to this question timer.",
-          );
-        }
-        if (toolId === "barrier") {
-          nextState.barrierArmed = true;
-          nextState.logs = pushTrainingLog(
-            currentState.logs,
-            "tool",
-            "Veil of Aegis armed: next enemy counterattack will be blocked.",
-          );
-        }
-        if (toolId === "chainGuard") {
-          nextState.chainArmed = true;
-          nextState.logs = pushTrainingLog(
-            currentState.logs,
-            "tool",
-            "Oathbound Chain armed: next mistake will not break combo.",
-          );
-        }
-        return nextState;
+        return applyTrainingToolActivation(
+          currentState,
+          currentTools,
+          toolId,
+          currentTrainingQuestion,
+        ).state;
       });
-      return nextTools;
+      return applyTrainingToolActivation(
+        trainingState,
+        currentTools,
+        toolId,
+        currentTrainingQuestion,
+      ).tools;
     });
   };
 
-  const previousSection =
-    activeIndex > 0 ? filteredGuideSections[activeIndex - 1] : null;
-  const nextSection =
-    activeIndex >= 0 && activeIndex < filteredGuideSections.length - 1
-      ? filteredGuideSections[activeIndex + 1]
-      : null;
+  const { previousSection, nextSection } = getAdjacentGuideSections(
+    filteredGuideSections,
+    activeIndex,
+  );
 
   const toggleHighContrast = () => {
     const next = !highContrast;
@@ -1154,10 +700,11 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         const direction = event.key === "ArrowDown" ? 1 : -1;
-        const startIndex = activeIndex >= 0 ? activeIndex : 0;
-        const nextIndex =
-          (startIndex + direction + filteredGuideSections.length) %
-          filteredGuideSections.length;
+        const nextIndex = getWrappedGuideSectionIndex(
+          activeIndex,
+          filteredGuideSections.length,
+          direction,
+        );
         selectSection(filteredGuideSections[nextIndex].id);
       }
 
@@ -1456,8 +1003,11 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                     {renderTextWithGlossary(
                       block.content,
                       storyGuideQuery,
-                      showGlossaryTooltip,
-                      hideGlossaryTooltip,
+                      GLOSSARY_TERMS,
+                      {
+                        onShowGlossary: showGlossaryTooltip,
+                        onHideGlossary: hideGlossaryTooltip,
+                      },
                     )}
                   </p>
                 </article>
@@ -1601,8 +1151,11 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                                 {renderTextWithGlossary(
                                   tool.effect,
                                   storyGuideQuery,
-                                  showGlossaryTooltip,
-                                  hideGlossaryTooltip,
+                                  GLOSSARY_TERMS,
+                                  {
+                                    onShowGlossary: showGlossaryTooltip,
+                                    onHideGlossary: hideGlossaryTooltip,
+                                  },
                                 )}
                               </p>
                             </td>
@@ -1999,85 +1552,4 @@ export default function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
     </div>
     </ModalPortal>
   );
-}
-
-function createTrainingInitialState(): TrainingRoundState {
-  return {
-    playerHp: 72,
-    enemyHp: TRAINING_MAX_ENEMY_HP,
-    combo: 0,
-    bestCombo: 0,
-    questionIndex: 0,
-    turn: 1,
-    timeBudget: TRAINING_BASE_TIME,
-    questionStartBudget: TRAINING_BASE_TIME,
-    timerStarted: false,
-    hasTakenDamage: false,
-    answeredCount: 0,
-    correctCount: 0,
-    totalResponseMs: 0,
-    hiddenOptionIndexes: [],
-    barrierArmed: false,
-    chainArmed: false,
-    finished: false,
-    logs: [
-      {
-        id: 1,
-        type: "system",
-        text: "Training started: answer questions, build combo, and use tools before momentum breaks.",
-      },
-    ],
-  };
-}
-
-function nextLogId(logs: TrainingLog[]): number {
-  return logs.length ? logs[logs.length - 1].id + 1 : 1;
-}
-
-function buildTrainingGuideSteps(
-  state: TrainingRoundState,
-  tools: TrainingToolState,
-): TrainingGuideStep[] {
-  const usedAnyTool =
-    tools.analyze < 2 ||
-    tools.hourglass < 1 ||
-    tools.barrier < 1 ||
-    tools.chainGuard < 1;
-  const tookDamage = state.hasTakenDamage;
-  const comboBuilt = state.combo >= 2;
-  const healedBackToFull =
-    state.playerHp === TRAINING_MAX_PLAYER_HP && state.hasTakenDamage;
-
-  return [
-    {
-      id: 1,
-      title: "Start The Timer",
-      hint: "Click your first answer option to start the countdown.",
-      done: state.timerStarted,
-    },
-    {
-      id: 2,
-      title: "Build Combo",
-      hint: "Land consecutive correct answers to build momentum.",
-      done: comboBuilt,
-    },
-    {
-      id: 3,
-      title: "Use A Support Tool",
-      hint: "Trigger any one tool to see tactical intervention.",
-      done: usedAnyTool,
-    },
-    {
-      id: 4,
-      title: "Handle Pressure",
-      hint: "Experience timeout or a wrong answer and observe recovery flow.",
-      done: tookDamage || state.logs.some((log) => log.text.includes("Timeout")),
-    },
-    {
-      id: 5,
-      title: "Recover HP",
-      hint: "Use Deep Sleep to restore HP after pressure.",
-      done: healedBackToFull,
-    },
-  ];
 }
