@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { AUTO_SAVE_ID } from "@/lib/save-slots";
+import { useAchievementStore } from "@/store/achievementStore";
 import { useAuthStore } from "@/store/authStore";
 import { useMCStore } from "@/store/mcStore";
 
@@ -9,6 +10,12 @@ export function PlayerSaveSync() {
   const user = useAuthStore((state) => state.user);
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const player = useMCStore((state) => state.player);
+  const copyActiveAchievementScopeTo = useAchievementStore(
+    (state) => state.copyActiveScopeTo,
+  );
+  const exportActiveAchievementCloudData = useAchievementStore(
+    (state) => state.exportActiveCloudData,
+  );
   const skipFirstSyncRef = useRef(true);
 
   useEffect(() => {
@@ -28,12 +35,14 @@ export function PlayerSaveSync() {
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
+        copyActiveAchievementScopeTo(`cloud:auto:${user.id}`);
+        const achievements = exportActiveAchievementCloudData();
         await fetch("/api/saves", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ saveId: AUTO_SAVE_ID, player }),
+          body: JSON.stringify({ saveId: AUTO_SAVE_ID, player, achievements }),
           signal: controller.signal,
         });
       } catch {
@@ -45,7 +54,13 @@ export function PlayerSaveSync() {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [isHydrated, player, user]);
+  }, [
+    copyActiveAchievementScopeTo,
+    exportActiveAchievementCloudData,
+    isHydrated,
+    player,
+    user,
+  ]);
 
   return null;
 }

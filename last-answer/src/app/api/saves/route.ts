@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { Player } from "@/game/core/types";
+import { normalizeAchievementCloudData } from "@/lib/achievement-data";
 import { getCurrentSession } from "@/lib/auth";
 import { getConfigurationErrorMessage } from "@/lib/config";
 import { getPlayerSave, updatePlayerSave } from "@/lib/player-save";
@@ -10,6 +11,7 @@ export const runtime = "nodejs";
 type SaveRequestBody = {
   saveId?: unknown;
   player?: unknown;
+  achievements?: unknown;
 };
 
 export async function GET() {
@@ -80,13 +82,14 @@ export async function PUT(request: Request) {
       );
     }
 
-    const player = await updatePlayerSave(
+    const save = await updatePlayerSave(
       session.user.id,
       body.saveId,
       body.player as Player,
+      normalizeAchievementCloudData(body.achievements),
     );
 
-    return NextResponse.json({ player });
+    return NextResponse.json({ save });
   } catch (error) {
     const configurationMessage = getConfigurationErrorMessage(error);
 

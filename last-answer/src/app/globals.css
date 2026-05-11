@@ -90,6 +90,32 @@ body {
   transform-origin: center;
 }
 
+@keyframes achievement-toast-inout {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  14% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.99);
+  }
+}
+
+.achievement-toast-inout {
+  animation: achievement-toast-inout 2s ease both;
+}
+
 @keyframes game-modal-backdrop-in {
   from {
     opacity: 0;
@@ -167,6 +193,7 @@ body {
   .game-modal-panel[data-closing="true"],
   .end-golden-order-enter,
   .end-ashes-enter,
+  .achievement-toast-inout,
   .save-msg-enter {
     animation-duration: 1ms;
   }
