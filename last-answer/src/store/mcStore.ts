@@ -46,6 +46,17 @@ const updateInventoryProperty = (
   return foundProperty ? nextInventory : null;
 };
 
+type SaveEnvelope = {
+  player: Player;
+  savedAt: string;
+};
+
+const isSaveEnvelope = (value: unknown): value is SaveEnvelope =>
+  isRecord(value) &&
+  "player" in value &&
+  "savedAt" in value &&
+  typeof value.savedAt === "string";
+
 const readPersistedPlayer = (storageKey: string): Player | null => {
   if (typeof window === "undefined") {
     return null;
@@ -58,7 +69,29 @@ const readPersistedPlayer = (storageKey: string): Player | null => {
       return null;
     }
 
-    return normalizeStoredPlayer(JSON.parse(storedValue));
+    const parsed: unknown = JSON.parse(storedValue);
+
+    if (isSaveEnvelope(parsed)) {
+      return normalizePlayer(parsed.player);
+    }
+
+    return normalizeStoredPlayer(parsed);
+  } catch {
+    return null;
+  }
+};
+
+const readPersistedSavedAt = (storageKey: string): string | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(storageKey);
+    if (!storedValue) return null;
+    const parsed: unknown = JSON.parse(storedValue);
+    if (isSaveEnvelope(parsed)) return parsed.savedAt;
+    return null;
   } catch {
     return null;
   }
@@ -84,8 +117,11 @@ const savePersistedPlayer = (storageKey: string, player: Player): boolean => {
   }
 
   try {
-    const normalizedPlayer = normalizePlayer(player);
-    window.localStorage.setItem(storageKey, JSON.stringify(normalizedPlayer));
+    const envelope: SaveEnvelope = {
+      player: normalizePlayer(player),
+      savedAt: new Date().toISOString(),
+    };
+    window.localStorage.setItem(storageKey, JSON.stringify(envelope));
     return true;
   } catch {
     return false;
@@ -98,8 +134,10 @@ type MCStore = {
   userId: string | null;
   readPlayer: () => Player;
   readPersistPlayer: (slotId: string) => Player | null;
+  readPersistSavedAt: (slotId: string) => string | null;
   savePlayer: (player: Player) => void;
   savePersistPlayer: (player: Player, slotId: string) => boolean;
+  deletePersistPlayer: (slotId: string) => void;
   hydratePlayer: (userId: string, player: Player) => void;
   clearPlayerContext: () => void;
   updatePlayer: (updates: Partial<Player>) => void;
@@ -174,6 +212,9 @@ const createMCStore = () =>
             createLegacyPlayerStorageKey(slotId),
           ]),
 
+        readPersistSavedAt: (slotId) =>
+          readPersistedSavedAt(createPlayerStorageKey(slotId)),
+
         savePlayer: (player) =>
           set({
             player: normalizePlayer(player),
@@ -181,6 +222,12 @@ const createMCStore = () =>
 
         savePersistPlayer: (player, slotId) => {
           return savePersistedPlayer(createPlayerStorageKey(slotId), player);
+        },
+
+        deletePersistPlayer: (slotId) => {
+          if (typeof window === "undefined") return;
+          window.localStorage.removeItem(createPlayerStorageKey(slotId));
+          window.localStorage.removeItem(createLegacyPlayerStorageKey(slotId));
         },
 
         hydratePlayer: (userId, player) => {

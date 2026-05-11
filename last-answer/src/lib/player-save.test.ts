@@ -5,6 +5,7 @@ import type { Player } from "@/game/core/types";
 import { buildInitialPlayer, normalizePlayer } from "./player";
 import {
   createInitialPlayerSave,
+  deletePlayerSave,
   ensurePlayerSave,
   getPlayerSave,
   updatePlayerSave,
@@ -16,6 +17,7 @@ type SaveRow = QueryResultRow & {
   user_id: string;
   save_id: PlayerSaveSlotId;
   save_data: Player;
+  updated_at?: Date | string | null;
 };
 
 function queryResult<TRow extends QueryResultRow>(
@@ -44,11 +46,16 @@ function createDb(results: QueryResult<QueryResultRow>[] = []) {
   };
 }
 
-function saveRow(saveId: PlayerSaveSlotId, player: Partial<Player>): SaveRow {
+function saveRow(
+  saveId: PlayerSaveSlotId,
+  player: Partial<Player>,
+  updatedAt: Date | string | null = null,
+): SaveRow {
   return {
     user_id: "user-1",
     save_id: saveId,
     save_data: normalizePlayer(player),
+    updated_at: updatedAt,
   };
 }
 
@@ -84,13 +91,31 @@ describe("getPlayerSave", () => {
       ]),
     ]);
 
-    const saves = await getPlayerSave("user-1", db);
+    const { saveList } = await getPlayerSave("user-1", db);
 
-    expect(saves).toHaveLength(PLAYER_SAVE_SLOT_IDS.length);
-    expect(saves[0]).toEqual(slot1Player);
-    expect(saves[1]).toBeNull();
-    expect(saves[2]).toEqual(slot3Player);
-    expect(saves.slice(3)).toEqual(Array(7).fill(null));
+    expect(saveList).toHaveLength(PLAYER_SAVE_SLOT_IDS.length);
+    expect(saveList[0]).toEqual(slot1Player);
+    expect(saveList[1]).toBeNull();
+    expect(saveList[2]).toEqual(slot3Player);
+    expect(saveList.slice(3)).toEqual(Array(7).fill(null));
+  });
+
+  it("returns ISO savedAt timestamps aligned with each slot", async () => {
+    const slot1At = new Date("2025-01-15T10:30:00.000Z");
+    const slot3At = "2025-02-20T08:45:00.000Z";
+    const { db } = createDb([
+      queryResult([
+        saveRow("slot1", { name: "A" }, slot1At),
+        saveRow("slot3", { name: "C" }, slot3At),
+      ]),
+    ]);
+
+    const { savedAtList } = await getPlayerSave("user-1", db);
+
+    expect(savedAtList[0]).toBe(slot1At.toISOString());
+    expect(savedAtList[1]).toBeNull();
+    expect(savedAtList[2]).toBe(new Date(slot3At).toISOString());
+    expect(savedAtList.slice(3)).toEqual(Array(7).fill(null));
   });
 
   it("normalizes persisted save data before returning it", async () => {
@@ -105,7 +130,8 @@ describe("getPlayerSave", () => {
       ]),
     ]);
 
-    const [firstSave] = await getPlayerSave("user-1", db);
+    const { saveList } = await getPlayerSave("user-1", db);
+    const firstSave = saveList[0];
 
     expect(firstSave).toMatchObject({
       name: "Persisted",
@@ -128,9 +154,9 @@ describe("ensurePlayerSave", () => {
       queryResult([saveRow("slot1", existingPlayer)]),
     ]);
 
-    const saves = await ensurePlayerSave("user-1", "Ada", db);
+    const { saveList } = await ensurePlayerSave("user-1", "Ada", db);
 
-    expect(saves[0]).toEqual(existingPlayer);
+    expect(saveList[0]).toEqual(existingPlayer);
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledWith(
       expect.stringContaining("SELECT user_id, save_id, save_data"),
@@ -146,7 +172,7 @@ describe("ensurePlayerSave", () => {
       queryResult([saveRow("slot1", initialPlayer)]),
     ]);
 
-    const saves = await ensurePlayerSave("user-1", "Ada", db);
+    const { saveList } = await ensurePlayerSave("user-1", "Ada", db);
 
     expect(queryMock).toHaveBeenCalledTimes(3);
     expect(queryMock).toHaveBeenNthCalledWith(
@@ -154,13 +180,16 @@ describe("ensurePlayerSave", () => {
       expect.stringContaining("INSERT INTO player_saves"),
       ["user-1", PLAYER_SAVE_SLOT_IDS[0], JSON.stringify(initialPlayer)],
     );
-    expect(saves[0]).toEqual(initialPlayer);
+    expect(saveList[0]).toEqual(initialPlayer);
   });
 });
 
 describe("updatePlayerSave", () => {
   it("normalizes the player before upserting save data", async () => {
-    const { db, queryMock } = createDb([queryResult([])]);
+    const updatedAt = new Date("2025-03-01T12:00:00.000Z");
+    const { db, queryMock } = createDb([
+      queryResult([{ updated_at: updatedAt } as QueryResultRow]),
+    ]);
     const player = normalizePlayer({
       name: "Updated",
       hp: 999,
@@ -168,7 +197,7 @@ describe("updatePlayerSave", () => {
       inventory: [{ id: "hourglass", leftNumber: 5, price: 999 }],
     });
 
-    const updatedPlayer = await updatePlayerSave(
+    const result = await updatePlayerSave(
       "user-1",
       "slot4",
       {
@@ -178,10 +207,36 @@ describe("updatePlayerSave", () => {
       db,
     );
 
-    expect(updatedPlayer).toEqual(player);
+    expect(result.player).toEqual(player);
+    expect(result.savedAt).toBe(updatedAt.toISOString());
     expect(queryMock).toHaveBeenCalledWith(
       expect.stringContaining("INSERT INTO player_saves"),
       ["user-1", "slot4", JSON.stringify(player)],
+    );
+  });
+
+  it("returns null savedAt when the database omits updated_at", async () => {
+    const { db } = createDb([queryResult([])]);
+    const result = await updatePlayerSave(
+      "user-1",
+      "slot1",
+      normalizePlayer({ name: "X" }),
+      db,
+    );
+    expect(result.savedAt).toBeNull();
+  });
+});
+
+describe("deletePlayerSave", () => {
+  it("issues a parameterized DELETE for the given user and slot", async () => {
+    const { db, queryMock } = createDb([queryResult([])]);
+
+    await deletePlayerSave("user-1", "slot3", db);
+
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(queryMock).toHaveBeenCalledWith(
+      expect.stringContaining("DELETE FROM player_saves"),
+      ["user-1", "slot3"],
     );
   });
 });

@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { totalXpForLevel } from "@/game/core/level";
 import type { BattleReward, Quest } from "@/game/core/types";
-import { buildInitialPlayer, createPlayerStorageKey } from "@/lib/player";
+import {
+  buildInitialPlayer,
+  createLegacyPlayerStorageKey,
+  createPlayerStorageKey,
+} from "@/lib/player";
 import { createMCStore, defaultPlayer } from "./mcStore";
 
 function createMemoryLocalStorage() {
@@ -247,14 +251,17 @@ describe("createMCStore", () => {
     store.getState().savePersistPlayer(player, "slot1");
 
     const storageKey = createPlayerStorageKey("slot1");
-    expect(JSON.parse(localStorage.read(storageKey) ?? "{}")).toMatchObject({
-      name: "Persisted",
-      coins: 45,
-    });
+    const stored = JSON.parse(localStorage.read(storageKey) ?? "{}") as {
+      player: { name: string; coins: number };
+      savedAt: string;
+    };
+    expect(stored.player).toMatchObject({ name: "Persisted", coins: 45 });
+    expect(typeof stored.savedAt).toBe("string");
     expect(store.getState().readPersistPlayer("slot1")).toMatchObject({
       name: "Persisted",
       coins: 45,
     });
+    expect(store.getState().readPersistSavedAt("slot1")).toBe(stored.savedAt);
   });
 
   it("returns null when persisted player data is missing or invalid", () => {
@@ -267,6 +274,23 @@ describe("createMCStore", () => {
     localStorage.setItem(createPlayerStorageKey("slot1"), "{invalid-json");
 
     expect(store.getState().readPersistPlayer("slot1")).toBeNull();
+  });
+
+  it("deletes both the current and legacy storage keys for a slot", () => {
+    const localStorage = createMemoryLocalStorage();
+    vi.stubGlobal("window", { localStorage });
+    const store = createMCStore();
+    const currentKey = createPlayerStorageKey("slot2");
+    const legacyKey = createLegacyPlayerStorageKey("slot2");
+
+    localStorage.setItem(currentKey, JSON.stringify({ player: defaultPlayer, savedAt: "" }));
+    localStorage.setItem(legacyKey, JSON.stringify(defaultPlayer));
+
+    store.getState().deletePersistPlayer("slot2");
+
+    expect(localStorage.read(currentKey)).toBeNull();
+    expect(localStorage.read(legacyKey)).toBeNull();
+    expect(store.getState().readPersistPlayer("slot2")).toBeNull();
   });
 
 });

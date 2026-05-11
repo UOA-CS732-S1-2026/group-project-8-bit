@@ -34,10 +34,16 @@ type SessionResponse = {
 
 type SavesResponse = {
   saveList?: Array<Player | null>;
+  savedAtList?: Array<string | null>;
   error?: string;
 };
 
-type SaveMessage = { type: "success" | "error"; text: string; id: number };
+type SaveMessage = {
+  type: "success" | "error";
+  text: string;
+  id: number;
+  origin: "save" | "delete";
+};
 type PendingSave = {
   tab: LoadPanelTab;
   slot: number;
@@ -48,11 +54,15 @@ type PendingLoad = {
   slot: number;
   save: Player;
 };
+type PendingDelete = {
+  tab: LoadPanelTab;
+  slot: number;
+};
 
 const emptySlots = () => gameSlots.slice(0, 10).map(() => null);
 
 const LOAD_PANEL_DESIGN_WIDTH = 760;
-const LOAD_PANEL_DESIGN_HEIGHT = 680;
+const LOAD_PANEL_DESIGN_HEIGHT = 720;
 const LOAD_PANEL_GAP_X = 20;
 const LOAD_PANEL_GAP_Y = 20;
 const SAVE_SUCCESS_AUTO_CLOSE_MS = 1000;
@@ -64,7 +74,7 @@ const tabButtonClass =
   "rounded border border-stone-700/45 bg-stone-900/55 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-stone-300/65 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-amber-100/65 hover:bg-amber-200/15 hover:text-amber-50 active:translate-y-[1px] active:scale-[0.98] data-[active=true]:border-amber-100/65 data-[active=true]:bg-amber-200/15 data-[active=true]:text-amber-50 data-[active=true]:shadow-[0_0_16px_rgba(251,191,36,0.22)]";
 
 const tabPanelClass =
-  "mx-auto mt-7 h-[18.25rem] w-[39rem] shrink-0 overflow-hidden rounded bg-black/18 p-4 shadow-[inset_0_0_0_1px_rgba(68,64,60,0.34),inset_0_18px_36px_rgba(0,0,0,0.08)]";
+  "mx-auto mt-7 h-[20.5rem] w-[39rem] shrink-0 overflow-hidden rounded bg-black/18 p-4 shadow-[inset_0_0_0_1px_rgba(68,64,60,0.34),inset_0_18px_36px_rgba(0,0,0,0.08)]";
 
 const confirmPanelButtonClass =
   "rounded border border-stone-600/55 bg-stone-800/70 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-100 transition duration-150 hover:border-stone-500/65 hover:bg-stone-700/75 active:translate-y-[1px] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0 disabled:active:scale-100";
@@ -183,8 +193,10 @@ export default function LoadPanel({
 }: LoadPanelProps) {
   const router = useRouter();
   const readPersistPlayer = useMCStore((state) => state.readPersistPlayer);
+  const readPersistSavedAt = useMCStore((state) => state.readPersistSavedAt);
   const savePlayer = useMCStore((state) => state.savePlayer);
   const savePersistPlayer = useMCStore((state) => state.savePersistPlayer);
+  const deletePersistPlayer = useMCStore((state) => state.deletePersistPlayer);
   const player = useMCStore((state) => state.player);
   const user = useAuthStore((state) => state.user);
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
@@ -193,8 +205,13 @@ export default function LoadPanel({
   const [localSaveList, setLocalSaveList] = useState<Array<Player | null>>(() =>
     gameSlots.slice(0, 10).map((slotId) => readPersistPlayer(slotId)),
   );
+  const [localSavedAtList, setLocalSavedAtList] = useState<Array<string | null>>(
+    () => gameSlots.slice(0, 10).map((slotId) => readPersistSavedAt(slotId)),
+  );
   const [cloudSaveList, setCloudSaveList] =
     useState<Array<Player | null>>(emptySlots);
+  const [cloudSavedAtList, setCloudSavedAtList] =
+    useState<Array<string | null>>(emptySlots);
   const [isCheckingSession, setIsCheckingSession] = useState(false);
   const [isLoadingCloudSaves, setIsLoadingCloudSaves] = useState(false);
   const [cloudAuthRequired, setCloudAuthRequired] = useState(false);
@@ -203,6 +220,8 @@ export default function LoadPanel({
   const [saveMessage, setSaveMessage] = useState<SaveMessage | null>(null);
   const [pendingSave, setPendingSave] = useState<PendingSave | null>(null);
   const [pendingLoad, setPendingLoad] = useState<PendingLoad | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { isClosing, requestClose } = useModalCloseAnimation(onClose);
   const { isClosing: isConfirmClosing, requestClose: requestCloseConfirm } =
     useModalCloseAnimation(() => setPendingSave(null));
@@ -210,12 +229,19 @@ export default function LoadPanel({
     isClosing: isLoadConfirmClosing,
     requestClose: requestCloseLoadConfirm,
   } = useModalCloseAnimation(() => setPendingLoad(null));
+  const {
+    isClosing: isDeleteConfirmClosing,
+    requestClose: requestCloseDeleteConfirm,
+  } = useModalCloseAnimation(() => setPendingDelete(null));
 
   const refreshLocalSaves = useCallback(() => {
     setLocalSaveList(
       gameSlots.slice(0, 10).map((slotId) => readPersistPlayer(slotId)),
     );
-  }, [readPersistPlayer]);
+    setLocalSavedAtList(
+      gameSlots.slice(0, 10).map((slotId) => readPersistSavedAt(slotId)),
+    );
+  }, [readPersistPlayer, readPersistSavedAt]);
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -261,6 +287,7 @@ export default function LoadPanel({
 
           if (!activeUser) {
             setCloudSaveList(emptySlots());
+            setCloudSavedAtList(emptySlots());
             setCloudAuthRequired(true);
             return;
           }
@@ -290,6 +317,11 @@ export default function LoadPanel({
             .slice(0, 10)
             .map((_, index) => savesPayload.saveList?.[index] ?? null),
         );
+        setCloudSavedAtList(
+          gameSlots
+            .slice(0, 10)
+            .map((_, index) => savesPayload.savedAtList?.[index] ?? null),
+        );
       } catch (error) {
         if (!controller.signal.aborted) {
           setCloudError(
@@ -314,7 +346,7 @@ export default function LoadPanel({
   }, [activeTab, hydrateAuth, user]);
 
   useEffect(() => {
-    if (saveMessage?.type !== "success") {
+    if (saveMessage?.type !== "success" || saveMessage.origin !== "save") {
       return;
     }
 
@@ -384,6 +416,7 @@ export default function LoadPanel({
           type: "error",
           text: `Unable to save to Local — ${slotLabel}. Storage may be full or unavailable.`,
           id: Date.now(),
+          origin: "save",
         });
         return;
       }
@@ -392,6 +425,7 @@ export default function LoadPanel({
         type: "success",
         text: `Saved to Local — ${slotLabel}`,
         id: Date.now(),
+        origin: "save",
       });
       return;
     }
@@ -406,6 +440,7 @@ export default function LoadPanel({
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
         player?: Player;
+        savedAt?: string | null;
       } | null;
 
       if (!response.ok) {
@@ -417,16 +452,23 @@ export default function LoadPanel({
         next[slot] = payload?.player ?? player;
         return next;
       });
+      setCloudSavedAtList((prev) => {
+        const next = [...prev];
+        next[slot] = payload?.savedAt ?? new Date().toISOString();
+        return next;
+      });
       setSaveMessage({
         type: "success",
         text: `Saved to Cloud — ${slotLabel}`,
         id: Date.now(),
+        origin: "save",
       });
     } catch (error) {
       setSaveMessage({
         type: "error",
         text: error instanceof Error ? error.message : "Unable to save to cloud.",
         id: Date.now(),
+        origin: "save",
       });
     } finally {
       setIsSaving(false);
@@ -477,6 +519,68 @@ export default function LoadPanel({
     loadSave(loadRequest.save);
   };
 
+  const handleDeleteRequest = () => {
+    if (selectedSlot === null || !selectedSave) return;
+    setSaveMessage(null);
+    setPendingDelete({ tab: activeTab, slot: selectedSlot });
+  };
+
+  const deleteFromSlot = async (tab: LoadPanelTab, slot: number) => {
+    const slotId = gameSlots[slot];
+    const slotLabel = `Slot ${slot + 1}`;
+
+    if (tab === "local") {
+      deletePersistPlayer(slotId);
+      refreshLocalSaves();
+      setSelectedSlot(null);
+      setSaveMessage({ type: "success", text: `Deleted Local — ${slotLabel}`, id: Date.now(), origin: "delete" });
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/saves", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ saveId: slotId }),
+      });
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Unable to delete cloud save.");
+      }
+
+      setCloudSaveList((prev) => {
+        const next = [...prev];
+        next[slot] = null;
+        return next;
+      });
+      setCloudSavedAtList((prev) => {
+        const next = [...prev];
+        next[slot] = null;
+        return next;
+      });
+      setSelectedSlot(null);
+      setSaveMessage({ type: "success", text: `Deleted Cloud — ${slotLabel}`, id: Date.now(), origin: "delete" });
+    } catch (error) {
+      setSaveMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Unable to delete cloud save.",
+        id: Date.now(),
+        origin: "delete",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    const req = pendingDelete;
+    setPendingDelete(null);
+    void deleteFromSlot(req.tab, req.slot);
+  };
+
   return (
     <ModalPortal>
       <div
@@ -523,6 +627,7 @@ export default function LoadPanel({
               {activeTab === "local" ? (
                 <SaveLoadMenu
                   saveList={localSaveList}
+                  savedAtList={localSavedAtList}
                   selectedSlot={selectedSlot}
                   onSlotClick={setSelectedSlot}
                 />
@@ -567,6 +672,7 @@ export default function LoadPanel({
                       ) : (
                         <SaveLoadMenu
                           saveList={cloudSaveList}
+                          savedAtList={cloudSavedAtList}
                           selectedSlot={selectedSlot}
                           onSlotClick={setSelectedSlot}
                         />
@@ -611,6 +717,14 @@ export default function LoadPanel({
                 onClick={handleLoadRequest}
               >
                 Load
+              </button>
+              <button
+                type="button"
+                className={`${panelButtonClass} hover:border-rose-500/65 hover:bg-rose-900/40 hover:text-rose-200`}
+                disabled={!selectedSave || isCloudBusy || isSaving || isDeleting}
+                onClick={handleDeleteRequest}
+              >
+                Delete
               </button>
               <button
                 type="button"
@@ -724,6 +838,49 @@ export default function LoadPanel({
                   onClick={requestCloseLoadConfirm}
                 >
                   No
+                </button>
+              </div>
+            </section>
+          </div>
+        ) : null}
+        {pendingDelete ? (
+          <div
+            className="game-modal-backdrop fixed inset-0 z-[70] flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm"
+            data-closing={isDeleteConfirmClosing}
+            onClick={(event) => {
+              event.stopPropagation();
+              requestCloseDeleteConfirm();
+            }}
+          >
+            <section
+              className="game-modal-panel relative flex aspect-square w-[min(82vw,21rem)] flex-col items-center justify-center bg-[url('/panels/menu-panel6.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-9 text-center text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.65)]"
+              data-closing={isDeleteConfirmClosing}
+              role="alertdialog"
+              aria-modal="true"
+              aria-label="Confirm delete"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <h3 className="font-serif text-2xl font-bold tracking-wide text-amber-950">
+                Delete Save?
+              </h3>
+              <p className="mt-4 text-sm italic leading-relaxed text-stone-600">
+                Delete {pendingDelete.tab === "local" ? "Local" : "Cloud"} Slot{" "}
+                {pendingDelete.slot + 1}? This cannot be undone.
+              </p>
+              <div className="mt-6 flex justify-center gap-3">
+                <button
+                  type="button"
+                  className={`${confirmPanelButtonClass} hover:border-rose-500/65 hover:bg-rose-900/40 hover:text-rose-200`}
+                  onClick={handleConfirmDelete}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className={confirmPanelButtonClass}
+                  onClick={requestCloseDeleteConfirm}
+                >
+                  Cancel
                 </button>
               </div>
             </section>
