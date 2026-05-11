@@ -2,7 +2,7 @@ import GameMainFooter from "@/components/game/GameMainFooter";
 import { MainHub } from "@/components/game/MainHub";
 
 export default function MainHubPage() {
-  const backgroundImage = "url('/backgrounds/main-hub.png')";
+  const backgroundImage = "url('/backgrounds/main-hub.jpg')";
   return (
     <main
       className="h-full w-full bg-cover bg-center bg-no-repeat flex flex-col"

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { getMCStore } from "@/store/mcStore";
 
 export const START_SCENE_IMAGES = [
-  "/backgrounds/the-opening.png",
-  "/backgrounds/the-opening2.png",
+  "/backgrounds/the-opening.jpg",
+  "/backgrounds/the-opening2.jpg",
 ] as const;
 
 export default function StartScene({ onClose }: { onClose: () => void }) {

@@ -38,44 +38,254 @@ type EmberConfig = {
 };
 
 const EMBERS: EmberConfig[] = [
-  { left: "8%",  bottom: "2%", delay: "0s",    duration: "7s",   drift: "25px",  size: 3   },
-  { left: "14%", bottom: "5%", delay: "1.5s",  duration: "5.5s", drift: "-20px", size: 2.5 },
-  { left: "22%", bottom: "1%", delay: "0.8s",  duration: "8s",   drift: "30px",  size: 4   },
-  { left: "31%", bottom: "3%", delay: "2.3s",  duration: "6s",   drift: "-15px", size: 2   },
-  { left: "38%", bottom: "2%", delay: "0.3s",  duration: "9s",   drift: "20px",  size: 3   },
-  { left: "45%", bottom: "4%", delay: "1.8s",  duration: "6.5s", drift: "-25px", size: 2.5 },
-  { left: "52%", bottom: "1%", delay: "3.1s",  duration: "7.5s", drift: "15px",  size: 3   },
-  { left: "60%", bottom: "3%", delay: "0.6s",  duration: "5s",   drift: "-30px", size: 2   },
-  { left: "67%", bottom: "2%", delay: "2.0s",  duration: "8.5s", drift: "25px",  size: 4   },
-  { left: "75%", bottom: "5%", delay: "1.2s",  duration: "6s",   drift: "-20px", size: 2.5 },
-  { left: "82%", bottom: "1%", delay: "3.5s",  duration: "7s",   drift: "30px",  size: 3   },
-  { left: "88%", bottom: "3%", delay: "0.9s",  duration: "5.5s", drift: "-15px", size: 2   },
-  { left: "93%", bottom: "2%", delay: "4.2s",  duration: "8s",   drift: "20px",  size: 3   },
-  { left: "12%", bottom: "4%", delay: "2.8s",  duration: "6.5s", drift: "-25px", size: 2.5 },
-  { left: "28%", bottom: "1%", delay: "1.0s",  duration: "9s",   drift: "15px",  size: 4   },
-  { left: "42%", bottom: "2%", delay: "3.8s",  duration: "5s",   drift: "-30px", size: 2   },
-  { left: "58%", bottom: "5%", delay: "0.4s",  duration: "7.5s", drift: "25px",  size: 3   },
-  { left: "72%", bottom: "3%", delay: "2.5s",  duration: "6s",   drift: "-20px", size: 2.5 },
-  { left: "86%", bottom: "1%", delay: "1.7s",  duration: "8.5s", drift: "30px",  size: 3   },
-  { left: "5%",  bottom: "2%", delay: "3.2s",  duration: "7s",   drift: "-15px", size: 2   },
-  { left: "96%", bottom: "4%", delay: "0.2s",  duration: "6.5s", drift: "20px",  size: 4   },
-  { left: "18%", bottom: "1%", delay: "4.5s",  duration: "5.5s", drift: "-25px", size: 2.5 },
-  { left: "35%", bottom: "3%", delay: "2.1s",  duration: "8s",   drift: "15px",  size: 3   },
-  { left: "50%", bottom: "2%", delay: "1.4s",  duration: "6s",   drift: "-30px", size: 2   },
-  { left: "78%", bottom: "5%", delay: "3.6s",  duration: "9s",   drift: "25px",  size: 4   },
-  { left: "10%", bottom: "3%", delay: "5.0s",  duration: "6s",   drift: "18px",  size: 3   },
-  { left: "20%", bottom: "1%", delay: "4.8s",  duration: "7.5s", drift: "-22px", size: 2   },
-  { left: "33%", bottom: "4%", delay: "5.3s",  duration: "5s",   drift: "28px",  size: 3.5 },
-  { left: "47%", bottom: "2%", delay: "4.1s",  duration: "8s",   drift: "-18px", size: 2.5 },
-  { left: "55%", bottom: "3%", delay: "5.7s",  duration: "6.5s", drift: "22px",  size: 3   },
+  {
+    left: "8%",
+    bottom: "2%",
+    delay: "0s",
+    duration: "7s",
+    drift: "25px",
+    size: 3,
+  },
+  {
+    left: "14%",
+    bottom: "5%",
+    delay: "1.5s",
+    duration: "5.5s",
+    drift: "-20px",
+    size: 2.5,
+  },
+  {
+    left: "22%",
+    bottom: "1%",
+    delay: "0.8s",
+    duration: "8s",
+    drift: "30px",
+    size: 4,
+  },
+  {
+    left: "31%",
+    bottom: "3%",
+    delay: "2.3s",
+    duration: "6s",
+    drift: "-15px",
+    size: 2,
+  },
+  {
+    left: "38%",
+    bottom: "2%",
+    delay: "0.3s",
+    duration: "9s",
+    drift: "20px",
+    size: 3,
+  },
+  {
+    left: "45%",
+    bottom: "4%",
+    delay: "1.8s",
+    duration: "6.5s",
+    drift: "-25px",
+    size: 2.5,
+  },
+  {
+    left: "52%",
+    bottom: "1%",
+    delay: "3.1s",
+    duration: "7.5s",
+    drift: "15px",
+    size: 3,
+  },
+  {
+    left: "60%",
+    bottom: "3%",
+    delay: "0.6s",
+    duration: "5s",
+    drift: "-30px",
+    size: 2,
+  },
+  {
+    left: "67%",
+    bottom: "2%",
+    delay: "2.0s",
+    duration: "8.5s",
+    drift: "25px",
+    size: 4,
+  },
+  {
+    left: "75%",
+    bottom: "5%",
+    delay: "1.2s",
+    duration: "6s",
+    drift: "-20px",
+    size: 2.5,
+  },
+  {
+    left: "82%",
+    bottom: "1%",
+    delay: "3.5s",
+    duration: "7s",
+    drift: "30px",
+    size: 3,
+  },
+  {
+    left: "88%",
+    bottom: "3%",
+    delay: "0.9s",
+    duration: "5.5s",
+    drift: "-15px",
+    size: 2,
+  },
+  {
+    left: "93%",
+    bottom: "2%",
+    delay: "4.2s",
+    duration: "8s",
+    drift: "20px",
+    size: 3,
+  },
+  {
+    left: "12%",
+    bottom: "4%",
+    delay: "2.8s",
+    duration: "6.5s",
+    drift: "-25px",
+    size: 2.5,
+  },
+  {
+    left: "28%",
+    bottom: "1%",
+    delay: "1.0s",
+    duration: "9s",
+    drift: "15px",
+    size: 4,
+  },
+  {
+    left: "42%",
+    bottom: "2%",
+    delay: "3.8s",
+    duration: "5s",
+    drift: "-30px",
+    size: 2,
+  },
+  {
+    left: "58%",
+    bottom: "5%",
+    delay: "0.4s",
+    duration: "7.5s",
+    drift: "25px",
+    size: 3,
+  },
+  {
+    left: "72%",
+    bottom: "3%",
+    delay: "2.5s",
+    duration: "6s",
+    drift: "-20px",
+    size: 2.5,
+  },
+  {
+    left: "86%",
+    bottom: "1%",
+    delay: "1.7s",
+    duration: "8.5s",
+    drift: "30px",
+    size: 3,
+  },
+  {
+    left: "5%",
+    bottom: "2%",
+    delay: "3.2s",
+    duration: "7s",
+    drift: "-15px",
+    size: 2,
+  },
+  {
+    left: "96%",
+    bottom: "4%",
+    delay: "0.2s",
+    duration: "6.5s",
+    drift: "20px",
+    size: 4,
+  },
+  {
+    left: "18%",
+    bottom: "1%",
+    delay: "4.5s",
+    duration: "5.5s",
+    drift: "-25px",
+    size: 2.5,
+  },
+  {
+    left: "35%",
+    bottom: "3%",
+    delay: "2.1s",
+    duration: "8s",
+    drift: "15px",
+    size: 3,
+  },
+  {
+    left: "50%",
+    bottom: "2%",
+    delay: "1.4s",
+    duration: "6s",
+    drift: "-30px",
+    size: 2,
+  },
+  {
+    left: "78%",
+    bottom: "5%",
+    delay: "3.6s",
+    duration: "9s",
+    drift: "25px",
+    size: 4,
+  },
+  {
+    left: "10%",
+    bottom: "3%",
+    delay: "5.0s",
+    duration: "6s",
+    drift: "18px",
+    size: 3,
+  },
+  {
+    left: "20%",
+    bottom: "1%",
+    delay: "4.8s",
+    duration: "7.5s",
+    drift: "-22px",
+    size: 2,
+  },
+  {
+    left: "33%",
+    bottom: "4%",
+    delay: "5.3s",
+    duration: "5s",
+    drift: "28px",
+    size: 3.5,
+  },
+  {
+    left: "47%",
+    bottom: "2%",
+    delay: "4.1s",
+    duration: "8s",
+    drift: "-18px",
+    size: 2.5,
+  },
+  {
+    left: "55%",
+    bottom: "3%",
+    delay: "5.7s",
+    duration: "6.5s",
+    drift: "22px",
+    size: 3,
+  },
 ];
 
 const MENU_BUTTONS = [
-  { label: "Load Game",    delay: "0.3s"  },
-  { label: "New Game",     delay: "0.45s" },
-  { label: "Settings",     delay: "0.6s"  },
-  { label: "Guide",        delay: "0.75s" },
-  { label: "Back to Home", delay: "0.9s"  },
+  { label: "Load Game", delay: "0.3s" },
+  { label: "New Game", delay: "0.45s" },
+  { label: "Settings", delay: "0.6s" },
+  { label: "Guide", delay: "0.75s" },
+  { label: "Back to Home", delay: "0.9s" },
 ];
 
 export function GameStartPage({
@@ -109,11 +319,12 @@ export function GameStartPage({
   }, [router, shouldClearLoadPanelParams]);
 
   function handleClick(label: string) {
-    if (label === "Load Game")     setLoadPanel({ isOpen: true, initialTab: "local" });
-    if (label === "New Game")      setIsNewGameOpen(true);
-    if (label === "Settings")      setIsSettingsOpen(true);
-    if (label === "Guide")         setIsStoryGuideOpen(true);
-    if (label === "Back to Home")  router.push("/");
+    if (label === "Load Game")
+      setLoadPanel({ isOpen: true, initialTab: "local" });
+    if (label === "New Game") setIsNewGameOpen(true);
+    if (label === "Settings") setIsSettingsOpen(true);
+    if (label === "Guide") setIsStoryGuideOpen(true);
+    if (label === "Back to Home") router.push("/");
   }
 
   return (
@@ -121,7 +332,7 @@ export function GameStartPage({
       {/* 背景层 */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/backgrounds/game-cover.png')" }}
+        style={{ backgroundImage: "url('/backgrounds/game-cover.jpg')" }}
       />
 
       {/* 火星粒子层 */}

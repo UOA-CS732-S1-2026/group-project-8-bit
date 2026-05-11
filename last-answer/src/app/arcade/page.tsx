@@ -28,27 +28,27 @@ const backgroundOptions = [
   {
     id: "forest",
     label: "Forest",
-    path: "/backgrounds/foggy-forest.png",
+    path: "/backgrounds/foggy-forest.jpg",
   },
   {
     id: "mainHub",
     label: "Main Hub",
-    path: "/backgrounds/main-hub.png",
+    path: "/backgrounds/main-hub.jpg",
   },
   {
     id: "tavern",
     label: "Tavern",
-    path: "/backgrounds/tavern-background.png",
+    path: "/backgrounds/tavern-background.jpg",
   },
   {
     id: "cave",
     label: "Cave",
-    path: "/backgrounds/cave-background.png",
+    path: "/backgrounds/cave-background.jpg",
   },
   {
     id: "source",
     label: "Source",
-    path: "/backgrounds/source-background.png",
+    path: "/backgrounds/source-background.jpg",
   },
 ] as const;
 
@@ -299,7 +299,7 @@ export default function ArcadePage() {
     <main className="relative h-full min-h-0 w-full overflow-hidden bg-black text-stone-100">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-70"
-        style={{ backgroundImage: "url('/backgrounds/game-cover.png')" }}
+        style={{ backgroundImage: "url('/backgrounds/game-cover.jpg')" }}
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,5,0.48)_0%,rgba(8,6,5,0.28)_35%,rgba(7,5,4,0.78)_100%)]" />
 
