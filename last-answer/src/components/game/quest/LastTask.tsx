@@ -340,7 +340,7 @@ export default function LastTask() {
       <>
         <BattlePage
           enemy={darksideEnemy}
-          backgroundImage="/backgrounds/theDarkSource.png"
+          backgroundImage="/backgrounds/theDarkSource.jpg"
           label="dark source"
           onFinish={handleDarksideBattleFinish}
         />
@@ -354,7 +354,7 @@ export default function LastTask() {
       <>
         <BattlePage
           enemy={andrewEnemy}
-          backgroundImage="/backgrounds/theGoldenSource.png"
+          backgroundImage="/backgrounds/theGoldenSource.jpg"
           label="golden source"
           onFinish={handleAndrewBattleFinish}
         />

@@ -2,7 +2,7 @@ import FoggyForestContent from "@/components/game/FoggyForestContent";
 import GameMainFooter from "@/components/game/GameMainFooter";
 
 export default function foggyForest() {
-  const backgroundImage = "url('/backgrounds/foggy-forest.png')";
+  const backgroundImage = "url('/backgrounds/foggy-forest.jpg')";
   return (
     <main
       className="h-full w-full bg-cover bg-center bg-no-repeat flex flex-col"

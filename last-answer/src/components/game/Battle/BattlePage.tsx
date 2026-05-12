@@ -48,7 +48,7 @@ type BattlePageProps = {
 
 export function BattlePage({
   enemy: initialEnemy = null,
-  backgroundImage = "/backgrounds/foggy-forest.png",
+  backgroundImage = "/backgrounds/foggy-forest.jpg",
   label = "battle",
   suppressBattleMusic = false,
   onFinish,
@@ -108,9 +108,8 @@ export function BattlePage({
   }>({ active: false, damage: null });
   const [outcomeVisible, setOutcomeVisible] = useState(false);
   const [viewportScale, setViewportScale] = useState(1);
-  const [battleVisualHeight, setBattleVisualHeight] = useState(
-    BATTLE_CANVAS_HEIGHT,
-  );
+  const [battleVisualHeight, setBattleVisualHeight] =
+    useState(BATTLE_CANVAS_HEIGHT);
   const [actionCue, setActionCue] = useState<{
     id: string;
     title: string;
@@ -170,9 +169,7 @@ export function BattlePage({
       }
     : null;
   const burstReady =
-    !!battle &&
-    battle.correctStreak >= 5 &&
-    battle.correctStreak % 5 === 0;
+    !!battle && battle.correctStreak >= 5 && battle.correctStreak % 5 === 0;
   const availableItemCount = battle
     ? Object.values(battle.supportTools).reduce(
         (sum, amount) => sum + amount,
@@ -206,7 +203,11 @@ export function BattlePage({
   );
 
   const pushActionCue = useCallback(
-    (entry: { title: string; detail: string; tone: "player" | "enemy" | "system" }) => {
+    (entry: {
+      title: string;
+      detail: string;
+      tone: "player" | "enemy" | "system";
+    }) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       setActionCue({ id, ...entry });
       if (actionCueTimeoutRef.current !== null) {
@@ -244,7 +245,13 @@ export function BattlePage({
         setImpactFlashTone("none");
       }, ATTACK_WINDUP_MS + FEEDBACK_DURATION_MS);
     },
-    [ATTACK_WINDUP_MS, FEEDBACK_DURATION_MS, HIT_STOP_MS, battleAudio, pushFloatingText],
+    [
+      ATTACK_WINDUP_MS,
+      FEEDBACK_DURATION_MS,
+      HIT_STOP_MS,
+      battleAudio,
+      pushFloatingText,
+    ],
   );
 
   const triggerPlayerHit = useCallback(
@@ -270,7 +277,13 @@ export function BattlePage({
         setImpactFlashTone("none");
       }, ATTACK_WINDUP_MS + FEEDBACK_DURATION_MS);
     },
-    [ATTACK_WINDUP_MS, FEEDBACK_DURATION_MS, HIT_STOP_MS, battleAudio, pushFloatingText],
+    [
+      ATTACK_WINDUP_MS,
+      FEEDBACK_DURATION_MS,
+      HIT_STOP_MS,
+      battleAudio,
+      pushFloatingText,
+    ],
   );
 
   const triggerBurstFinishImpact = useCallback(() => {
@@ -382,7 +395,12 @@ export function BattlePage({
     return () => {
       stopBattleMusic();
     };
-  }, [initialEnemy?.isBoss, setBattleMusic, stopBattleMusic, suppressBattleMusic]);
+  }, [
+    initialEnemy?.isBoss,
+    setBattleMusic,
+    stopBattleMusic,
+    suppressBattleMusic,
+  ]);
 
   useEffect(() => {
     if (hasAutoStartedRef.current || battle) {
@@ -1060,9 +1078,9 @@ export function BattlePage({
                 </div>
               </div>
             </div>
-            </div>
           </div>
         </div>
+      </div>
       {battle?.supportMenuOpen ? (
         <BattleSupportOverlay
           battle={battle}

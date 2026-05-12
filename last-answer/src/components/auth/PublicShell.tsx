@@ -156,7 +156,7 @@ export function PublicShell({
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/backgrounds/auth-tavern-entrance.png')",
+          backgroundImage: "url('/backgrounds/auth-tavern-entrance.jpg')",
         }}
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_58%,rgba(245,158,11,0.15),transparent_27%),linear-gradient(90deg,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.42)_44%,rgba(0,0,0,0.76)_100%),linear-gradient(180deg,rgba(0,0,0,0.38)_0%,rgba(0,0,0,0.1)_44%,rgba(0,0,0,0.72)_100%)]" />

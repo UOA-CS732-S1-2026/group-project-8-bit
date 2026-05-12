@@ -15,7 +15,7 @@ export function TavernActionsRow() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const restoreHpToFull = useMCStore((state) => state.restoreHpToFull);
   const btnClass = "w-full max-w-[33.333%] min-h-[3rem] max-h-[6rem]";
-  const tavernBackground = "url('/backgrounds/tavern-background.png')";
+  const tavernBackground = "url('/backgrounds/tavern-background.jpg')";
 
   useEffect(() => {
     if (!toastMessage) {

@@ -37,8 +37,8 @@ type MainMenuItem = {
 };
 
 const backgroundImage = "url('/panels/tarven-panel.png')";
-const chatDialogueBackground = "url('/backgrounds/chat-barkeeper.png')";
-const pageDialogueBackground = "url('/backgrounds/barkeeper-interact.png')";
+const chatDialogueBackground = "url('/backgrounds/chat-barkeeper.jpg')";
+const pageDialogueBackground = "url('/backgrounds/barkeeper-interact.jpg')";
 
 const pageQuest = {
   id: "PageFight",
@@ -385,7 +385,11 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
   const handleUndo = () => {
     if (!undoPurchase) return;
     if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current);
-    refundProperty(undoPurchase.item.id, undoPurchase.qty, undoPurchase.refundCoins);
+    refundProperty(
+      undoPurchase.item.id,
+      undoPurchase.qty,
+      undoPurchase.refundCoins,
+    );
     setUndoPurchase(null);
   };
 
@@ -471,7 +475,10 @@ export default function BarkeeperMenu({ onClose }: BarkeeperMenuProps) {
         </div>
       )}
       {undoPurchase && (
-        <div className="fixed left-1/2 top-6 z-[80] -translate-x-1/2 flex items-center gap-3 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-8 py-4 text-amber-100 shadow-[0_18px_45px_rgba(0,0,0,0.55)]" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed left-1/2 top-6 z-[80] -translate-x-1/2 flex items-center gap-3 bg-[url('/panels/interact-panel.png')] bg-[length:100%_100%] bg-center bg-no-repeat px-8 py-4 text-amber-100 shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
+          onClick={(e) => e.stopPropagation()}
+        >
           <span className="text-base font-semibold">
             Purchased {undoPurchase.qty}× {undoPurchase.item.name}
           </span>

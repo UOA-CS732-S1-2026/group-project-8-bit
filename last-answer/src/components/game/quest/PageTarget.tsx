@@ -4,10 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createEnemy } from "@/game/core/battleCore";
 import type { BattleOutcome } from "@/game/core/types";
-import {
-  pauseSceneryMusic,
-  resumeSceneryMusic,
-} from "@/lib/sceneryMusic";
+import { pauseSceneryMusic, resumeSceneryMusic } from "@/lib/sceneryMusic";
 import { BattlePage } from "../Battle/BattlePage";
 import DialogueScene from "../DialogueScene";
 import type { DialogueSingle } from "../DialogueScene";
@@ -233,7 +230,7 @@ export function PageTarget({ onFinish }: PageTargetProps) {
       <>
         <BattlePage
           enemy={pageEnemy}
-          backgroundImage="/backgrounds/cave-background.png"
+          backgroundImage="/backgrounds/cave-background.jpg"
           label="cave"
           onFinish={handleBattleFinish}
         />

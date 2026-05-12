@@ -18,10 +18,9 @@ import InteractBtn from "./InteractBtn";
 import DialogueScene, { type DialogueSingle } from "./DialogueScene";
 import { BattlePage } from "./Battle/BattlePage";
 
-const officerChatBackground = "url('/backgrounds/chatOfficer.png')";
-const pageChatBackground = "url('/backgrounds/chatPage.png')";
-const seekerHunterChatBackground =
-  "url('/backgrounds/chatSeekerHunter.png')";
+const officerChatBackground = "url('/backgrounds/chatOfficer.jpg')";
+const pageChatBackground = "url('/backgrounds/chatPage.jpg')";
+const seekerHunterChatBackground = "url('/backgrounds/chatSeekerHunter.jpg')";
 const explorePanelBackground = "url('/panels/tarven-panel.png')";
 const exploreMenuItemClass =
   "w-full rounded-[1rem] border border-amber-100/16 bg-[linear-gradient(180deg,rgba(30,21,14,0.82)_0%,rgba(16,12,10,0.92)_100%)] px-8 py-5 text-center shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition duration-150 hover:-translate-y-0.5 hover:border-amber-100/34 hover:shadow-[0_14px_32px_rgba(0,0,0,0.28)] active:translate-y-[1px] active:scale-[0.98]";
@@ -71,8 +70,7 @@ function ScaledExplorePanel({ children }: { children: ReactNode }) {
       setMetrics((currentMetrics) => {
         const heightChanged =
           Math.abs(currentMetrics.height - contentHeight) > 0.5;
-        const scaleChanged =
-          Math.abs(currentMetrics.scale - nextScale) > 0.001;
+        const scaleChanged = Math.abs(currentMetrics.scale - nextScale) > 0.001;
 
         if (!heightChanged && !scaleChanged) {
           return currentMetrics;
@@ -144,7 +142,7 @@ export default function FoggyForestContent() {
   const [rescueOverlayVisible, setRescueOverlayVisible] = useState(false);
   const [dialogues, setDialogues] = useState<DialogueSingle[]>([]);
   const [dialogBackgroundImage, setDialogBackgroundImage] = useState(
-    "url('/backgrounds/the-opening.png')",
+    "url('/backgrounds/the-opening.jpg')",
   );
 
   useEffect(() => {
@@ -241,7 +239,7 @@ export default function FoggyForestContent() {
         <div className="fixed inset-0 z-50">
           <BattlePage
             enemy={battleEnemy}
-            backgroundImage="/backgrounds/foggy-forest.png"
+            backgroundImage="/backgrounds/foggy-forest.jpg"
             label="forest"
             onFinish={handleBattleFinish}
           />
@@ -262,7 +260,8 @@ export default function FoggyForestContent() {
             </h2>
             <p className="mt-4 text-sm leading-7 text-amber-100/78 sm:text-base">
               The last thing you remember is the cold ground and a fading light.
-              When your eyes open again, you are being carried back toward the tavern.
+              When your eyes open again, you are being carried back toward the
+              tavern.
             </p>
             <p className="mt-8 text-[0.72rem] uppercase tracking-[0.28em] text-amber-100/56">
               Click to continue
@@ -283,56 +282,56 @@ export default function FoggyForestContent() {
           onClick={() => setShowExplorePanel(false)}
         >
           <ScaledExplorePanel>
-          <section
-            className="relative w-full bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-12 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
-            style={{ backgroundImage: explorePanelBackground }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Choose forest area"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setShowExplorePanel(false)}
-              className={exploreCloseButtonClass}
+            <section
+              className="relative w-full bg-[length:100%_100%] bg-center bg-no-repeat px-10 py-12 text-amber-100 shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
+              style={{ backgroundImage: explorePanelBackground }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Choose forest area"
+              onClick={(event) => event.stopPropagation()}
             >
-              Close
-            </button>
-
-            <h2 className="text-center text-3xl font-semibold text-stone-100">
-              Choose Forest Path
-            </h2>
-            <p className="mt-4 text-center text-sm leading-6 text-amber-100/85">
-              Pick a route through the fog and prepare for battle.
-            </p>
-
-            <div className="mt-6 space-y-3">
               <button
                 type="button"
-                className={exploreMenuItemClass}
-                onClick={startRimAreaBattle}
+                onClick={() => setShowExplorePanel(false)}
+                className={exploreCloseButtonClass}
               >
-                <p className="text-[1.25rem] font-semibold leading-6 text-stone-100">
-                  Rim Area
-                </p>
-                <p className="mt-2 text-[0.7rem] uppercase tracking-[0.16em] text-amber-100/52">
-                  Below level 10
-                </p>
+                Close
               </button>
-              <button
-                type="button"
-                className={exploreMenuItemClass}
-                onClick={startDeepForestBattle}
-              >
-                <p className="text-[1.25rem] font-semibold leading-6 text-stone-100">
-                  Deep Forest
-                </p>
-                <p className="mt-2 text-[0.7rem] uppercase tracking-[0.16em] text-amber-100/52">
-                  Above level 10
-                </p>
-              </button>
-            </div>
-          </section>
+
+              <h2 className="text-center text-3xl font-semibold text-stone-100">
+                Choose Forest Path
+              </h2>
+              <p className="mt-4 text-center text-sm leading-6 text-amber-100/85">
+                Pick a route through the fog and prepare for battle.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                <button
+                  type="button"
+                  className={exploreMenuItemClass}
+                  onClick={startRimAreaBattle}
+                >
+                  <p className="text-[1.25rem] font-semibold leading-6 text-stone-100">
+                    Rim Area
+                  </p>
+                  <p className="mt-2 text-[0.7rem] uppercase tracking-[0.16em] text-amber-100/52">
+                    Below level 10
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  className={exploreMenuItemClass}
+                  onClick={startDeepForestBattle}
+                >
+                  <p className="text-[1.25rem] font-semibold leading-6 text-stone-100">
+                    Deep Forest
+                  </p>
+                  <p className="mt-2 text-[0.7rem] uppercase tracking-[0.16em] text-amber-100/52">
+                    Above level 10
+                  </p>
+                </button>
+              </div>
+            </section>
           </ScaledExplorePanel>
         </div>
       )}
