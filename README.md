@@ -1,6 +1,10 @@
 # CS732 Project - Team 8-Bit
 
-![Team 8-Bit logo](./8-Bit.png)
+## About The Game
+
+**The Last Answer: Ashes of the First Monolith** is a browser-based fantasy quiz RPG where players journey through a ruined world, make progress through story scenes, and survive turn-based battles by answering quiz questions correctly.
+
+![The Last Answer game start screen](./last-answer/public/backgrounds/game-start.jpg)
 
 ## Overview
 
@@ -105,9 +109,11 @@ The main automated test suite uses Vitest. Tests are colocated with the implemen
 
 ## Team Members
 
-- Mingjie Jiang _(mjia237@aucklanduni.ac.nz)_
-- Francis Lee _(tli174@aucklanduni.ac.nz)_
 - Leo Mo-yung _(xmu745@aucklanduni.ac.nz)_
+- Zhongwei Zhang _(zahz885@aucklanduni.ac.nz)_
+- Francis Lee _(tli174@aucklanduni.ac.nz)_
 - Yushun Shi _(yshi675@aucklanduni.ac.nz)_
 - Xuan Zeng _(xzen317@aucklanduni.ac.nz)_
-- Zhongwei Zhang _(zahz885@aucklanduni.ac.nz)_
+- Mingjie Jiang _(mjia237@aucklanduni.ac.nz)_
+
+![Team 8-Bit logo](./8-Bit.png)
